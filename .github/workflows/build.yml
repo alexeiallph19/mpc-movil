@@ -149,7 +149,7 @@ jobs:
               </application>
           </manifest>
           EOF
-               cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
@@ -317,7 +317,9 @@ jobs:
               </LinearLayout>
           </RelativeLayout>
           EOF
-             cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
+          cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
+          package com.mpcmovil
+
           import android.app.AlertDialog
           import android.content.Intent
           import android.content.pm.ActivityInfo
@@ -339,40 +341,34 @@ jobs:
 
           class MainActivity : AppCompatActivity() {
 
-              private lateinit var videoLayout: VLCVideoLayout
-              private lateinit var welcomeScreen: View
+              private lateinit var vLayout: VLCVideoLayout
+              private lateinit var welcome: View
               private lateinit var topBar: View
-              private lateinit var bottomBar: View
-              private lateinit var txtStatus: TextView
-              private lateinit var txtDecoderInfo: TextView
+              private lateinit var botBar: View
+              private lateinit var txtStat: TextView
+              private lateinit var txtDec: TextView
               private lateinit var txtTime: TextView
               private lateinit var txtOsd: TextView
-              private lateinit var seekBar: SeekBar
+              private lateinit var seek: SeekBar
               private lateinit var btnPlay: Button
-              private lateinit var btnHwSw: Button
-              private lateinit var btnSpeed: Button
+              private lateinit var btnHw: Button
+              private lateinit var btnSpd: Button
 
-              private var libVLC: LibVLC? = null
-              private var mediaPlayer: MediaPlayer? = null
-              private var currentUri: Uri? = null
+              private var vlc: LibVLC? = null
+              private var player: MediaPlayer? = null
+              private var curUri: Uri? = null
               private var isHw = true
-              private var isControlsVisible = true
-              private var aspectIndex = 0
-              private var rotationMode = 0
-              private val speeds = floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
-              private var speedIndex = 2
-              private val aspects = arrayOf("Auto", "16:9", "4:3", "Rellenar", "Estirar")
-
+              private var isUi = true
+              private var rot = 0
+              private var asp = 0
+              private val spds = floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
+              private var spdIdx = 2
               private val handler = Handler(Looper.getMainLooper())
-              private var isSeeking = false
-              private lateinit var gestureDetector: GestureDetector
+              private var seeking = false
+              private lateinit var gesture: GestureDetector
 
-              private val fileLauncher = registerForActivityResult(
-                  ActivityResultContracts.StartActivityForResult()
-              ) { res ->
-                  if (res.resultCode == RESULT_OK) {
-                      res.data?.data?.let { play(it) }
-                  }
+              private val picker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
+                  if (res.resultCode == RESULT_OK) res.data?.data?.let { play(it) }
               }
 
               override fun onCreate(savedInstanceState: Bundle?) {
@@ -380,325 +376,227 @@ jobs:
                   window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                   setContentView(R.layout.activity_main)
 
-                  initViews()
-                  initGestures()
-                  initPlayer()
-
-                  intent?.data?.let { play(it) }
-              }
-
-              private fun initViews() {
-                  videoLayout = findViewById(R.id.videoLayout)
-                  welcomeScreen = findViewById(R.id.welcomeScreen)
+                  vLayout = findViewById(R.id.videoLayout)
+                  welcome = findViewById(R.id.welcomeScreen)
                   topBar = findViewById(R.id.topBar)
-                  bottomBar = findViewById(R.id.bottomBar)
-                  txtStatus = findViewById(R.id.txtStatus)
-                  txtDecoderInfo = findViewById(R.id.txtDecoderInfo)
+                  botBar = findViewById(R.id.bottomBar)
+                  txtStat = findViewById(R.id.txtStatus)
+                  txtDec = findViewById(R.id.txtDecoderInfo)
                   txtTime = findViewById(R.id.txtTime)
                   txtOsd = findViewById(R.id.txtOsd)
-                  seekBar = findViewById(R.id.seekBar)
+                  seek = findViewById(R.id.seekBar)
                   btnPlay = findViewById(R.id.btnPlay)
-                  btnHwSw = findViewById(R.id.btnHwSw)
-                  btnSpeed = findViewById(R.id.btnSpeed)
+                  btnHw = findViewById(R.id.btnHwSw)
+                  btnSpd = findViewById(R.id.btnSpeed)
 
-                  findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
-                  findViewById<Button>(R.id.btnMenuFile).setOnClickListener { pickFile() }
-                  findViewById<Button>(R.id.btnMenuAudio).setOnClickListener { pickAudio() }
-                  findViewById<Button>(R.id.btnMenuSubtitles).setOnClickListener { pickSubtitles() }
-                  findViewById<Button>(R.id.btnMenuAspect).setOnClickListener { cycleAspect() }
+                  findViewById<View>(R.id.btnWelcomeOpen).setOnClickListener { openFile() }
+                  findViewById<View>(R.id.btnMenuFile).setOnClickListener { openFile() }
+                  findViewById<View>(R.id.btnMenuAudio).setOnClickListener { pickAudio() }
+                  findViewById<View>(R.id.btnMenuSubtitles).setOnClickListener { pickSubs() }
+                  findViewById<View>(R.id.btnMenuAspect).setOnClickListener { toggleAspect() }
 
-                  val rotLambda = { cycleRotation() }
-                  findViewById<Button>(R.id.btnMenuRotate).setOnClickListener { rotLambda() }
-                  findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { rotLambda() }
+                  val rotFn = { toggleRot() }
+                  findViewById<View>(R.id.btnMenuRotate).setOnClickListener { rotFn() }
+                  findViewById<View>(R.id.btnRotateBottom).setOnClickListener { rotFn() }
 
-                  btnPlay.setOnClickListener {
-                      mediaPlayer?.let { p -> if (p.isPlaying) p.pause() else p.play() }
-                  }
-                  findViewById<Button>(R.id.btnPause).setOnClickListener { mediaPlayer?.pause() }
-
-                  findViewById<Button>(R.id.btnStop).setOnClickListener {
-                      mediaPlayer?.stop()
-                      welcomeScreen.visibility = View.VISIBLE
-                      txtStatus.text = "Detenido"
+                  btnPlay.setOnClickListener { player?.let { if (it.isPlaying) it.pause() else it.play() } }
+                  findViewById<View>(R.id.btnPause).setOnClickListener { player?.pause() }
+                  findViewById<View>(R.id.btnStop).setOnClickListener {
+                      player?.stop()
+                      welcome.visibility = View.VISIBLE
+                      txtStat.text = "Detenido"
                       txtTime.text = "00:00:00 / 00:00:00"
-                      seekBar.progress = 0
+                      seek.progress = 0
                   }
-
-                  findViewById<Button>(R.id.btnBack).setOnClickListener {
-                      mediaPlayer?.let { p ->
-                          p.time = (p.time - 10000L).coerceAtLeast(0L)
-                          showOsd("-10s (${formatTime(p.time)})")
-                      }
+                  findViewById<View>(R.id.btnBack).setOnClickListener {
+                      player?.let { it.time = (it.time - 10000L).coerceAtLeast(0L); osd("-10s") }
                   }
-
-                  findViewById<Button>(R.id.btnForward).setOnClickListener {
-                      mediaPlayer?.let { p ->
-                          p.time = (p.time + 10000L).coerceAtMost(p.length)
-                          showOsd("+10s (${formatTime(p.time)})")
-                      }
+                  findViewById<View>(R.id.btnForward).setOnClickListener {
+                      player?.let { it.time = (it.time + 10000L).coerceAtMost(it.length); osd("+10s") }
                   }
-
-                  btnSpeed.setOnClickListener {
-                      speedIndex = (speedIndex + 1) % speeds.size
-                      val spd = speeds[speedIndex]
-                      mediaPlayer?.rate = spd
-                      btnSpeed.text = "${spd}X"
-                      showOsd("Velocidad: ${spd}X")
+                  btnSpd.setOnClickListener {
+                      spdIdx = (spdIdx + 1) % spds.size
+                      player?.rate = spds[spdIdx]
+                      btnSpd.text = "${spds[spdIdx]}X"
+                      osd("Velocidad: ${spds[spdIdx]}X")
                   }
-
-                  btnHwSw.setOnClickListener {
+                  btnHw.setOnClickListener {
                       isHw = !isHw
-                      updateDecoderUi()
-                      showOsd(if (isHw) "Decodificador Hardware (HW)" else "Decodificador Software (SW)")
-                      currentUri?.let { u ->
-                          val pos = mediaPlayer?.time ?: 0L
-                          rebuildPlayer()
-                          play(u, pos)
-                      }
+                      updateDec()
+                      osd(if (isHw) "Decodificador HW" else "Decodificador SW")
+                      curUri?.let { u -> val pos = player?.time ?: 0L; resetPlayer(); play(u, pos) }
                   }
 
-                  seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                      override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                          if (fromUser && mediaPlayer != null) {
-                              val len = mediaPlayer!!.length
-                              if (len > 0) {
-                                  val t = (len * (progress / 1000f)).toLong()
-                                  txtTime.text = "${formatTime(t)} / ${formatTime(len)}"
-                              }
+                  seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                      override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                          if (fromUser && player != null && player!!.length > 0) {
+                              val t = (player!!.length * (p / 1000f)).toLong()
+                              txtTime.text = "${fmt(t)} / ${fmt(player!!.length)}"
                           }
                       }
-                      override fun onStartTrackingTouch(sb: SeekBar?) { isSeeking = true }
-                      override fun onStopTrackingTouch(sb: SeekBar?) {
-                          isSeeking = false
-                          mediaPlayer?.let { p ->
-                              if (p.length > 0) p.time = (p.length * (seekBar.progress / 1000f)).toLong()
-                          }
+                      override fun onStartTrackingTouch(s: SeekBar?) { seeking = true }
+                      override fun onStopTrackingTouch(s: SeekBar?) {
+                          seeking = false
+                          player?.let { if (it.length > 0) it.time = (it.length * (seek.progress / 1000f)).toLong() }
                       }
                   })
+
+                  gesture = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+                      override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                          isUi = !isUi
+                          val v = if (isUi) View.VISIBLE else View.GONE
+                          topBar.visibility = v
+                          botBar.visibility = v
+                          return true
+                      }
+                      override fun onDoubleTap(e: MotionEvent): Boolean {
+                          player?.let { if (it.isPlaying) it.pause() else it.play() }
+                          return true
+                      }
+                  })
+                  vLayout.setOnTouchListener { _, ev -> gesture.onTouchEvent(ev); true }
+
+                  initPlayer()
+                  intent?.data?.let { play(it) }
               }
 
               private fun initPlayer() {
                   val opts = ArrayList<String>()
                   opts.add("--file-caching=2000")
-                  opts.add("--network-caching=2000")
                   opts.add("--avcodec-threads=4")
                   opts.add("--avcodec-fast")
-                  if (isHw) {
-                      opts.add("--codec=mediacodec_ndk,mediacodec_jni,all")
-                  } else {
-                      opts.add("--codec=all")
-                      opts.add("--avcodec-hw=none")
-                  }
+                  if (isHw) opts.add("--codec=mediacodec_ndk,mediacodec_jni,all")
+                  else { opts.add("--codec=all"); opts.add("--avcodec-hw=none") }
 
-                  libVLC = LibVLC(this, opts)
-                  mediaPlayer = MediaPlayer(libVLC)
-                  mediaPlayer?.attachViews(videoLayout, null, false, false)
-
-                  mediaPlayer?.setEventListener { ev ->
+                  vlc = LibVLC(this, opts)
+                  player = MediaPlayer(vlc)
+                  player?.attachViews(vLayout, null, false, false)
+                  player?.setEventListener { ev ->
                       when (ev.type) {
-                          MediaPlayer.Event.Playing -> {
-                              welcomeScreen.visibility = View.GONE
-                              txtStatus.text = "Reproduciendo"
-                              btnPlay.text = "❚❚"
-                          }
-                          MediaPlayer.Event.Paused -> {
-                              txtStatus.text = "Pausa"
-                              btnPlay.text = "▶"
-                          }
-                          MediaPlayer.Event.Stopped -> {
-                              welcomeScreen.visibility = View.VISIBLE
-                              txtStatus.text = "Detenido"
-                              btnPlay.text = "▶"
-                          }
+                          MediaPlayer.Event.Playing -> { welcome.visibility = View.GONE; txtStat.text = "Reproduciendo"; btnPlay.text = "❚❚" }
+                          MediaPlayer.Event.Paused -> { txtStat.text = "Pausa"; btnPlay.text = "▶" }
+                          MediaPlayer.Event.Stopped -> { welcome.visibility = View.VISIBLE; txtStat.text = "Detenido"; btnPlay.text = "▶" }
                           MediaPlayer.Event.TimeChanged -> {
-                              if (!isSeeking) {
-                                  val t = ev.timeChanged
-                                  val l = mediaPlayer?.length ?: 0L
-                                  if (l > 0) {
-                                      seekBar.progress = ((t.toFloat() / l) * 1000).toInt()
-                                      txtTime.text = "${formatTime(t)} / ${formatTime(l)}"
-                                  }
+                              if (!seeking && player != null && player!!.length > 0) {
+                                  val t = player!!.time
+                                  val l = player!!.length
+                                  seek.progress = ((t.toFloat() / l) * 1000).toInt()
+                                  txtTime.text = "${fmt(t)} / ${fmt(l)}"
                               }
                           }
                           MediaPlayer.Event.EncounteredError -> {
-                              txtStatus.text = "Error al abrir"
-                              Toast.makeText(this, "Si no da imagen, pulsa [HW/SW]", Toast.LENGTH_LONG).show()
+                              txtStat.text = "Error"
+                              Toast.makeText(this, "Toca [HW/SW] si la pantalla no carga", Toast.LENGTH_LONG).show()
                           }
                       }
                   }
-                  updateDecoderUi()
+                  updateDec()
               }
 
-              private fun rebuildPlayer() {
-                  mediaPlayer?.stop()
-                  mediaPlayer?.detachViews()
-                  mediaPlayer?.release()
-                  libVLC?.release()
+              private fun resetPlayer() {
+                  player?.stop()
+                  player?.detachViews()
+                  player?.release()
+                  vlc?.release()
                   initPlayer()
               }
 
-              private fun play(uri: Uri, startPos: Long = 0L) {
-                  currentUri = uri
+              private fun play(uri: Uri, pos: Long = 0L) {
+                  curUri = uri
                   try {
-                      val pfd = contentResolver.openFileDescriptor(uri, "r")
-                      if (pfd != null) {
-                          val m = Media(libVLC, pfd.fileDescriptor)
-                          m.addOption(":file-caching=2000")
-                          if (!isHw) m.addOption(":avcodec-hw=none")
-                          mediaPlayer?.media = m
-                          m.release()
-                          mediaPlayer?.play()
-                          if (startPos > 0) {
-                              handler.postDelayed({ mediaPlayer?.time = startPos }, 250)
-                          }
-                          welcomeScreen.visibility = View.GONE
-                      }
+                      val pfd = contentResolver.openFileDescriptor(uri, "r") ?: return
+                      val m = Media(vlc, pfd.fileDescriptor)
+                      m.addOption(":file-caching=2000")
+                      if (!isHw) m.addOption(":avcodec-hw=none")
+                      player?.media = m
+                      m.release()
+                      player?.play()
+                      if (pos > 0) handler.postDelayed({ player?.time = pos }, 250)
+                      welcome.visibility = View.GONE
                   } catch (e: Exception) {
                       Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                   }
               }
 
-              private fun pickFile() {
-                  val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+              private fun openFile() {
+                  val i = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                       addCategory(Intent.CATEGORY_OPENABLE)
                       type = "video/*"
                   }
-                  fileLauncher.launch(intent)
+                  picker.launch(i)
               }
 
-              private fun cycleRotation() {
-                  rotationMode = (rotationMode + 1) % 3
-                  when (rotationMode) {
-                      0 -> {
-                          requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
-                          showOsd("Pantalla: Sensor Automático")
-                      }
-                      1 -> {
-                          requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                          showOsd("Pantalla: Horizontal (Landscape)")
-                      }
-                      2 -> {
-                          requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                          showOsd("Pantalla: Vertical (Portrait)")
-                      }
+              private fun toggleRot() {
+                  rot = (rot + 1) % 3
+                  when (rot) {
+                      0 -> { requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR; osd("Pantalla: Auto") }
+                      1 -> { requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE; osd("Pantalla: Horizontal") }
+                      2 -> { requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT; osd("Pantalla: Vertical") }
                   }
-                  videoLayout.post { videoLayout.requestLayout() }
+                  vLayout.post { vLayout.requestLayout() }
               }
 
               override fun onConfigurationChanged(newConfig: Configuration) {
                   super.onConfigurationChanged(newConfig)
-                  videoLayout.post { videoLayout.requestLayout() }
+                  vLayout.post { vLayout.requestLayout() }
               }
 
-              private fun cycleAspect() {
-                  aspectIndex = (aspectIndex + 1) % aspects.size
-                  when (aspectIndex) {
-                      0 -> mediaPlayer?.aspectRatio = null
-                      1 -> mediaPlayer?.aspectRatio = "16:9"
-                      2 -> mediaPlayer?.aspectRatio = "4:3"
-                      3 -> mediaPlayer?.aspectRatio = "18:9"
-                      4 -> mediaPlayer?.aspectRatio = "fill"
-                  }
-                  showOsd("Aspecto: ${aspects[aspectIndex]}")
+              private fun toggleAspect() {
+                  val list = arrayOf("Auto", "16:9", "4:3", "fill")
+                  asp = (asp + 1) % list.size
+                  player?.aspectRatio = if (asp == 0) null else list[asp]
+                  osd("Aspecto: ${list[asp]}")
               }
 
               private fun pickAudio() {
-                  val tracks = mediaPlayer?.audioTracks ?: return
-                  if (tracks.isEmpty()) return
-                  val names = tracks.map { it.name }.toTypedArray()
-                  val cur = mediaPlayer?.audioTrack ?: -1
-                  val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
-
+                  val t = player?.audioTracks ?: return
+                  if (t.isEmpty()) return
+                  val names = t.map { it.name }.toTypedArray()
                   AlertDialog.Builder(this)
-                      .setTitle("Audio (MPC-HC)")
-                      .setSingleChoiceItems(names, sel) { d, i ->
-                          mediaPlayer?.audioTrack = tracks[i].id
-                          showOsd("Audio: ${tracks[i].name}")
-                          dialogClose(d)
-                      }
-                      .setNegativeButton("Cerrar", null).show()
+                      .setTitle("Pista de Audio")
+                      .setItems(names) { _, i -> player?.audioTrack = t[i].id; osd("Audio: ${t[i].name}") }
+                      .show()
               }
 
-              private fun pickSubtitles() {
-                  val tracks = mediaPlayer?.spuTracks ?: return
-                  if (tracks.isEmpty()) return
-                  val names = tracks.map { it.name }.toTypedArray()
-                  val cur = mediaPlayer?.spuTrack ?: -1
-                  val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
-
+              private fun pickSubs() {
+                  val t = player?.spuTracks ?: return
+                  if (t.isEmpty()) return
+                  val names = t.map { it.name }.toTypedArray()
                   AlertDialog.Builder(this)
-                      .setTitle("Subtítulos (MPC-HC)")
-                      .setSingleChoiceItems(names, sel) { d, i ->
-                          mediaPlayer?.spuTrack = tracks[i].id
-                          showOsd("Subtítulos: ${tracks[i].name}")
-                          dialogClose(d)
-                      }
-                      .setNegativeButton("Cerrar", null).show()
+                      .setTitle("Subtítulos")
+                      .setItems(names) { _, i -> player?.spuTrack = t[i].id; osd("Subs: ${t[i].name}") }
+                      .show()
               }
 
-              private fun dialogClose(d: android.content.DialogInterface) {
-                  d.dismiss()
-              }
-
-              private fun initGestures() {
-                  gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-                      override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                          isControlsVisible = !isControlsVisible
-                          val v = if (isControlsVisible) View.VISIBLE else View.GONE
-                          topBar.visibility = v
-                          bottomBar.visibility = v
-                          return true
-                      }
-                      override fun onDoubleTap(e: MotionEvent): Boolean {
-                          mediaPlayer?.let { p -> if (p.isPlaying) p.pause() else p.play() }
-                          return true
-                      }
-                  })
-
-                  videoLayout.setOnTouchListener { _, ev ->
-                      gestureDetector.onTouchEvent(ev)
-                      true
-                  }
-              }
-
-              private fun showOsd(msg: String) {
+              private fun osd(msg: String) {
                   txtOsd.text = msg
                   txtOsd.visibility = View.VISIBLE
-                  handler.removeCallbacks(osdRunnable)
-                  handler.postDelayed(osdRunnable, 1600)
+                  handler.removeCallbacks(osdRun)
+                  handler.postDelayed(osdRun, 1500)
               }
+              private val osdRun = Runnable { txtOsd.visibility = View.GONE }
 
-              private val osdRunnable = Runnable { txtOsd.visibility = View.GONE }
-
-              private fun updateDecoderUi() {
+              private fun updateDec() {
                   if (isHw) {
-                      btnHwSw.text = "HW"
-                      btnHwSw.setTextColor(0xFF2ECC71.toInt())
-                      txtDecoderInfo.text = "[HW | 60 FPS]"
+                      btnHw.text = "HW"
+                      btnHw.setTextColor(0xFF2ECC71.toInt())
+                      txtDec.text = "[HW | 60 FPS]"
                   } else {
-                      btnHwSw.text = "SW"
-                      btnHwSw.setTextColor(0xFFE67E22.toInt())
-                      txtDecoderInfo.text = "[SW | Hi10P Anime]"
+                      btnHw.text = "SW"
+                      btnHw.setTextColor(0xFFE67E22.toInt())
+                      txtDec.text = "[SW | Hi10P]"
                   }
               }
 
-              private fun formatTime(ms: Long): String {
+              private fun fmt(ms: Long): String {
                   val s = (ms / 1000) % 60
                   val m = (ms / 60000) % 60
                   val h = ms / 3600000
                   return String.format(Locale.US, "%02d:%02d:%02d", h, m, s)
               }
 
-              override fun onPause() {
-                  super.onPause()
-                  mediaPlayer?.pause()
-              }
-
-              override fun onDestroy() {
-                  super.onDestroy()
-                  mediaPlayer?.release()
-                  libVLC?.release()
-              }
+              override fun onPause() { super.onPause(); player?.pause() }
+              override fun onDestroy() { super.onDestroy(); player?.release(); vlc?.release() }
           }
           EOF
 
