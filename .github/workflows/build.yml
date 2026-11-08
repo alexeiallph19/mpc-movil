@@ -3,26 +3,33 @@ name: Compilar MPC-HC Android
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "desarrollo/**" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
       - name: Configurar JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
-      - name: Generar Proyecto MPC-HC
+      - name: Configurar Gradle 8.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
+
+      - name: Generar proyecto MPC-HC
         run: |
           mkdir -p app/src/main/java/com/mpcmovil
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/values
 
-          # 1. Gradle Settings
           cat << 'EOF' > settings.gradle
           pluginManagement {
               repositories {
@@ -73,10 +80,12 @@ jobs:
                       signingConfig signingConfigs.debug
                   }
               }
+
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
               }
+
               kotlinOptions {
                   jvmTarget = '17'
               }
@@ -84,20 +93,28 @@ jobs:
 
           dependencies {
               implementation 'androidx.core:core-ktx:1.12.0'
+              implementation 'androidx.activity:activity-ktx:1.8.2'
               implementation 'androidx.appcompat:appcompat:1.6.1'
               implementation 'com.google.android.material:material:1.11.0'
               implementation 'org.videolan.android:libvlc-all:3.6.0-eap13'
           }
           EOF
 
-          # 2. Icono oficial vector claqueta MPC-HC
+          cat << 'EOF' > gradle.properties
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+          org.gradle.workers.max=2
+          org.gradle.parallel=false
+          EOF
+
           cat << 'EOF' > app/src/main/res/drawable/ic_mpc_logo.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
               android:height="108dp"
               android:viewportWidth="108"
               android:viewportHeight="108">
-              <path android:fillColor="#181818" android:pathData="M14,14h80a8,8 0 0,1 8,8v64a8,8 0 0,1 -8,8h-80a8,8 0 0,1 -8,-8v-64a8,8 0 0,1 8,-8z" />
+              <path android:fillColor="#181818" android:pathData="M14,14h80a8,8 0,0 1,8 8v64a8,8 0,0 1,-8 8h-80a8,8 0,0 1,-8 -8v-64a8,8 0,0 1,8 -8z" />
               <path android:fillColor="#2A2A2A" android:pathData="M14,14h80v20h-80z" />
               <path android:fillColor="#E0E0E0" android:pathData="M20,16l10,16h-7l-10,-16z M40,16l10,16h-7l-10,-16z M60,16l10,16h-7l-10,-16z M80,16l10,16h-7l-10,-16z" />
               <path android:fillColor="#2196F3" android:pathData="M44,46l28,17l-28,17z" />
@@ -117,17 +134,18 @@ jobs:
                   <item name="android:windowBackground">#121212</item>
                   <item name="android:statusBarColor">#1A1A1A</item>
                   <item name="android:navigationBarColor">#1A1A1A</item>
+                  <item name="android:windowLightStatusBar">false</item>
               </style>
           </resources>
           EOF
 
-          # 3. AndroidManifest con sensor de rotación libre
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
-              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
-              <uses-permission android:name="android.permission.WAKE_LOCK"/>
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+              <uses-permission android:name="android.permission.WAKE_LOCK" />
 
               <application
                   android:allowBackup="true"
@@ -151,7 +169,177 @@ jobs:
                   </activity>
               </application>
           </manifest>
-          
+          EOF
+
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#101010">
+
+              <org.videolan.libvlc.util.VLCVideoLayout
+                  android:id="@+id/videoLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent" />
+
+              <LinearLayout
+                  android:id="@+id/welcomeScreen"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center"
+                  android:orientation="vertical"
+                  android:background="#E6121212"
+                  android:padding="24dp">
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="MPC-HC"
+                      android:textColor="#FFFFFF"
+                      android:textSize="32sp"
+                      android:textStyle="bold" />
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="8dp"
+                      android:text="Media Player Classic - Home Cinema"
+                      android:textColor="#BDBDBD"
+                      android:textSize="13sp" />
+
+                  <Button
+                      android:id="@+id/btnWelcomeOpen"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="28dp"
+                      android:text="Abrir archivo" />
+              </LinearLayout>
+
+              <LinearLayout
+                  android:id="@+id/topBar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="top"
+                  android:background="#E6202020"
+                  android:gravity="center_vertical"
+                  android:orientation="vertical"
+                  android:padding="6dp">
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:padding="4dp"
+                      android:text="Archivo     Ver     Reproducir     Navegar     Favoritos     Ayuda"
+                      android:textColor="#FFFFFF"
+                      android:textSize="12sp" />
+
+                  <HorizontalScrollView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:fillViewport="false"
+                      android:scrollbars="none">
+
+                      <LinearLayout
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+                          <Button android:id="@+id/btnMenuFile" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Abrir" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuAudio" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Audio" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuSubtitles" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Subtítulos" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuAspect" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Aspecto" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuRotate" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Rotación" android:textColor="#FFFFFF" />
+                      </LinearLayout>
+                  </HorizontalScrollView>
+              </LinearLayout>
+
+              <TextView
+                  android:id="@+id/txtOsd"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center"
+                  android:background="#CC202020"
+                  android:padding="12dp"
+                  android:textColor="#FFFFFF"
+                  android:textSize="16sp"
+                  android:visibility="gone" />
+
+              <LinearLayout
+                  android:id="@+id/bottomBar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="bottom"
+                  android:background="#E6202020"
+                  android:orientation="vertical"
+                  android:padding="8dp">
+
+                  <SeekBar
+                      android:id="@+id/seekBar"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="1000"
+                      android:progressTint="#2196F3"
+                      android:thumbTint="#FFFFFF" />
+
+                  <TextView
+                      android:id="@+id/txtTime"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:gravity="center"
+                      android:text="00:00:00 / 00:00:00"
+                      android:textColor="#FFFFFF"
+                      android:textSize="12sp" />
+
+                  <HorizontalScrollView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:scrollbars="none">
+
+                      <LinearLayout
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:gravity="center_vertical"
+                          android:orientation="horizontal">
+
+                          <Button android:id="@+id/btnBack" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-10s" />
+                          <Button android:id="@+id/btnPlay" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="▶" />
+                          <Button android:id="@+id/btnPause" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ⅱ" />
+                          <Button android:id="@+id/btnStop" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="■" />
+                          <Button android:id="@+id/btnForward" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+10s" />
+                          <Button android:id="@+id/btnSpeed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1.0X" />
+                          <Button android:id="@+id/btnHwSw" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="HW" />
+                          <Button android:id="@+id/btnRotateBottom" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="↻" />
+                      </LinearLayout>
+                  </HorizontalScrollView>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:gravity="center_vertical"
+                      android:orientation="horizontal">
+
+                      <TextView
+                          android:id="@+id/txtStatus"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="Listo"
+                          android:textColor="#BDBDBD"
+                          android:textSize="11sp" />
+
+                      <TextView
+                          android:id="@+id/txtDecoderInfo"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginStart="12dp"
+                          android:text="[HW]"
+                          android:textColor="#2ECC71"
+                          android:textSize="11sp" />
+                  </LinearLayout>
+              </LinearLayout>
+          </FrameLayout>
+          EOF
+
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           package com.mpcmovil
 
@@ -216,11 +404,9 @@ jobs:
                   super.onCreate(savedInstanceState)
                   window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                   setContentView(R.layout.activity_main)
-
                   initViews()
                   initGestures()
                   initPlayer()
-
                   intent?.data?.let { play(it) }
               }
 
@@ -384,6 +570,7 @@ jobs:
                           if (!isHw) m.addOption(":avcodec-hw=none")
                           mediaPlayer?.media = m
                           m.release()
+                          pfd.close()
                           mediaPlayer?.play()
                           if (startPos > 0) {
                               handler.postDelayed({ mediaPlayer?.time = startPos }, 250)
@@ -533,11 +720,13 @@ jobs:
                   libVLC?.release()
               }
           }
-          
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          EOF
 
-      - name: Subir APK Generado a GitHub Artifacts
+          gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
           name: MPC-HC-Android-v4.0
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
