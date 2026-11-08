@@ -148,7 +148,8 @@ jobs:
                   </activity>
               </application>
           </manifest>
-          EOFcat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          EOF
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
@@ -315,7 +316,8 @@ jobs:
                   </LinearLayout>
               </LinearLayout>
           </RelativeLayout>
-          EOF cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
+          EOF
+          cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           package com.mpcmovil
 
           import android.app.AlertDialog
