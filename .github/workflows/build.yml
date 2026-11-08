@@ -1,0 +1,337 @@
+name: Compilar APK
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Crear proyecto
+        run: |
+          mkdir -p app/src/main/java/com/mpcmovil app/src/main/res/layout
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "org.gradle.jvmargs=-Xmx3g" >> gradle.properties
+
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
+          }
+          dependencyResolutionManagement {
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = "MpcMovil"
+          include(":app")
+          EOF
+
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.24" apply false
+          }
+          EOF
+
+          cat > app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+          android {
+              namespace = "com.mpcmovil"
+              compileSdk = 34
+              defaultConfig {
+                  applicationId = "com.mpcmovil"
+                  minSdk = 24
+                  targetSdk = 34
+                  versionCode = 1
+                  versionName = "1.0"
+                  ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+              }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+              kotlinOptions { jvmTarget = "17" }
+          }
+          dependencies {
+              implementation("androidx.appcompat:appcompat:1.7.0")
+              implementation("androidx.core:core-ktx:1.13.1")
+              implementation("org.videolan.android:libvlc-all:3.6.0")
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application android:label="MPC Movil"
+                  android:theme="@style/Theme.AppCompat.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true"
+                      android:screenOrientation="fullSensor"
+                      android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/res/layout/activity_main.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent" android:layout_height="match_parent"
+              android:orientation="vertical" android:background="#000000">
+
+              <org.videolan.libvlc.util.VLCVideoLayout
+                  android:id="@+id/video" android:layout_width="match_parent"
+                  android:layout_height="0dp" android:layout_weight="1"
+                  android:keepScreenOn="true"/>
+
+              <LinearLayout android:id="@+id/panel"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:orientation="vertical" android:background="#1B1D21" android:padding="8dp">
+
+                  <SeekBar android:id="@+id/seek" android:layout_width="match_parent"
+                      android:layout_height="wrap_content" android:max="1000"/>
+                  <TextView android:id="@+id/time" android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" android:text="00:00 / 00:00"
+                      android:textColor="#8B929C"/>
+
+                  <HorizontalScrollView android:layout_width="match_parent"
+                      android:layout_height="wrap_content">
+                      <LinearLayout android:layout_width="wrap_content"
+                          android:layout_height="wrap_content" android:orientation="horizontal">
+                          <Button android:id="@+id/open" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Abrir"/>
+                          <Button android:id="@+id/back" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-10"/>
+                          <Button android:id="@+id/play" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="▶"/>
+                          <Button android:id="@+id/fwd" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+10"/>
+                          <Button android:id="@+id/subs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Subs"/>
+                          <Button android:id="@+id/audio" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Audio"/>
+                          <Button android:id="@+id/speed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1x"/>
+                      </LinearLayout>
+                  </HorizontalScrollView>
+              </LinearLayout>
+          </LinearLayout>
+          EOF
+
+          cat > app/src/main/java/com/mpcmovil/MainActivity.kt <<'EOF'
+          package com.mpcmovil
+
+          import android.content.res.Configuration
+          import android.net.Uri
+          import android.os.Bundle
+          import android.os.ParcelFileDescriptor
+          import android.provider.OpenableColumns
+          import android.view.View
+          import android.widget.Button
+          import android.widget.SeekBar
+          import android.widget.TextView
+          import android.widget.Toast
+          import androidx.activity.result.contract.ActivityResultContracts
+          import androidx.appcompat.app.AlertDialog
+          import androidx.appcompat.app.AppCompatActivity
+          import androidx.core.view.WindowInsetsCompat
+          import androidx.core.view.WindowInsetsControllerCompat
+          import org.videolan.libvlc.LibVLC
+          import org.videolan.libvlc.Media
+          import org.videolan.libvlc.MediaPlayer
+          import org.videolan.libvlc.util.VLCVideoLayout
+          import java.io.File
+
+          class MainActivity : AppCompatActivity() {
+              private lateinit var libVLC: LibVLC
+              private lateinit var player: MediaPlayer
+              private lateinit var panel: View
+              private var pfd: ParcelFileDescriptor? = null
+              private val speeds = floatArrayOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+              private var speedIdx = 2
+              private var seeking = false
+              private var subDelayMs = 0L
+
+              private val pickVideo = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                  if (uri != null) playUri(uri)
+              }
+              private val pickSubs = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                  if (uri != null) addSubtitle(uri)
+              }
+
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContentView(R.layout.activity_main)
+                  panel = findViewById(R.id.panel)
+                  val video = findViewById<VLCVideoLayout>(R.id.video)
+                  val seek = findViewById<SeekBar>(R.id.seek)
+                  val time = findViewById<TextView>(R.id.time)
+                  val playBtn = findViewById<Button>(R.id.play)
+
+                  libVLC = LibVLC(this, arrayListOf("--no-drop-late-frames", "--no-skip-frames"))
+                  player = MediaPlayer(libVLC)
+                  player.attachViews(video, null, true, false)
+
+                  player.setEventListener(MediaPlayer.EventListener { e ->
+                      when (e.type) {
+                          MediaPlayer.Event.TimeChanged -> runOnUiThread {
+                              val len = player.length
+                              if (!seeking && len > 0) seek.progress = (player.time * 1000 / len).toInt()
+                              time.text = fmt(player.time) + " / " + fmt(len)
+                          }
+                          MediaPlayer.Event.Playing -> runOnUiThread { playBtn.text = "⏸" }
+                          MediaPlayer.Event.Paused, MediaPlayer.Event.Stopped ->
+                              runOnUiThread { playBtn.text = "▶" }
+                      }
+                  })
+
+                  seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                      override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                          val len = player.length
+                          if (fromUser && len > 0) player.setTime(p * len / 1000)
+                      }
+                      override fun onStartTrackingTouch(s: SeekBar?) { seeking = true }
+                      override fun onStopTrackingTouch(s: SeekBar?) { seeking = false }
+                  })
+
+                  video.setOnClickListener {
+                      panel.visibility = if (panel.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                  }
+                  findViewById<Button>(R.id.open).setOnClickListener {
+                      pickVideo.launch(arrayOf("video/*", "audio/*", "application/x-matroska"))
+                  }
+                  playBtn.setOnClickListener { if (player.isPlaying) player.pause() else player.play() }
+                  findViewById<Button>(R.id.back).setOnClickListener {
+                      player.setTime(maxOf(0L, player.time - 10000L))
+                  }
+                  findViewById<Button>(R.id.fwd).setOnClickListener { player.setTime(player.time + 10000L) }
+                  findViewById<Button>(R.id.speed).setOnClickListener { b ->
+                      speedIdx = (speedIdx + 1) % speeds.size
+                      player.setRate(speeds[speedIdx])
+                      (b as Button).text = speeds[speedIdx].toString() + "x"
+                  }
+                  findViewById<Button>(R.id.audio).setOnClickListener { chooseAudio() }
+                  findViewById<Button>(R.id.subs).setOnClickListener { subsMenu() }
+
+                  applyOrientation(resources.configuration)
+              }
+
+              override fun onConfigurationChanged(newConfig: Configuration) {
+                  super.onConfigurationChanged(newConfig)
+                  applyOrientation(newConfig)
+              }
+
+              private fun applyOrientation(c: Configuration) {
+                  val ctl = WindowInsetsControllerCompat(window, window.decorView)
+                  if (c.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                      panel.visibility = View.GONE
+                      ctl.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                      ctl.hide(WindowInsetsCompat.Type.systemBars())
+                  } else {
+                      panel.visibility = View.VISIBLE
+                      ctl.show(WindowInsetsCompat.Type.systemBars())
+                  }
+              }
+
+              private fun playUri(uri: Uri) {
+                  pfd?.close()
+                  val d = contentResolver.openFileDescriptor(uri, "r") ?: return
+                  pfd = d
+                  val media = Media(libVLC, d.fileDescriptor)
+                  media.setHWDecoderEnabled(true, false)
+                  player.setMedia(media)
+                  media.release()
+                  player.play()
+              }
+
+              private fun addSubtitle(uri: Uri) {
+                  try {
+                      var ext = "srt"
+                      contentResolver.query(uri, null, null, null, null)?.use { c ->
+                          if (c.moveToFirst()) {
+                              val i = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                              if (i >= 0) ext = c.getString(i).substringAfterLast('.', "srt")
+                          }
+                      }
+                      val f = File(cacheDir, "sub_" + System.currentTimeMillis() + "." + ext)
+                      contentResolver.openInputStream(uri)?.use { input ->
+                          f.outputStream().use { out -> input.copyTo(out) }
+                      }
+                      // 0 = tipo "subtitulo"
+                      player.addSlave(0, Uri.fromFile(f), true)
+                      Toast.makeText(this, "Subtitulos cargados", Toast.LENGTH_SHORT).show()
+                  } catch (e: Exception) {
+                      Toast.makeText(this, "No se pudo cargar el subtitulo", Toast.LENGTH_LONG).show()
+                  }
+              }
+
+              private fun subsMenu() {
+                  val items = arrayOf(
+                      "Cargar archivo (.srt / .vtt)", "Elegir pista", "Mas tarde +0.5 s",
+                      "Mas temprano -0.5 s", "Desactivar"
+                  )
+                  AlertDialog.Builder(this).setTitle("Subtitulos").setItems(items) { _, i ->
+                      when (i) {
+                          0 -> pickSubs.launch(arrayOf("*/*"))
+                          1 -> {
+                              val t = player.spuTracks
+                              if (t == null || t.isEmpty()) {
+                                  Toast.makeText(this, "Sin pistas de subtitulos", Toast.LENGTH_SHORT).show()
+                              } else {
+                                  AlertDialog.Builder(this).setTitle("Pista")
+                                      .setItems(t.map { it.name }.toTypedArray()) { _, k ->
+                                          player.setSpuTrack(t[k].id)
+                                      }.show()
+                              }
+                          }
+                          2 -> { subDelayMs += 500; player.setSpuDelay(subDelayMs * 1000) }
+                          3 -> { subDelayMs -= 500; player.setSpuDelay(subDelayMs * 1000) }
+                          4 -> player.setSpuTrack(-1)
+                      }
+                  }.show()
+              }
+
+              private fun chooseAudio() {
+                  val t = player.audioTracks
+                  if (t == null || t.isEmpty()) {
+                      Toast.makeText(this, "Sin pistas de audio", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  AlertDialog.Builder(this).setTitle("Pista de audio")
+                      .setItems(t.map { it.name }.toTypedArray()) { _, k ->
+                          player.setAudioTrack(t[k].id)
+                      }.show()
+              }
+
+              private fun fmt(ms: Long): String {
+                  val s = maxOf(0L, ms) / 1000
+                  return String.format("%02d:%02d", s / 60, s % 60)
+              }
+
+              override fun onStop() { super.onStop(); player.pause() }
+
+              override fun onDestroy() {
+                  super.onDestroy()
+                  player.detachViews()
+                  player.release()
+                  libVLC.release()
+                  pfd?.close()
+              }
+          }
+          EOF
+
+      - name: Compilar
+        run: gradle assembleDebug --no-daemon
+
+      - name: Publicar APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ github.run_number }}" app/build/outputs/apk/debug/app-debug.apk \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "MPC Movil ${{ github.run_number }}" --notes "APK de depuracion"
