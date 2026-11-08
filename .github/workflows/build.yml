@@ -348,6 +348,7 @@ jobs:
 
           import android.app.AlertDialog
           import android.content.Intent
+          import android.content.res.AssetFileDescriptor
           import android.database.Cursor
           import android.provider.OpenableColumns
           import android.util.Log
@@ -386,6 +387,7 @@ jobs:
               private var libVLC: LibVLC? = null
               private var mediaPlayer: MediaPlayer? = null
               private var currentUri: Uri? = null
+              private var currentAssetDescriptor: AssetFileDescriptor? = null
               private var playbackDiagnostics = ""
               private var playbackEvents = mutableListOf<String>()
               private var isHw = true
@@ -449,6 +451,7 @@ jobs:
 
                   findViewById<Button>(R.id.btnStop).setOnClickListener {
                       mediaPlayer?.stop()
+                      releaseCurrentAssetDescriptor()
                       welcomeScreen.visibility = View.VISIBLE
                       txtStatus.text = "Detenido"
                       txtTime.text = "00:00:00 / 00:00:00"
@@ -580,6 +583,7 @@ jobs:
 
               private fun rebuildPlayer() {
                   mediaPlayer?.stop()
+                  releaseCurrentAssetDescriptor()
                   mediaPlayer?.detachViews()
                   mediaPlayer?.release()
                   libVLC?.release()
@@ -587,6 +591,8 @@ jobs:
               }
 
               private fun play(uri: Uri, startPos: Long = 0L) {
+                  mediaPlayer?.stop()
+                  releaseCurrentAssetDescriptor()
                   currentUri = uri
                   playbackEvents.clear()
                   try {
@@ -609,9 +615,12 @@ jobs:
                       }
                       playbackDiagnostics = "Archivo: $displayName\nTamaño: $fileSize bytes\nTipo: $mimeType\nURI: $uri\nEsquema: ${uri.scheme}\nHW/SW: ${if (isHw) "HW" else "SW"}"
                       Log.d("MPC_VLC", playbackDiagnostics)
-                      // Usar la URI de Android directamente permite que VLC acceda
-                      // correctamente a archivos elegidos mediante el selector del sistema.
-                      val m = Media(libVLC, uri)
+                      // Abrir el URI SAF como AssetFileDescriptor y entregarle el descriptor
+                      // directamente a LibVLC, evitando que VLC intente resolver content:// por su cuenta.
+                      val afd = contentResolver.openAssetFileDescriptor(uri, "r")
+                          ?: throw IllegalStateException("Android no pudo abrir el descriptor del archivo")
+                      currentAssetDescriptor = afd
+                      val m = Media(libVLC, afd)
                       m.addOption(":file-caching=2000")
                       mediaPlayer?.media = m
                       m.release()
@@ -621,10 +630,21 @@ jobs:
                       }
                       welcomeScreen.visibility = View.GONE
                   } catch (e: Exception) {
+                      releaseCurrentAssetDescriptor()
                       txtStatus.text = "No se pudo abrir el archivo"
                       playbackDiagnostics = "Excepción: ${e.javaClass.name}\nMensaje: ${e.message}\nURI: $uri"
                       Log.e("MPC_VLC", playbackDiagnostics, e)
                       AlertDialog.Builder(this).setTitle("Error al abrir archivo").setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
+                  }
+              }
+
+              private fun releaseCurrentAssetDescriptor() {
+                  try {
+                      currentAssetDescriptor?.close()
+                  } catch (e: Exception) {
+                      Log.w("MPC_VLC", "No se pudo cerrar el descriptor anterior", e)
+                  } finally {
+                      currentAssetDescriptor = null
                   }
               }
 
@@ -762,7 +782,9 @@ jobs:
 
               override fun onDestroy() {
                   super.onDestroy()
+                  mediaPlayer?.stop()
                   mediaPlayer?.release()
+                  releaseCurrentAssetDescriptor()
                   libVLC?.release()
               }
           }
