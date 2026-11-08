@@ -606,9 +606,13 @@ jobs:
           }
           EOF
 
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+          cp gradle.properties app/gradle.properties
+
           gradle wrapper --gradle-version 8.2
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true --no-daemon --stacktrace
 
       - name: Subir APK Generado a GitHub Artifacts
         uses: actions/upload-artifact@v4
