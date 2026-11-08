@@ -1,4 +1,4 @@
-name: Compilar MPC-HC Android
+name: Compilar MPC-Móvil Android
 
 permissions:
   contents: write
@@ -48,7 +48,7 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "MPCHCMovil"
+          rootProject.name = "MPCMovil"
           include ':app'
           EOF
 
@@ -127,7 +127,7 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
-              <string name="app_name">MPC-Móvil Beta</string>
+              <string name="app_name">MPC-Móvil</string>
           </resources>
           EOF
 
@@ -198,7 +198,7 @@ jobs:
                   <TextView
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="MPC-HC"
+                      android:text="MPC-Móvil"
                       android:textColor="#FFFFFF"
                       android:textSize="32sp"
                       android:textStyle="bold" />
@@ -207,7 +207,7 @@ jobs:
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_marginTop="8dp"
-                      android:text="Media Player Classic - Home Cinema"
+                      android:text="Reproductor multimedia para Android"
                       android:textColor="#BDBDBD"
                       android:textSize="13sp" />
 
@@ -744,7 +744,7 @@ jobs:
                   val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
 
                   AlertDialog.Builder(this)
-                      .setTitle("Audio (MPC-HC)")
+                      .setTitle("Audio (MPC-Móvil)")
                       .setSingleChoiceItems(names, sel) { d, i ->
                           mediaPlayer?.audioTrack = tracks[i].id
                           showOsd("Audio: ${tracks[i].name}")
@@ -761,7 +761,7 @@ jobs:
                   val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
 
                   AlertDialog.Builder(this)
-                      .setTitle("Subtítulos (MPC-HC)")
+                      .setTitle("Subtítulos (MPC-Móvil)")
                       .setSingleChoiceItems(names, sel) { d, i ->
                           mediaPlayer?.spuTrack = tracks[i].id
                           showOsd("Subtítulos: ${tracks[i].name}")
@@ -839,7 +839,7 @@ jobs:
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: MPC-HC-Android-v4.0
+          name: MPC-Móvil-Android-v4.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
@@ -847,7 +847,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: mpc-android-build-${{ github.run_number }}
-          name: MPC-HC Android - compilación #${{ github.run_number }}
+          name: MPC-Móvil Android - compilación #${{ github.run_number }}
           body: |
             APK generado automáticamente por GitHub Actions.
             Rama: ${{ github.ref_name }}
