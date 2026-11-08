@@ -1,0 +1,577 @@
+name: Compilar MPC-HC Android
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Generar Proyecto MPC-HC
+        run: |
+          mkdir -p app/src/main/java/com/mpcmovil app/src/main/res/layout
+
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "org.gradle.jvmargs=-Xmx3g" >> gradle.properties
+
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = "MpcMovil"
+          include(":app")
+          EOF
+
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.24" apply false
+          }
+          EOF
+
+          cat > app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+          android {
+              namespace = "com.mpcmovil"
+              compileSdk = 34
+              defaultConfig {
+                  applicationId = "com.mpcmovil"
+                  minSdk = 24
+                  targetSdk = 34
+                  versionCode = 5
+                  versionName = "3.2"
+                  ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+              }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+              kotlinOptions { jvmTarget = "17" }
+          }
+          dependencies {
+              implementation("androidx.appcompat:appcompat:1.7.0")
+              implementation("androidx.core:core-ktx:1.13.1")
+              implementation("org.videolan.android:libvlc-all:3.6.0")
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.WAKE_LOCK" />
+              <application
+                  android:label="MPC-HC"
+                  android:theme="@style/Theme.AppCompat.NoActionBar">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          # Diseño visual clásico de MPC-HC con botón HW/SW
+          cat > app/src/main/res/layout/activity_main.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#000000">
+
+              <org.videolan.libvlc.util.VLCVideoLayout
+                  android:id="@+id/videoLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:keepScreenOn="true"/>
+
+              <View
+                  android:id="@+id/touchLayer"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"/>
+
+              <!-- Pantalla de inicio MPC-HC -->
+              <LinearLayout
+                  android:id="@+id/welcomeScreen"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center"
+                  android:orientation="vertical"
+                  android:background="#16171A"
+                  android:padding="24dp">
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="🎬"
+                      android:textSize="64sp"/>
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="Media Player Classic"
+                      android:textColor="#FFFFFF"
+                      android:textSize="20sp"
+                      android:textStyle="bold"
+                      android:layout_marginTop="8dp"/>
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="Home Cinema · Compatible con Anime (10-bit)"
+                      android:textColor="#888888"
+                      android:textSize="12sp"
+                      android:layout_marginBottom="24dp"/>
+
+                  <Button
+                      android:id="@+id/btnOpenMain"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="📂 Abrir Video / Anime..."
+                      android:background="#2E3440"
+                      android:textColor="#ECEFF4"
+                      android:paddingStart="24dp"
+                      android:paddingEnd="24dp"/>
+              </LinearLayout>
+
+              <!-- Barra Superior de Menús -->
+              <LinearLayout
+                  android:id="@+id/topBar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentTop="true"
+                  android:background="#A6181A1D"
+                  android:orientation="horizontal"
+                  android:padding="2dp">
+
+                  <Button android:id="@+id/btnMenuFile" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Archivo" android:textSize="11sp" style="?android:attr/borderlessButtonStyle" android:textColor="#E0E0E0"/>
+                  <Button android:id="@+id/btnMenuAudio" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Audio" android:textSize="11sp" style="?android:attr/borderlessButtonStyle" android:textColor="#E0E0E0"/>
+                  <Button android:id="@+id/btnMenuSubs" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Subtítulos" android:textSize="11sp" style="?android:attr/borderlessButtonStyle" android:textColor="#E0E0E0"/>
+                  <Button android:id="@+id/btnMenuAspect" android:layout_width="wrap_content" android:layout_height="36dp" android:text="Aspecto" android:textSize="11sp" style="?android:attr/borderlessButtonStyle" android:textColor="#E0E0E0"/>
+              </LinearLayout>
+
+              <!-- Panel Inferior MPC-HC -->
+              <LinearLayout
+                  android:id="@+id/bottomBar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentBottom="true"
+                  android:background="#E6181A1D"
+                  android:orientation="vertical">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:gravity="center_vertical"
+                      android:paddingStart="8dp"
+                      android:paddingEnd="8dp">
+
+                      <SeekBar
+                          android:id="@+id/seekBar"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:max="1000"/>
+
+                      <TextView
+                          android:id="@+id/txtTime"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="00:00:00 / 00:00:00"
+                          android:textColor="#E0E0E0"
+                          android:textSize="11sp"
+                          android:fontFamily="monospace"/>
+                  </LinearLayout>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:gravity="center_vertical"
+                      android:orientation="horizontal"
+                      android:paddingStart="6dp"
+                      android:paddingEnd="6dp"
+                      android:paddingBottom="4dp">
+
+                      <Button android:id="@+id/btnPlay" android:layout_width="44dp" android:layout_height="38dp" android:text="▶" android:textSize="14sp"/>
+                      <Button android:id="@+id/btnPause" android:layout_width="44dp" android:layout_height="38dp" android:text="⏸" android:textSize="12sp"/>
+                      <Button android:id="@+id/btnStop" android:layout_width="44dp" android:layout_height="38dp" android:text="◼" android:textSize="12sp"/>
+                      <Button android:id="@+id/btnBack" android:layout_width="48dp" android:layout_height="38dp" android:text="◀◀" android:textSize="11sp"/>
+                      <Button android:id="@+id/btnFwd" android:layout_width="48dp" android:layout_height="38dp" android:text="▶▶" android:textSize="11sp"/>
+                      <Button android:id="@+id/btnSpeed" android:layout_width="50dp" android:layout_height="38dp" android:text="1.0x" android:textSize="11sp"/>
+                      <Button android:id="@+id/btnHwSw" android:layout_width="52dp" android:layout_height="38dp" android:text="HW" android:textStyle="bold" android:textSize="11sp"/>
+
+                      <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+                      <Button android:id="@+id/btnOpenFast" android:layout_width="wrap_content" android:layout_height="38dp" android:text="📂 Abrir" android:textSize="11sp"/>
+                  </LinearLayout>
+
+                  <!-- Barra de estado clásica MPC-HC -->
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="22dp"
+                      android:background="#101113"
+                      android:gravity="center_vertical"
+                      android:orientation="horizontal"
+                      android:paddingStart="8dp"
+                      android:paddingEnd="8dp">
+
+                      <TextView
+                          android:id="@+id/txtStatus"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="Detenido"
+                          android:textColor="#A0A0A0"
+                          android:textSize="10sp"
+                          android:fontFamily="monospace"/>
+
+                      <TextView
+                          android:id="@+id/txtDecoderMode"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="[HW Codec]"
+                          android:textColor="#00D2FF"
+                          android:textSize="10sp"
+                          android:fontFamily="monospace"/>
+                  </LinearLayout>
+              </LinearLayout>
+          </RelativeLayout>
+          EOF
+
+          cat > app/src/main/java/com/mpcmovil/MainActivity.kt <<'EOF'
+          package com.mpcmovil
+
+          import android.content.Intent
+          import android.net.Uri
+          import android.os.Bundle
+          import android.os.Handler
+          import android.os.Looper
+          import android.view.View
+          import android.widget.Button
+          import android.widget.SeekBar
+          import android.widget.TextView
+          import android.widget.Toast
+          import androidx.activity.result.contract.ActivityResultContracts
+          import androidx.appcompat.app.AlertDialog
+          import androidx.appcompat.app.AppCompatActivity
+          import org.videolan.libvlc.LibVLC
+          import org.videolan.libvlc.Media
+          import org.videolan.libvlc.MediaPlayer
+          import org.videolan.libvlc.util.VLCVideoLayout
+          import java.io.File
+
+          class MainActivity : AppCompatActivity() {
+              private lateinit var libVLC: LibVLC
+              private lateinit var player: MediaPlayer
+              private lateinit var topBar: View
+              private lateinit var bottomBar: View
+              private lateinit var welcomeScreen: View
+              private lateinit var txtStatus: TextView
+              private lateinit var txtTime: TextView
+              private lateinit var txtDecoderMode: TextView
+              private lateinit var btnHwSw: Button
+              private lateinit var seekBar: SeekBar
+
+              private var currentUri: Uri? = null
+              private var isHardwareDecoding = true
+              private val speeds = floatArrayOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+              private var speedIndex = 2
+              private var userIsSeeking = false
+              private var controlsVisible = true
+              private val uiHandler = Handler(Looper.getMainLooper())
+              private val hideControlsTask = Runnable { hideControls() }
+
+              private val pickVideoLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                  if (uri != null) {
+                      try {
+                          contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                      } catch (_: Exception) {}
+                      currentUri = uri
+                      loadAndPlay(uri, isHardwareDecoding)
+                  }
+              }
+
+              private val pickSubsLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                  if (uri != null) loadSubtitleFile(uri)
+              }
+
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContentView(R.layout.activity_main)
+
+                  topBar = findViewById(R.id.topBar)
+                  bottomBar = findViewById(R.id.bottomBar)
+                  welcomeScreen = findViewById(R.id.welcomeScreen)
+                  txtStatus = findViewById(R.id.txtStatus)
+                  txtTime = findViewById(R.id.txtTime)
+                  txtDecoderMode = findViewById(R.id.txtDecoderMode)
+                  btnHwSw = findViewById(R.id.btnHwSw)
+                  seekBar = findViewById(R.id.seekBar)
+                  val videoLayout = findViewById<VLCVideoLayout>(R.id.videoLayout)
+                  val touchLayer = findViewById<View>(R.id.touchLayer)
+
+                  // Configuración de LibVLC con soporte para todos los núcleos de CPU (para Anime 10-bit)
+                  val options = arrayListOf(
+                      "--avcodec-threads=0",
+                      "--aout=opensles",
+                      "--audio-time-stretch"
+                  )
+                  libVLC = LibVLC(this, options)
+                  player = MediaPlayer(libVLC)
+                  player.attachViews(videoLayout, null, true, true)
+
+                  player.setEventListener { event ->
+                      when (event.type) {
+                          MediaPlayer.Event.TimeChanged -> runOnUiThread {
+                              val total = player.length
+                              if (!userIsSeeking && total > 0) {
+                                  seekBar.progress = (player.time * 1000 / total).toInt()
+                              }
+                              txtTime.text = "${formatHMS(player.time)} / ${formatHMS(total)}"
+                          }
+                          MediaPlayer.Event.Playing -> runOnUiThread {
+                              txtStatus.text = "Reproduciendo"
+                              welcomeScreen.visibility = View.GONE
+                              scheduleAutoHideControls()
+                          }
+                          MediaPlayer.Event.Paused -> runOnUiThread {
+                              txtStatus.text = "En pausa"
+                              showControls()
+                          }
+                          MediaPlayer.Event.Stopped -> runOnUiThread {
+                              txtStatus.text = "Detenido"
+                              seekBar.progress = 0
+                              txtTime.text = "00:00:00 / 00:00:00"
+                              showControls()
+                          }
+                          MediaPlayer.Event.EncounteredError -> runOnUiThread {
+                              txtStatus.text = "Error en video"
+                              Toast.makeText(this, "Prueba tocando el botón HW/SW", Toast.LENGTH_LONG).show()
+                          }
+                      }
+                  }
+
+                  touchLayer.setOnClickListener {
+                      if (welcomeScreen.visibility != View.VISIBLE) toggleControls()
+                  }
+
+                  seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                      override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                          val total = player.length
+                          if (fromUser && total > 0) player.setTime(progress * total / 1000)
+                      }
+                      override fun onStartTrackingTouch(sb: SeekBar?) {
+                          userIsSeeking = true
+                          uiHandler.removeCallbacks(hideControlsTask)
+                      }
+                      override fun onStopTrackingTouch(sb: SeekBar?) {
+                          userIsSeeking = false
+                          scheduleAutoHideControls()
+                      }
+                  })
+
+                  // Botón HW/SW: Si el anime se ve negro, tocas este botón y lo decodifica por CPU
+                  btnHwSw.setOnClickListener {
+                      isHardwareDecoding = !isHardwareDecoding
+                      updateHwSwLabel()
+                      currentUri?.let { uri ->
+                          val pos = player.time
+                          loadAndPlay(uri, isHardwareDecoding)
+                          player.time = pos
+                          Toast.makeText(this, if (isHardwareDecoding) "Modo Hardware (HW)" else "Modo Software (SW) - Ideal para Anime", Toast.LENGTH_SHORT).show()
+                      }
+                  }
+
+                  findViewById<Button>(R.id.btnOpenMain).setOnClickListener { openFile() }
+                  findViewById<Button>(R.id.btnOpenFast).setOnClickListener { openFile() }
+                  findViewById<Button>(R.id.btnMenuFile).setOnClickListener { openFile() }
+                  findViewById<Button>(R.id.btnPlay).setOnClickListener { player.play() }
+                  findViewById<Button>(R.id.btnPause).setOnClickListener { player.pause() }
+                  findViewById<Button>(R.id.btnStop).setOnClickListener {
+                      player.stop()
+                      welcomeScreen.visibility = View.VISIBLE
+                  }
+                  findViewById<Button>(R.id.btnBack).setOnClickListener {
+                      player.setTime(maxOf(0L, player.time - 10000L))
+                      scheduleAutoHideControls()
+                  }
+                  findViewById<Button>(R.id.btnFwd).setOnClickListener {
+                      player.setTime(player.time + 10000L)
+                      scheduleAutoHideControls()
+                  }
+                  findViewById<Button>(R.id.btnSpeed).setOnClickListener { btn ->
+                      speedIndex = (speedIndex + 1) % speeds.size
+                      val spd = speeds[speedIndex]
+                      player.setRate(spd)
+                      (btn as Button).text = "${spd}x"
+                      scheduleAutoHideControls()
+                  }
+
+                  findViewById<Button>(R.id.btnMenuAudio).setOnClickListener { showAudioMenu() }
+                  findViewById<Button>(R.id.btnMenuSubs).setOnClickListener { showSubsMenu() }
+                  findViewById<Button>(R.id.btnMenuAspect).setOnClickListener { showAspectMenu() }
+
+                  updateHwSwLabel()
+                  showControls()
+              }
+
+              private fun updateHwSwLabel() {
+                  btnHwSw.text = if (isHardwareDecoding) "HW" else "SW"
+                  txtDecoderMode.text = if (isHardwareDecoding) "[Decodificador HW]" else "[Decodificador SW (CPU)]"
+                  }
+
+              private fun toggleControls() {
+                  if (controlsVisible) hideControls() else showControls()
+              }
+
+              private fun showControls() {
+                  topBar.visibility = View.VISIBLE
+                  bottomBar.visibility = View.VISIBLE
+                  controlsVisible = true
+                  if (player.isPlaying) scheduleAutoHideControls()
+              }
+
+              private fun hideControls() {
+                  topBar.visibility = View.GONE
+                  bottomBar.visibility = View.GONE
+                  controlsVisible = false
+              }
+
+              private fun scheduleAutoHideControls() {
+              uiHandler.removeCallbacks(hideControlsTask)
+                  uiHandler.postDelayed(hideControlsTask, 4000)
+              }
+
+              private fun openFile() {
+                  pickVideoLauncher.launch(arrayOf("video/*", "audio/*", "application/x-matroska", "*/*"))
+              }
+
+              private fun loadAndPlay(uri: Uri, useHardware: Boolean) {
+                  try {
+                      val media = Media(libVLC, uri)
+                      media.setHWDecoderEnabled(useHardware, false)
+                      player.media = media
+                      media.release()
+                      player.play()
+                      welcomeScreen.visibility = View.GONE
+                      showControls()
+                  } catch (e: Exception) {    
+                  Toast.makeText(this, "Error al cargar: ${e.message}", Toast.LENGTH_SHORT).show()
+                  }
+              } 
+              private fun loadSubtitleFile(uri: Uri) {
+                  try {
+                      val tempSub = File(cacheDir, "sub_${System.currentTimeMillis()}.ass")
+                      contentResolver.openInputStream(uri)?.use { input ->
+                          tempSub.outputStream().use { output -> input.copyTo(output) }
+                      }
+                      player.addSlave(0, Uri.fromFile(tempSub), true)
+                      Toast.makeText(this, "Subtítulo cargado en MPC-HC", Toast.LENGTH_SHORT).show()
+                  } catch (e: Exception) {
+                      Toast.makeText(this, "Error al cargar subtítulo", Toast.LENGTH_SHORT).show()
+                  }
+              }
+
+              private fun showSubsMenu() {
+                  val items = arrayOf("Cargar subtítulo externo (.ass/.srt)", "Pistas internas del MKV", "Desactivar")
+                  AlertDialog.Builder(this).setTitle("Subtítulos (MPC-HC)").setItems(items) { _, i ->
+                      when (i) {
+                          0 -> pickSubsLauncher.launch(arrayOf("*/*"))
+                          1 -> {
+                              val tracks = player.spuTracks
+                              if (tracks.isNullOrEmpty()) {
+                                  Toast.makeText(this, "Sin pistas de subtítulo", Toast.LENGTH_SHORT).show()
+                              } else {
+                                  AlertDialog.Builder(this).setTitle("Pista de subtítulo")
+                                      .setItems(tracks.map { it.name }.toTypedArray()) { _, k ->
+                                          player.setSpuTrack(tracks[k].id)
+                                      }.show()
+                              }
+                          }
+                          2 -> player.setSpuTrack(-1)
+                      }
+                  }.show()
+              }
+
+              private fun showAudioMenu() {
+                  val tracks = player.audioTracks
+                  if (tracks.isNullOrEmpty() || tracks.size <= 1) {
+                      Toast.makeText(this, "Solo hay 1 pista de audio", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  AlertDialog.Builder(this).setTitle("Idioma de Audio (Japonés / Latino)")
+                      .setItems(tracks.map { it.name }.toTypedArray()) { _, k ->
+                          player.setAudioTrack(tracks[k].id)
+                      }.show()
+              }
+
+              private fun showAspectMenu() {
+                  val options = arrayOf("Original", "16:9", "4:3 (Anime Clásico)", "Rellenar pantalla")
+                  AlertDialog.Builder(this).setTitle("Relación de Aspecto")
+                      .setItems(options) { _, i ->
+                          when (i) {
+                              0 -> player.aspectRatio = null
+                              1 -> player.aspectRatio = "16:9"
+                              2 -> player.aspectRatio = "4:3"
+                              3 -> player.scale = 0f
+                          }
+                      }.show()
+              }
+
+              private fun formatHMS(ms: Long): String {
+                  val sTotal = maxOf(0L, ms) / 1000
+                  val h = sTotal / 3600
+                  val m = (sTotal % 3600) / 60
+                  val s = sTotal % 60
+                  return String.format("%02d:%02d:%02d", h, m, s)
+              }
+
+              override fun onStop() {
+                  super.onStop()
+                  player.pause()
+              }
+
+              override fun onDestroy() {
+                  super.onDestroy()
+                  uiHandler.removeCallbacks(hideControlsTask)
+                  player.detachViews()
+                  player.release()
+                  libVLC.release()
+              }
+          }
+          EOF
+
+      - name: Compilar APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Publicar APK en Releases (Descarga Directa)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v3.2.${{ github.run_number }}" app/build/outputs/apk/debug/app-debug.apk \
+            --repo "${{ github.repository }}" \
+            --title "MPC-HC v3.2 (Con botón HW/SW y Soporte Anime)" \
+            --notes "Versión con botón interactivo HW/SW, TextureView y soporte para anime en 10 bits"
