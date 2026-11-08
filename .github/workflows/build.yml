@@ -26,7 +26,19 @@ jobs:
         with:
           gradle-version: '8.2'
 
+      - name: Preparar firma permanente
+        env:
+          MPM_KEYSTORE_BASE64: ${{ secrets.MPM_KEYSTORE_BASE64 }}
+        run: |
+          echo "$MPM_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mpm-player-release.jks"
+          test -s "$RUNNER_TEMP/mpm-player-release.jks"
+
       - name: Generar proyecto MPM Player
+        env:
+          MPM_KEYSTORE_PATH: ${{ runner.temp }}/mpm-player-release.jks
+          MPM_KEYSTORE_PASSWORD: ${{ secrets.MPM_KEYSTORE_PASSWORD }}
+          MPM_KEY_ALIAS: ${{ secrets.MPM_KEY_ALIAS }}
+          MPM_KEY_PASSWORD: ${{ secrets.MPM_KEY_PASSWORD }}
         run: |
           mkdir -p app/src/main/java/com/mpcmovil
           mkdir -p app/src/main/res/layout
@@ -73,14 +85,23 @@ jobs:
                   applicationId "com.mpcmovil.beta"
                   minSdk 21
                   targetSdk 34
-                  versionCode 4
-                  versionName "4.0.0-MPM"
+                  versionCode 5
+                  versionName "4.0.1-MPM"
+              }
+
+              signingConfigs {
+                  release {
+                      storeFile file(System.getenv("MPM_KEYSTORE_PATH"))
+                      storePassword System.getenv("MPM_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("MPM_KEY_ALIAS")
+                      keyPassword System.getenv("MPM_KEY_PASSWORD")
+                  }
               }
 
               buildTypes {
                   release {
                       minifyEnabled false
-                      signingConfig signingConfigs.debug
+                      signingConfig signingConfigs.release
                   }
               }
 
@@ -834,13 +855,13 @@ jobs:
           }
           EOF
 
-          gradle assembleDebug --no-daemon --stacktrace
+          gradle assembleRelease --no-daemon --stacktrace
 
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: MPM Player-Android-v4.0
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: MPM Player-Android-v4.0.1
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
       - name: Publicar APK en GitHub Releases
@@ -853,4 +874,4 @@ jobs:
             Rama: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
           prerelease: true
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/release/app-release.apk
