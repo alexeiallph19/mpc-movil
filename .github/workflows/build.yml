@@ -1,4 +1,4 @@
-name: Compilar MPC-Móvil Android
+name: Compilar MPM Player Android
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      - name: Generar proyecto MPC-Móvil
+      - name: Generar proyecto MPM Player
         run: |
           mkdir -p app/src/main/java/com/mpcmovil
           mkdir -p app/src/main/res/layout
@@ -48,7 +48,7 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "MPCMovil"
+          rootProject.name = "MPMPlayer"
           include ':app'
           EOF
 
@@ -74,7 +74,7 @@ jobs:
                   minSdk 21
                   targetSdk 34
                   versionCode 4
-                  versionName "4.0.0-MPC"
+                  versionName "4.0.0-MPM"
               }
 
               buildTypes {
@@ -111,7 +111,7 @@ jobs:
           org.gradle.parallel=false
           EOF
 
-          cat << 'EOF' > app/src/main/res/drawable/ic_mpc_logo.xml
+          cat << 'EOF' > app/src/main/res/drawable/ic_mpm_logo.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
               android:height="108dp"
@@ -127,13 +127,13 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
-              <string name="app_name">MPC-Móvil</string>
+              <string name="app_name">MPM Player</string>
           </resources>
           EOF
 
           cat << 'EOF' > app/src/main/res/values/styles.xml
           <resources>
-              <style name="Theme.MPCMovil" parent="Theme.AppCompat.NoActionBar">
+              <style name="Theme.MPMPlayer" parent="Theme.AppCompat.NoActionBar">
                   <item name="android:windowBackground">#121212</item>
                   <item name="android:statusBarColor">#1A1A1A</item>
                   <item name="android:navigationBarColor">#1A1A1A</item>
@@ -152,9 +152,9 @@ jobs:
 
               <application
                   android:allowBackup="true"
-                  android:icon="@drawable/ic_mpc_logo"
+                  android:icon="@drawable/ic_mpm_logo"
                   android:label="@string/app_name"
-                  android:theme="@style/Theme.MPCMovil">
+                  android:theme="@style/Theme.MPMPlayer">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true"
@@ -198,7 +198,7 @@ jobs:
                   <TextView
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="MPC-Móvil"
+                      android:text="MPM Player"
                       android:textColor="#FFFFFF"
                       android:textSize="32sp"
                       android:textStyle="bold" />
@@ -543,7 +543,7 @@ jobs:
                       }
                       playbackEvents.add(eventName)
                       if (playbackEvents.size > 20) playbackEvents.removeAt(0)
-                      Log.d("MPC_VLC", "VLC event: $eventName")
+                      Log.d("MPM_PLAYER", "VLC event: $eventName")
                       when (ev.type) {
                           MediaPlayer.Event.Playing -> {
                               welcomeScreen.visibility = View.GONE
@@ -572,7 +572,7 @@ jobs:
                           MediaPlayer.Event.EncounteredError -> {
                               txtStatus.text = "Error al abrir"
                               val report = playbackDiagnostics + "\n\nEventos VLC: " + playbackEvents.joinToString(" → ")
-                              Log.e("MPC_VLC", report)
+                              Log.e("MPM_PLAYER", report)
                               AlertDialog.Builder(this)
                                   .setTitle("Diagnóstico de reproducción")
                                   .setMessage(report)
@@ -628,10 +628,10 @@ jobs:
                               }
                           }
                       } catch (queryError: Exception) {
-                          Log.e("MPC_VLC", "No se pudo consultar el archivo", queryError)
+                          Log.e("MPM_PLAYER", "No se pudo consultar el archivo", queryError)
                       }
                       playbackDiagnostics = "Archivo: $displayName\nTamaño: $fileSize bytes\nTipo: $mimeType\nURI: $uri\nEsquema: ${uri.scheme}\nHW/SW: ${if (isHw) "HW" else "SW"}"
-                      Log.d("MPC_VLC", playbackDiagnostics)
+                      Log.d("MPM_PLAYER", playbackDiagnostics)
                       // Abrir el URI SAF como AssetFileDescriptor y entregarle el descriptor
                       // directamente a LibVLC, evitando que VLC intente resolver content:// por su cuenta.
                       val afd = contentResolver.openAssetFileDescriptor(uri, "r")
@@ -650,7 +650,7 @@ jobs:
                       releaseCurrentAssetDescriptor()
                       txtStatus.text = "No se pudo abrir el archivo"
                       playbackDiagnostics = "Excepción: ${e.javaClass.name}\nMensaje: ${e.message}\nURI: $uri"
-                      Log.e("MPC_VLC", playbackDiagnostics, e)
+                      Log.e("MPM_PLAYER", playbackDiagnostics, e)
                       AlertDialog.Builder(this).setTitle("Error al abrir archivo").setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
                   }
               }
@@ -659,7 +659,7 @@ jobs:
                   try {
                       currentAssetDescriptor?.close()
                   } catch (e: Exception) {
-                      Log.w("MPC_VLC", "No se pudo cerrar el descriptor anterior", e)
+                      Log.w("MPM_PLAYER", "No se pudo cerrar el descriptor anterior", e)
                   } finally {
                       currentAssetDescriptor = null
                   }
@@ -744,7 +744,7 @@ jobs:
                   val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
 
                   AlertDialog.Builder(this)
-                      .setTitle("Audio (MPC-Móvil)")
+                      .setTitle("Audio (MPM Player)")
                       .setSingleChoiceItems(names, sel) { d, i ->
                           mediaPlayer?.audioTrack = tracks[i].id
                           showOsd("Audio: ${tracks[i].name}")
@@ -761,7 +761,7 @@ jobs:
                   val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
 
                   AlertDialog.Builder(this)
-                      .setTitle("Subtítulos (MPC-Móvil)")
+                      .setTitle("Subtítulos (MPM Player)")
                       .setSingleChoiceItems(names, sel) { d, i ->
                           mediaPlayer?.spuTrack = tracks[i].id
                           showOsd("Subtítulos: ${tracks[i].name}")
@@ -839,7 +839,7 @@ jobs:
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: MPC-Móvil-Android-v4.0
+          name: MPM Player-Android-v4.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
@@ -847,7 +847,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: mpc-android-build-${{ github.run_number }}
-          name: MPC-Móvil Android - compilación #${{ github.run_number }}
+          name: MPM Player Android - compilación #${{ github.run_number }}
           body: |
             APK generado automáticamente por GitHub Actions.
             Rama: ${{ github.ref_name }}
