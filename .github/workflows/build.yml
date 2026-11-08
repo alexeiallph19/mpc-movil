@@ -70,7 +70,7 @@ jobs:
               compileSdk 34
 
               defaultConfig {
-                  applicationId "com.mpcmovil"
+                  applicationId "com.mpcmovil.beta"
                   minSdk 21
                   targetSdk 34
                   versionCode 4
@@ -127,7 +127,7 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
-              <string name="app_name">MPC-HC</string>
+              <string name="app_name">MPC-Móvil Beta</string>
           </resources>
           EOF
 
