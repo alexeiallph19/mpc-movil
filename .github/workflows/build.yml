@@ -388,6 +388,7 @@ jobs:
               private var mediaPlayer: MediaPlayer? = null
               private var currentUri: Uri? = null
               private var currentAssetDescriptor: AssetFileDescriptor? = null
+              private var viewsAttached = false
               private var playbackDiagnostics = ""
               private var playbackEvents = mutableListOf<String>()
               private var isHw = true
@@ -525,7 +526,6 @@ jobs:
 
                   libVLC = LibVLC(this, opts)
                   mediaPlayer = MediaPlayer(libVLC)
-                  mediaPlayer?.attachViews(videoLayout, null, false, false)
 
                   mediaPlayer?.setEventListener { ev ->
                       val eventName = when (ev.type) {
@@ -584,13 +584,27 @@ jobs:
               private fun rebuildPlayer() {
                   mediaPlayer?.stop()
                   releaseCurrentAssetDescriptor()
-                  mediaPlayer?.detachViews()
+                  if (viewsAttached) {
+                      mediaPlayer?.detachViews()
+                      viewsAttached = false
+                  }
                   mediaPlayer?.release()
                   libVLC?.release()
                   initPlayer()
               }
 
               private fun play(uri: Uri, startPos: Long = 0L) {
+                  if (!viewsAttached) {
+                      videoLayout.post {
+                          if (isFinishing || isDestroyed) return@post
+                          if (!viewsAttached) {
+                              mediaPlayer?.attachViews(videoLayout, null, false, false)
+                              viewsAttached = true
+                          }
+                          play(uri, startPos)
+                      }
+                      return
+                  }
                   mediaPlayer?.stop()
                   releaseCurrentAssetDescriptor()
                   currentUri = uri
