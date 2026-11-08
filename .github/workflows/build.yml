@@ -151,8 +151,7 @@ jobs:
                   </activity>
               </application>
           </manifest>
-          EOF
-          # 5. Código Kotlin MainActivity
+          
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           package com.mpcmovil
 
@@ -534,9 +533,7 @@ jobs:
                   libVLC?.release()
               }
           }
-          EOF
-
-          # 6. Compilar APK
+          
           ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Subir APK Generado a GitHub Artifacts
