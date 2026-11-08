@@ -509,10 +509,9 @@ jobs:
                   opts.add("--network-caching=2000")
                   opts.add("--avcodec-threads=4")
                   opts.add("--avcodec-fast")
-                  if (isHw) {
-                      opts.add("--codec=mediacodec_ndk,mediacodec_jni,all")
-                  } else {
-                      opts.add("--codec=all")
+                  // Dejar que VLC seleccione el decodificador de hardware compatible.
+                  // En modo software se desactiva explícitamente la aceleración.
+                  if (!isHw) {
                       opts.add("--avcodec-hw=none")
                   }
 
@@ -566,22 +565,20 @@ jobs:
               private fun play(uri: Uri, startPos: Long = 0L) {
                   currentUri = uri
                   try {
-                      val pfd = contentResolver.openFileDescriptor(uri, "r")
-                      if (pfd != null) {
-                          val m = Media(libVLC, pfd.fileDescriptor)
-                          m.addOption(":file-caching=2000")
-                          if (!isHw) m.addOption(":avcodec-hw=none")
-                          mediaPlayer?.media = m
-                          m.release()
-                          pfd.close()
-                          mediaPlayer?.play()
-                          if (startPos > 0) {
-                              handler.postDelayed({ mediaPlayer?.time = startPos }, 250)
-                          }
-                          welcomeScreen.visibility = View.GONE
+                      // Usar la URI de Android directamente permite que VLC acceda
+                      // correctamente a archivos elegidos mediante el selector del sistema.
+                      val m = Media(libVLC, uri)
+                      m.addOption(":file-caching=2000")
+                      mediaPlayer?.media = m
+                      m.release()
+                      mediaPlayer?.play()
+                      if (startPos > 0) {
+                          handler.postDelayed({ mediaPlayer?.time = startPos }, 500)
                       }
+                      welcomeScreen.visibility = View.GONE
                   } catch (e: Exception) {
-                      Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                      txtStatus.text = "No se pudo abrir el archivo"
+                      Toast.makeText(this, "Error al abrir: ${e.message}", Toast.LENGTH_LONG).show()
                   }
               }
 
