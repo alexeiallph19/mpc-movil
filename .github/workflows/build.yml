@@ -149,6 +149,7 @@ jobs:
               </application>
           </manifest>
           EOF
+
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -317,6 +318,7 @@ jobs:
               </LinearLayout>
           </RelativeLayout>
           EOF
+
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           package com.mpcmovil
 
@@ -600,7 +602,6 @@ jobs:
           }
           EOF
 
-          # Generar Wrapper y Compilar APK
           gradle wrapper --gradle-version 8.2
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
