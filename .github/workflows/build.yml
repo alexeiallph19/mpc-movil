@@ -1,5 +1,8 @@
 name: Compilar MPC-HC Android
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   push:
@@ -730,3 +733,15 @@ jobs:
           name: MPC-HC-Android-v4.0
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publicar APK en GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mpc-android-build-${{ github.run_number }}
+          name: MPC-HC Android - compilación #${{ github.run_number }}
+          body: |
+            APK generado automáticamente por GitHub Actions.
+            Rama: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+          prerelease: true
+          files: app/build/outputs/apk/debug/app-debug.apk
