@@ -22,8 +22,7 @@ jobs:
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/values
 
-          # 1. Gradle Settings
-          cat << 'EOF' > settings.gradle
+          settings.gradle
           pluginManagement {
               repositories {
                   google()
