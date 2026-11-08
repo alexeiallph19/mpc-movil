@@ -149,7 +149,7 @@ jobs:
               </application>
           </manifest>
           EOF
-          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+               cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
@@ -317,9 +317,7 @@ jobs:
               </LinearLayout>
           </RelativeLayout>
           EOF
-          cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
-          package com.mpcmovil
-
+             cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           import android.app.AlertDialog
           import android.content.Intent
           import android.content.pm.ActivityInfo
