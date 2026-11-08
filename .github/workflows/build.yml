@@ -326,7 +326,13 @@ jobs:
                   </LinearLayout>
               </LinearLayout>
           </RelativeLayout>
-          EOF
+          EOF run: cat << 'EOF' > gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+org.gradle.workers.max=2
+org.gradle.parallel=false
+EOF
 
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           package com.mpcmovil
@@ -611,10 +617,13 @@ jobs:
           }
           EOF
 
-          echo "android.useAndroidX=true" > gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-          cp gradle.properties app/gradle.properties
-
+          cat << 'EOF' > gradle.properties
+android.useAndroidX=true
+android.enableJetifier=true
+org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+org.gradle.workers.max=2
+org.gradle.parallel=false
+EOF
           # Compilar APK directamente
           gradle assembleDebug -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true --no-daemon --stacktrace
       - name: Subir APK Generado a GitHub Artifacts
