@@ -5,8 +5,6 @@ permissions:
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main", "master", "desarrollo/**" ]
 
 jobs:
   build:
@@ -82,11 +80,11 @@ jobs:
               compileSdk 34
 
               defaultConfig {
-                  applicationId "com.mpcmovil.beta"
+                  applicationId "com.mpmplayer.android"
                   minSdk 21
                   targetSdk 34
-                  versionCode 5
-                  versionName "4.0.1-MPM"
+                  versionCode 6
+                  versionName "4.1.0-MPM"
               }
 
               signingConfigs {
