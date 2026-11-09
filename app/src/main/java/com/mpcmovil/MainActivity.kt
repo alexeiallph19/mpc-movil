@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
         displayUnderNotch = getSharedPreferences("mpm_player", MODE_PRIVATE)
             .getBoolean("display_under_notch", true)
         applyDisplayUnderNotch()
-        enterImmersiveMode()
+        showSystemBars()
         applyPreferredRefreshRate()
         initViews()
         initGestures()
@@ -595,6 +595,7 @@ class MainActivity : AppCompatActivity() {
             welcomeScreen.visibility = View.VISIBLE
             setControlsVisible(false)
             renderLibrary("Videos")
+            showSystemBars()
         }
         dialog.setContentView(root)
         dialog.show()
@@ -1175,6 +1176,7 @@ class MainActivity : AppCompatActivity() {
             welcomeScreen.visibility = View.VISIBLE
             setControlsVisible(false)
             renderLibrary(libraryMode)
+            showSystemBars()
         }
         bottomBar = findViewById(R.id.bottomBar)
         centerControls = findViewById(R.id.centerControls)
@@ -2021,9 +2023,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyDisplayUnderNotch() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
-        window.navigationBarColor = android.graphics.Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes = window.attributes.apply {
                 layoutInDisplayCutoutMode = if (displayUnderNotch) {
@@ -2033,8 +2032,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        if (immersiveMode) enterImmersiveMode() else showSystemBars()
         window.decorView.requestLayout()
-        enterImmersiveMode()
+    }
+
+    // La biblioteca y la reproducción normal conservan las barras del sistema,
+    // como VLC. Solo se ocultan cuando el usuario activa pantalla completa.
+    private fun showSystemBars() {
+        immersiveMode = false
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.statusBarColor = 0xFF101722.toInt()
+        window.navigationBarColor = 0xFF101722.toInt()
+        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+            controller.show(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+        }
     }
 
     private fun enterImmersiveMode() {
@@ -2077,15 +2092,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus && immersiveMode) {
-            window.decorView.post { enterImmersiveMode() }
+        if (hasFocus) {
+            window.decorView.post {
+                if (immersiveMode) enterImmersiveMode() else showSystemBars()
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (immersiveMode) {
-            window.decorView.post { enterImmersiveMode() }
+        window.decorView.post {
+            if (immersiveMode) enterImmersiveMode() else showSystemBars()
         }
     }
 
@@ -2094,7 +2111,7 @@ class MainActivity : AppCompatActivity() {
         videoLayout.post {
             applyResponsiveControls()
             videoLayout.requestLayout()
-            if (immersiveMode) enterImmersiveMode()
+            if (immersiveMode) enterImmersiveMode() else showSystemBars()
         }
     }
 
