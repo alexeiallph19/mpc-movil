@@ -26,7 +26,11 @@ jobs:
       - name: Configurar Gradle 8.2
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: '8.2'
+          gradle-version: '9.4.1'
+
+      - name: Configurar propiedades de VLC
+        run: |
+          printf 'android.ndkFullVersion=21.4.7075529\\n' > local.properties
 
       - name: Preparar firma permanente
         env:
