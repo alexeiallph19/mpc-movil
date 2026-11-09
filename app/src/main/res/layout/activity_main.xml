@@ -278,7 +278,7 @@
                 android:background="@drawable/library_secondary_button" />
         </LinearLayout>
     </LinearLayout>
-<LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="52dp"
+<LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="44dp"
     android:layout_gravity="top" android:background="@drawable/vlc_hud_top" android:gravity="center_vertical"
     android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="12dp"
     android:paddingTop="2dp" android:paddingBottom="2dp">
@@ -288,7 +288,7 @@
         android:tint="#FFFFFFFF" android:scaleType="center" android:contentDescription="Volver a la biblioteca" />
     <TextView android:id="@+id/txtStatus" android:layout_width="0dp" android:layout_height="wrap_content"
         android:layout_weight="1" android:gravity="center" android:maxLines="1" android:singleLine="true"
-        android:ellipsize="middle" android:text="Listo" android:textColor="#FFFFFFFF" android:textSize="16sp"
+        android:ellipsize="middle" android:text="Listo" android:textColor="#FFFFFFFF" android:textSize="14sp"
         android:fontFamily="sans-serif-medium" android:shadowColor="#99000000" android:shadowRadius="5" android:shadowDy="1" />
     <View android:layout_width="40dp" android:layout_height="1dp" />
 </LinearLayout>
@@ -317,13 +317,13 @@
             android:textColor="#CCFFFFFF" android:textSize="12sp" android:fontFamily="sans-serif-medium" />
     </LinearLayout>
     <com.mpcmovil.VlcAccessibleSeekBar android:id="@+id/seekBar"
-        android:layout_width="match_parent" android:layout_height="28dp"
+        android:layout_width="match_parent" android:layout_height="22dp"
         android:max="1000" android:minHeight="4dp" android:maxHeight="4dp"
         android:paddingStart="0dp" android:paddingEnd="0dp"
         android:progressDrawable="@drawable/vlc_seekbar_track" android:thumb="@drawable/vlc_seekbar_thumb"
         android:thumbOffset="9dp" android:splitTrack="false" android:contentDescription="Barra de progreso del video" />
     <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/playerControlsRow"
-        android:layout_width="match_parent" android:layout_height="46dp">
+        android:layout_width="match_parent" android:layout_height="38dp">
         <LinearLayout android:id="@+id/playerControlsLeft" android:layout_width="wrap_content" android:layout_height="match_parent"
             android:gravity="center_vertical|start" android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
