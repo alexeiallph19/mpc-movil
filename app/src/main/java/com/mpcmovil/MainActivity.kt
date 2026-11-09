@@ -489,10 +489,13 @@ class MainActivity : AppCompatActivity() {
                 setStroke(dp(1), 0xFF303B49.toInt())
             }
         }
-        val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+        }
         header.addView(TextView(this).apply {
-            text = "Ajustes del reproductor"
-            textSize = 20f; setTextColor(0xFFFFFFFF.toInt())
+            text = "Ajustes"
+            textSize = 22f; setTextColor(0xFFFFFFFF.toInt())
             setTypeface(null, android.graphics.Typeface.BOLD)
         }, LinearLayout.LayoutParams(0, dp(52), 1f))
         header.addView(TextView(this).apply {
@@ -502,42 +505,90 @@ class MainActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(dp(42), dp(48)))
         root.addView(header)
         root.addView(TextView(this).apply {
-            text = "CONFIGURACIÓN"; textSize = 10f
-            setTextColor(0xFFFF8738.toInt()); setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(dp(4), dp(8), 0, dp(8))
+            text = "MPM PLAYER  ·  CONFIGURACIÓN"
+            textSize = 10f; letterSpacing = 0.12f
+            setTextColor(0xFFFF8738.toInt())
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(dp(4), dp(4), 0, dp(14))
         })
         val scroll = ScrollView(this)
         val items = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         scroll.addView(items)
         root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+
+        fun section(label: String) {
+            items.addView(TextView(this).apply {
+                text = label.uppercase(Locale.getDefault())
+                textSize = 10f; letterSpacing = 0.1f
+                setTextColor(0xFFFF8738.toInt())
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(dp(4), dp(12), 0, dp(8))
+            }, LinearLayout.LayoutParams(-1, dp(34)))
+        }
         fun action(label: String, detail: String, callback: () -> Unit) {
             val row = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
+                orientation = LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(dp(14), dp(8), dp(14), dp(8))
+                setPadding(dp(14), dp(8), dp(12), dp(8))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF202936.toInt()); cornerRadius = dp(12).toFloat()
+                    setColor(0xFF202936.toInt()); cornerRadius = dp(13).toFloat()
+                    setStroke(dp(1), 0xFF2D3948.toInt())
                 }
                 isClickable = true; isFocusable = true
                 setOnClickListener { dialog.dismiss(); callback() }
             }
-            row.addView(TextView(this).apply {
-                text = label; textSize = 14f; setTextColor(0xFFF5F5F5.toInt())
+            val labels = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+            labels.addView(TextView(this).apply {
+                text = label; textSize = 14f; setTextColor(0xFFF5F7FA.toInt())
                 setTypeface(null, android.graphics.Typeface.BOLD)
+                maxLines = 1
             })
+            labels.addView(TextView(this).apply {
+                text = detail; textSize = 11f; setTextColor(0xFF9BA8B8.toInt())
+                maxLines = 2
+            })
+            row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
             row.addView(TextView(this).apply {
-                text = detail; textSize = 11f; setTextColor(0xFFAAAAAA.toInt())
+                text = "›"; textSize = 25f; gravity = android.view.Gravity.CENTER
+                setTextColor(0xFFFF8738.toInt())
+            }, LinearLayout.LayoutParams(dp(24), dp(42)))
+            items.addView(row, LinearLayout.LayoutParams(-1, dp(64)).apply {
+                bottomMargin = dp(7)
             })
-            items.addView(row, LinearLayout.LayoutParams(-1, dp(62)).apply { bottomMargin = dp(7) })
         }
-        action("Reproducción", "Velocidad, búsqueda y temporizador") { showPlaybackTools() }
-        action("Audio", "Seleccionar pista de sonido") { showAudioSubsPanel("Audio") }
+
+        section("Reproducción")
+        action("Audio", "Elegir pista de sonido") { showAudioSubsPanel("Audio") }
         action("Subtítulos", "Pistas VLC, archivos externos y sincronización") { showAudioSubsPanel("Subs") }
+        action("Velocidad y herramientas", "Velocidad, salto, repetición A-B y temporizador") { showPlaybackTools() }
+        action("Decodificación", if (isHw) "Aceleración por hardware activada" else "Decodificación por software activada") {
+            btnHwSw.performClick()
+        }
+        action("Intervalo de salto", "Doble toque: ${seekIntervalSeconds} segundos") { showSeekIntervalDialog() }
+
+        section("Pantalla e interfaz")
         action("Imagen y pantalla", "Relación de aspecto, orientación y notch") { showImagePanel() }
-        action("Interfaz", "Mostrar u ocultar los controles del reproductor") {
+        action("Vídeo bajo el notch", if (displayUnderNotch) "Activado" else "Desactivado") {
+            displayUnderNotch = !displayUnderNotch
+            getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                .putBoolean("display_under_notch", displayUnderNotch).apply()
+            applyDisplayUnderNotch()
+            showOsd(if (displayUnderNotch) "Vídeo bajo el notch activado" else "Vídeo bajo el notch desactivado")
+        }
+        val floatingScreenshot = getSharedPreferences("mpm_player", MODE_PRIVATE)
+            .getBoolean("floating_screenshot", true)
+        action("Botón flotante de captura", if (floatingScreenshot) "Visible durante la reproducción" else "Oculto") {
+            toggleFloatingScreenshot()
+        }
+        action("Controles del reproductor", "Mostrar u ocultar la barra de reproducción") {
             setControlsVisible(!isControlsVisible)
         }
-        action("Biblioteca", "Volver a tus vídeos, carpetas y favoritos") {
+
+        section("Biblioteca")
+        action("Volver a la biblioteca", "Vídeos, carpetas, recientes y favoritos") {
             welcomeScreen.visibility = View.VISIBLE
             setControlsVisible(false)
             renderLibrary("Videos")
@@ -545,7 +596,7 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(root)
         dialog.show()
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x00000000))
-        dialog.window?.setLayout(minOf(dp(380), resources.displayMetrics.widthPixels - dp(24)), -1)
+        dialog.window?.setLayout(minOf(dp(390), resources.displayMetrics.widthPixels - dp(24)), -1)
         dialog.window?.setGravity(android.view.Gravity.END)
         dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.58f }
