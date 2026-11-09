@@ -835,7 +835,7 @@ jobs:
                               subtitleFile.outputStream().use { output -> input.copyTo(output) }
                           } ?: throw IllegalStateException("No se pudo leer el subtítulo")
                           runOnUiThread {
-                              val added = mediaPlayer?.addSlave(0, Uri.fromFile(subtitleFile), true) // 0 = libvlc_media_slave_type_subtitle ?: false
+                              val added = mediaPlayer?.addSlave(0, Uri.fromFile(subtitleFile), true) ?: false // 0 = libvlc_media_slave_type_subtitle
                               if (added) showOsd("Subtítulo cargado: $displayName")
                               else Toast.makeText(this, "VLC no pudo cargar este subtítulo", Toast.LENGTH_LONG).show()
                           }
