@@ -1049,7 +1049,8 @@ class MainActivity : AppCompatActivity() {
         val state = if (visible) View.VISIBLE else View.GONE
         topBar.visibility = state
         bottomBar.visibility = state
-        centerControls.visibility = if (visible && mediaPlayer?.isPlaying != true && currentUri != null) View.VISIBLE else View.GONE
+        // VLC mantiene el control principal en la fila inferior, no como botón flotante duplicado.
+        centerControls.visibility = View.GONE
         btnScreenshotFloat.visibility = if (visible && currentUri != null &&
             getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) View.VISIBLE else View.GONE
         handler.removeCallbacks(controlsHideRunnable)
@@ -1059,23 +1060,16 @@ class MainActivity : AppCompatActivity() {
     private fun applyResponsiveControls() {
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val bottom = bottomBar as? LinearLayout ?: return
-        bottom.setPadding(dp(10), dp(if (landscape) 2 else 5), dp(10), dp(if (landscape) 2 else 4))
+        bottom.setPadding(dp(if (landscape) 18 else 12), dp(if (landscape) 3 else 6),
+            dp(if (landscape) 18 else 12), dp(if (landscape) 3 else 6))
         bottom.getChildAt(0)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 14 else 18) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 18 else 20) }
         }
-        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 30 else 34) }
-        (bottom.getChildAt(2) as? LinearLayout)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 34 else 42) }
-            for (index in 0 until row.childCount) {
-                val child = row.getChildAt(index)
-                if (child is View) child.layoutParams = child.layoutParams.apply {
-                    height = dp(if (landscape) 32 else 40)
-                }
-            }
+        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 28 else 32) }
+        bottom.findViewById<View>(R.id.playerControlsRow)?.let { row ->
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 48 else 52) }
         }
-        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 46 else 54) }
-        btnCenterPlay.layoutParams =
-            btnCenterPlay.layoutParams.apply { height = dp(if (landscape) 56 else 68) }
+        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 48 else 56) }
     }
 
     private fun togglePlayback() {
@@ -1330,12 +1324,14 @@ class MainActivity : AppCompatActivity() {
                     welcomeScreen.visibility = View.GONE
                     txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Reproduciendo"
                     btnPlay.setImageResource(R.drawable.vlc_ic_pause_player)
+                    btnPlay.contentDescription = "Pausar"
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     setControlsVisible(true)
                 }
                 MediaPlayer.Event.Paused -> {
                     txtStatus.text = currentUri?.let { "Pausa · " + getDisplayName(it) } ?: "Pausa"
                     btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
+                    btnPlay.contentDescription = "Reproducir"
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     setControlsVisible(true)
                 }
