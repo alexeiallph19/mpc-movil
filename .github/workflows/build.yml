@@ -272,13 +272,13 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/drawable/mpm_seekbar_thumb.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="28dp"
-              android:height="28dp"
+              android:width="22dp"
+              android:height="22dp"
               android:viewportWidth="14"
               android:viewportHeight="14">
               <path
                   android:fillColor="#FFFF610A"
-                  android:pathData="M7,4a3,3 0,1 0,0 6a3,3 0,1 0,0 -6" />
+                  android:pathData="M7,3.5a3.5,3.5 0,1 0,0 7a3.5,3.5 0,1 0,0 -7" />
           </vector>
           EOF
 
@@ -366,13 +366,13 @@ jobs:
                       android:layout_weight="1" android:gravity="end" android:text="-00:00" android:textColor="#C7C7C7"
                       android:textSize="11sp" android:fontFamily="monospace" />
               </LinearLayout>
-              <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="30dp"
-                  android:max="1000" android:minHeight="3dp" android:maxHeight="3dp"
+              <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="28dp"
+                  android:max="1000" android:minHeight="2dp" android:maxHeight="2dp"
                   android:paddingStart="0dp" android:paddingEnd="0dp"
                   android:progressDrawable="@drawable/mpm_seekbar_track"
                   android:thumb="@drawable/mpm_seekbar_thumb" android:thumbOffset="12dp"
                   android:splitTrack="false" android:contentDescription="Barra de progreso del video" />
-              <HorizontalScrollView android:layout_width="match_parent" android:layout_height="46dp"
+              <HorizontalScrollView android:layout_width="match_parent" android:layout_height="42dp"
                   android:scrollbars="none" android:fillViewport="true">
                   <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                       android:gravity="center" android:orientation="horizontal">
@@ -595,7 +595,10 @@ jobs:
                   val root = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
                       setPadding(dp(18), dp(12), dp(18), dp(12))
-                      setBackgroundColor(0xFF171717.toInt())
+                      background = android.graphics.drawable.GradientDrawable().apply {
+                          setColor(0xFF101318.toInt()); cornerRadius = dp(22).toFloat()
+                          setStroke(dp(1), 0xFF303944.toInt())
+                      }
                   }
                   val header = LinearLayout(this).apply { gravity = android.view.Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL }
                   val title = TextView(this).apply {
@@ -877,7 +880,10 @@ jobs:
                   val root = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
                       setPadding(dp(18), dp(14), dp(18), dp(16))
-                      setBackgroundColor(0xFF171717.toInt())
+                      background = android.graphics.drawable.GradientDrawable().apply {
+                          setColor(0xFF101318.toInt()); cornerRadius = dp(22).toFloat()
+                          setStroke(dp(1), 0xFF303944.toInt())
+                      }
                   }
                   val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
                   header.addView(TextView(this).apply {
@@ -1614,6 +1620,11 @@ jobs:
               }
               private fun renderLibrary(mode: String) {
                   libraryMode = mode; libraryItems.removeAllViews()
+                  // No mostrar HUD ni botón central mientras se navega por la biblioteca.
+                  topBar.visibility = View.GONE
+                  bottomBar.visibility = View.GONE
+                  centerControls.visibility = View.GONE
+                  btnScreenshotFloat.visibility = View.GONE
                   val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
                   val recent = prefs.getString("recent_files_ordered", "")?.split("\\n")?.filter { it.isNotBlank() }.orEmpty()
                   val favorites = prefs.getStringSet("favorites", emptySet()).orEmpty()
@@ -2263,25 +2274,35 @@ jobs:
               }
           
               private fun pickSubtitles() {
-                  val tracks = mediaPlayer?.spuTracks ?: return
-                  if (tracks.isEmpty()) return
-                  val names = (listOf("Desactivados") + tracks.map { it.name }).toTypedArray()
-                  val cur = mediaPlayer?.spuTrack ?: -1
-                  val sel = if (cur == -1) 0 else tracks.indexOfFirst { it.id == cur }.let { if (it < 0) 0 else it + 1 }
-          
+                  val tracks = mediaPlayer?.spuTracks.orEmpty()
+                  val current = mediaPlayer?.spuTrack ?: -1
+                  val options = mutableListOf("Cargar subtítulo externo…", "Desactivados")
+                  options.addAll(tracks.map { it.name.ifBlank { "Pista de VLC" } })
+                  val selected = if (current == -1) 1 else {
+                      val index = tracks.indexOfFirst { it.id == current }
+                      if (index < 0) 1 else index + 2
+                  }
                   AlertDialog.Builder(this)
-                      .setTitle("Subtítulos")
-                      .setSingleChoiceItems(names, sel) { d, i ->
-                          if (i == 0) {
-                              mediaPlayer?.spuTrack = -1
-                              showOsd("Subtítulos desactivados")
-                          } else {
-                              mediaPlayer?.spuTrack = tracks[i - 1].id
-                              showOsd("Subtítulos: ${tracks[i - 1].name}")
+                      .setTitle("Subtítulos · VLC")
+                      .setSingleChoiceItems(options.toTypedArray(), selected) { dialog, which ->
+                          when (which) {
+                              0 -> { dialog.dismiss(); pickExternalSubtitle() }
+                              1 -> {
+                                  mediaPlayer?.spuTrack = -1
+                                  showOsd("Subtítulos desactivados")
+                                  dialog.dismiss()
+                              }
+                              else -> {
+                                  tracks.getOrNull(which - 2)?.let { track ->
+                                      mediaPlayer?.spuTrack = track.id
+                                      showOsd("Subtítulo: ${track.name}")
+                                  }
+                                  dialog.dismiss()
+                              }
                           }
-                          d.dismiss()
                       }
-                      .setNegativeButton("Cerrar", null).show()
+                      .setNegativeButton("Cerrar", null)
+                      .show()
               }
           
               private fun initGestures() {
