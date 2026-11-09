@@ -713,22 +713,100 @@ jobs:
                       Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
                       return
                   }
+
                   val root = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      setPadding(dp(18), dp(8), dp(18), dp(8))
+                      setPadding(dp(18), dp(10), dp(18), dp(12))
+                      setBackgroundColor(0xFF11161D.toInt())
+                  }
+                  val header = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = android.view.Gravity.CENTER_VERTICAL
                   }
                   val status = TextView(this).apply {
                       text = "Buscando dispositivos compatibles en tu red…"
                       setTextColor(0xFFB9C4D0.toInt())
                       textSize = 13f
-                      setPadding(0, dp(4), 0, dp(10))
+                      setPadding(0, dp(8), dp(8), dp(12))
                   }
-                  val listView = ListView(this)
+                  header.addView(status, LinearLayout.LayoutParams(0, -2, 1f))
+                  val refresh = Button(this).apply {
+                      text = "↻"
+                      textSize = 20f
+                      isAllCaps = false
+                      minWidth = dp(44)
+                      minHeight = dp(42)
+                      setTextColor(0xFFE7EDF5.toInt())
+                      setBackgroundColor(0xFF252E39.toInt())
+                  }
+                  header.addView(refresh, LinearLayout.LayoutParams(dp(48), dp(42)))
+                  root.addView(header)
+
                   val names = mutableListOf<String>()
-                  val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, names)
+                  val listView = ListView(this).apply {
+                      divider = android.graphics.drawable.ColorDrawable(0xFF29323D.toInt())
+                      dividerHeight = dp(1)
+                      cacheColorHint = android.graphics.Color.TRANSPARENT
+                      isVerticalScrollBarEnabled = false
+                  }
+                  val empty = TextView(this).apply {
+                      text = "Buscando dispositivos…"
+                      gravity = android.view.Gravity.CENTER
+                      setTextColor(0xFF8F9BA9.toInt())
+                      textSize = 13f
+                      setPadding(dp(20), dp(28), dp(20), dp(28))
+                  }
+                  val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, names) {
+                      override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                          val deviceName = getItem(position).orEmpty()
+                          val row = LinearLayout(this@MainActivity).apply {
+                              orientation = LinearLayout.HORIZONTAL
+                              gravity = android.view.Gravity.CENTER_VERTICAL
+                              setPadding(dp(12), dp(10), dp(12), dp(10))
+                              background = android.graphics.drawable.GradientDrawable().apply {
+                                  setColor(0xFF1B222C.toInt())
+                                  cornerRadius = dp(10).toFloat()
+                              }
+                          }
+                          val icon = TextView(this@MainActivity).apply {
+                              text = "▣"
+                              textSize = 22f
+                              gravity = android.view.Gravity.CENTER
+                              setTextColor(0xFFFF8A00.toInt())
+                          }
+                          row.addView(icon, LinearLayout.LayoutParams(dp(42), dp(48)))
+                          val labels = LinearLayout(this@MainActivity).apply {
+                              orientation = LinearLayout.VERTICAL
+                              gravity = android.view.Gravity.CENTER_VERTICAL
+                          }
+                          labels.addView(TextView(this@MainActivity).apply {
+                              text = deviceName
+                              textSize = 14f
+                              maxLines = 1
+                              ellipsize = android.text.TextUtils.TruncateAt.END
+                              setTextColor(0xFFF0F3F7.toInt())
+                              setTypeface(null, android.graphics.Typeface.BOLD)
+                          })
+                          labels.addView(TextView(this@MainActivity).apply {
+                              text = "Dispositivo de reproducción compatible"
+                              textSize = 11f
+                              setTextColor(0xFF8995A3.toInt())
+                          })
+                          row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
+                          row.addView(TextView(this@MainActivity).apply {
+                              text = "›"
+                              textSize = 25f
+                              setTextColor(0xFF9AA7B5.toInt())
+                          })
+                          return row
+                      }
+                  }
                   listView.adapter = adapter
-                  root.addView(status)
-                  root.addView(listView, LinearLayout.LayoutParams(-1, dp(260)))
+                  listView.emptyView = empty
+                  root.addView(listView, LinearLayout.LayoutParams(-1, dp(300)))
+                  root.addView(empty, LinearLayout.LayoutParams(-1, dp(300)))
+                  empty.visibility = View.GONE
+
                   val dialog = AlertDialog.Builder(this)
                       .setTitle("Emitir a dispositivo")
                       .setView(root)
@@ -740,33 +818,56 @@ jobs:
                       stopRendererDiscovery()
                       if (castDialog === dialog) castDialog = null
                   }
+
+                  fun refreshDevices() {
+                      stopRendererDiscovery()
+                      names.clear()
+                      adapter.notifyDataSetChanged()
+                      empty.text = "Buscando dispositivos…"
+                      status.text = "Buscando en la red local…"
+                      startRendererDiscovery(status, adapter, names)
+                  }
+                  refresh.setOnClickListener { refreshDevices() }
+
                   listView.setOnItemClickListener { _, _, position, _ ->
                       val item = rendererItems.getOrNull(position)
-                      if (item != null) {
-                          val player = mediaPlayer
-                          if (player == null) {
-                              Toast.makeText(this, "El reproductor no está disponible", Toast.LENGTH_SHORT).show()
+                      val player = mediaPlayer
+                      if (item == null) return@setOnItemClickListener
+                      if (player == null) {
+                          Toast.makeText(this, "El reproductor no está disponible", Toast.LENGTH_SHORT).show()
+                          return@setOnItemClickListener
+                      }
+                      val wasPlaying = player.isPlaying
+                      status.text = "Conectando con " + item.displayName + "…"
+                      listView.isEnabled = false
+                      refresh.isEnabled = false
+                      try {
+                          if (wasPlaying) player.pause()
+                          val result = player.setRenderer(item)
+                          if (result == 0) {
+                              activeRendererName = item.displayName
+                              player.play()
+                              status.text = "Reproducción enviada a " + item.displayName
+                              showOsd("Emitiendo en " + item.displayName)
+                              dialog.dismiss()
                           } else {
-                              try {
-                                  if (player.isPlaying) player.pause()
-                                  val result = player.setRenderer(item)
-                                  if (result == 0) {
-                                      activeRendererName = item.displayName
-                                      player.play()
-                                      showOsd("Emitiendo en " + item.displayName)
-                                      dialog.dismiss()
-                                  } else {
-                                      player.play()
-                                      Toast.makeText(this, "No se pudo conectar con ese dispositivo", Toast.LENGTH_LONG).show()
-                                  }
-                              } catch (e: Exception) {
-                                  Log.e("MPM_PLAYER", "Error al conectar con el dispositivo de emisión", e)
-                                  Toast.makeText(this, "No se pudo iniciar la emisión", Toast.LENGTH_LONG).show()
-                              }
+                              if (wasPlaying) player.play()
+                              listView.isEnabled = true
+                              refresh.isEnabled = true
+                              status.text = "El dispositivo rechazó la conexión. Prueba otro o vuelve a buscar."
                           }
+                      } catch (e: Exception) {
+                          Log.e("MPM_PLAYER", "Error al conectar con el dispositivo de emisión", e)
+                          if (wasPlaying) {
+                              try { player.play() } catch (_: Exception) {}
+                          }
+                          listView.isEnabled = true
+                          refresh.isEnabled = true
+                          status.text = "No se pudo conectar. Comprueba que ambos estén en la misma red Wi-Fi."
                       }
                   }
                   dialog.show()
+                  dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
                   startRendererDiscovery(status, adapter, names)
               }
 
