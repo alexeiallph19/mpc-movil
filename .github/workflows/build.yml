@@ -301,15 +301,15 @@ jobs:
                       android:text="00:00:00 / 00:00:00" android:textColor="#B9C4D0" android:textSize="11sp" android:fontFamily="monospace" />
                   <LinearLayout android:layout_width="match_parent" android:layout_height="54dp"
                       android:gravity="center" android:orientation="horizontal">
-                      <Button android:id="@+id/btnBack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="−10" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
-                      <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="58dp" android:layout_height="50dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▶" android:textAllCaps="false" android:textColor="#72B7FF" android:textSize="19sp" />
-                      <Button android:id="@+id/btnPause" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="Ⅱ" android:textAllCaps="false" android:textColor="#DCE4EC" android:textSize="16sp" />
-                      <Button android:id="@+id/btnStop" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="■" android:textAllCaps="false" android:textColor="#DCE4EC" android:textSize="14sp" />
-                      <Button android:id="@+id/btnForward" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="+10" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
+                      <Button android:id="@+id/btnBack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="58dp" android:layout_height="52dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="−10" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
+                      <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="76dp" android:layout_height="60dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▶" android:textAllCaps="false" android:textColor="#72B7FF" android:textSize="19sp" />
+                      <Button android:id="@+id/btnPause" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="Ⅱ" android:textAllCaps="false" android:textColor="#DCE4EC" android:textSize="16sp" />
+                      <Button android:id="@+id/btnStop" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="■" android:textAllCaps="false" android:textColor="#DCE4EC" android:textSize="14sp" />
+                      <Button android:id="@+id/btnForward" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="58dp" android:layout_height="52dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="+10" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
                       <View android:layout_width="1dp" android:layout_height="20dp" android:layout_marginStart="5dp" android:layout_marginEnd="5dp" android:background="#3B4652" />
                       <Button android:id="@+id/btnSpeed" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="48dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="1.0X" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
-                      <Button android:id="@+id/btnHwSw" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="HW" android:textAllCaps="false" android:textColor="#78D6A1" android:textSize="11sp" />
-                      <Button android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="↻" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="17sp" />
+                      <Button android:id="@+id/btnHwSw" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="HW" android:textAllCaps="false" android:textColor="#78D6A1" android:textSize="11sp" />
+                      <Button android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="↻" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="17sp" />
                   </LinearLayout>
                   <LinearLayout android:layout_width="match_parent" android:layout_height="18dp"
                       android:gravity="center_vertical" android:orientation="horizontal">
@@ -464,9 +464,14 @@ jobs:
                   val tabs = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
                   val body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
                   root.addView(tabs)
-                  root.addView(body, LinearLayout.LayoutParams(-1, dp(300)))
+                  val trackScroll = ScrollView(this).apply {
+                      isFillViewport = true
+                      addView(body, ScrollView.LayoutParams(-1, -2))
+                  }
+                  root.addView(trackScroll, LinearLayout.LayoutParams(-1, dp(300)))
                   val dialog = AlertDialog.Builder(this).setTitle("Audio y subtítulos").setView(root)
                       .setNegativeButton("Cerrar", null).create()
+                  var currentTab = if (initial == "Subs") "Subs" else "Audio"
                   fun add(label: String, action: () -> Unit) {
                       body.addView(Button(this).apply {
                           text = label
@@ -475,6 +480,7 @@ jobs:
                       }, LinearLayout.LayoutParams(-1, dp(46)))
                   }
                   fun render(tab: String) {
+                      currentTab = tab
                       body.removeAllViews()
                       if (tab == "Audio") {
                           val tracks = mediaPlayer?.audioTracks.orEmpty()
@@ -512,8 +518,13 @@ jobs:
                           setOnClickListener { render(tab) }
                       }, LinearLayout.LayoutParams(0, dp(46), 1f))
                   }
-                  render(if (initial == "Subs") "Subs" else "Audio")
+                  render(currentTab)
                   dialog.show()
+                  if (currentTab == "Subs") {
+                      handler.postDelayed({
+                          if (dialog.isShowing && currentTab == "Subs") render("Subs")
+                      }, 650)
+                  }
               }
 
               private fun showImagePanel() {
@@ -1204,7 +1215,7 @@ jobs:
                       return
                   }
                   subtitlePickerPending = true
-                  resumeAfterSubtitlePicker = false
+                  resumeAfterSubtitlePicker = mediaPlayer?.isPlaying == true
                   val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                       addCategory(Intent.CATEGORY_OPENABLE)
                       addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
@@ -1229,11 +1240,14 @@ jobs:
                   val player = mediaPlayer ?: return
                   if (currentUri == null) return
                   try {
-                      if (viewsAttached) player.detachViews()
-                      viewsAttached = false
-                      player.attachViews(videoLayout, null, false, false)
-                      viewsAttached = true
-                      if (shouldResume) player.play()
+                      // No desmontar la superficie al volver del selector: hacerlo provoca
+                      // un parpadeo negro y puede reiniciar la salida de video.
+                      if (!viewsAttached) {
+                          player.attachViews(videoLayout, null, false, false)
+                          viewsAttached = true
+                      }
+                      videoLayout.requestLayout()
+                      if (shouldResume && !player.isPlaying) player.play()
                   } catch (e: Exception) {
                       Log.w("MPM_PLAYER", "No se pudo restaurar la salida de video", e)
                   }
