@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity() {
     private var isHw = true
     private var isControlsVisible = true
     private var isLibraryVisible = true
+    private var isPreparingPlayback = false
     private val controlsHideRunnable = Runnable {
         if (mediaPlayer?.isPlaying == true) setControlsVisible(false)
     }
@@ -1621,7 +1622,11 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer(libVLC)
 
         mediaPlayer?.setEventListener { ev ->
-            val eventName = when (ev.type) {
+            val eventType = ev.type
+            val eventTime = if (eventType == MediaPlayer.Event.TimeChanged) ev.timeChanged else 0L
+            handler.post {
+                if (isFinishing || isDestroyed) return@post
+            val eventName = when (eventType) {
                 MediaPlayer.Event.Opening -> "Opening"
                 MediaPlayer.Event.Buffering -> "Buffering"
                 MediaPlayer.Event.Playing -> "Playing"
@@ -1629,13 +1634,18 @@ class MainActivity : AppCompatActivity() {
                 MediaPlayer.Event.Stopped -> "Stopped"
                 MediaPlayer.Event.EndReached -> "EndReached"
                 MediaPlayer.Event.EncounteredError -> "EncounteredError"
-                else -> "Event-${ev.type}"
+                else -> "Event-${eventType}"
             }
             playbackEvents.add(eventName)
             if (playbackEvents.size > 20) playbackEvents.removeAt(0)
             Log.d("MPM_PLAYER", "VLC event: $eventName")
-            when (ev.type) {
+            when (eventType) {
+                MediaPlayer.Event.Opening -> {
+                    isPreparingPlayback = false
+                    txtStatus.text = "Abriendo vídeo…"
+                }
                 MediaPlayer.Event.Playing -> {
+                    isPreparingPlayback = false
                     isLibraryVisible = false
                     welcomeScreen.visibility = View.GONE
                     txtStatus.text = currentUri?.let { getPlayerTitle(it) } ?: "Reproduciendo"
@@ -1656,15 +1666,19 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 MediaPlayer.Event.Stopped -> {
-                    isLibraryVisible = true
-                    welcomeScreen.visibility = View.VISIBLE
-                    setControlsVisible(false)
-                    txtStatus.text = "Detenido"
-                    btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
-                    btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
+                    if (isPreparingPlayback) {
+                        Log.d("MPM_PLAYER", "Se ignora Stopped de la sesión anterior durante el cambio de vídeo")
+                    } else {
+                        isLibraryVisible = true
+                        welcomeScreen.visibility = View.VISIBLE
+                        setControlsVisible(false)
+                        txtStatus.text = "Detenido"
+                        btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
+                        btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
+                    }
                 }
                 MediaPlayer.Event.TimeChanged -> {
-                    val t = ev.timeChanged
+                    val t = eventTime
                     val l = mediaPlayer?.length ?: 0L
                     if (l > 0) {
                         if (!isSeeking) {
@@ -1705,6 +1719,7 @@ class MainActivity : AppCompatActivity() {
                     } else handler.post { txtStatus.text = "Lista finalizada" }
                 }
                 MediaPlayer.Event.EncounteredError -> {
+                    isPreparingPlayback = false
                     txtStatus.text = "Error al abrir"
                     val report = playbackDiagnostics + "\n\nEventos VLC: " + playbackEvents.joinToString(" → ")
                     Log.e("MPM_PLAYER", report)
@@ -1714,6 +1729,7 @@ class MainActivity : AppCompatActivity() {
                         .setPositiveButton("Cerrar", null)
                         .show()
                 }
+            }
             }
         }
         updateDecoderUi()
@@ -1764,11 +1780,28 @@ class MainActivity : AppCompatActivity() {
             videoLayout.post {
                 Log.e("MPM_PLAY_TRACE", "inside videoLayout.post thread=${Thread.currentThread().name} viewsAttached=$viewsAttached")
                 if (isFinishing || isDestroyed) return@post
-                if (!viewsAttached) {
-                    Log.e("MPM_PLAY_TRACE", "before attachViews")
-                    mediaPlayer?.attachViews(videoLayout, null, false, true)
-                    Log.e("MPM_PLAY_TRACE", "after attachViews")
-                    viewsAttached = true
+                val player = mediaPlayer ?: run {
+                    isPreparingPlayback = false
+                    txtStatus.text = "El motor VLC no está disponible"
+                    return@post
+                }
+                if (!viewsAttached || !player.getVLCVout().areViewsAttached()) {
+                    try {
+                        Log.e("MPM_PLAY_TRACE", "before attachViews subtitles=true textureView=false")
+                        player.attachViews(videoLayout, null, true, false)
+                        viewsAttached = player.getVLCVout().areViewsAttached()
+                        Log.e("MPM_PLAY_TRACE", "after attachViews attached=$viewsAttached")
+                        if (!viewsAttached) throw IllegalStateException("LibVLC no pudo asociar la superficie de vídeo")
+                    } catch (attachError: Exception) {
+                        isPreparingPlayback = false
+                        Log.e("MPM_PLAYER", "Error al asociar la superficie de vídeo", attachError)
+                        txtStatus.text = "No se pudo preparar la pantalla de vídeo"
+                        AlertDialog.Builder(this)
+                            .setTitle("Error de salida de vídeo")
+                            .setMessage(attachError.message ?: attachError.javaClass.simpleName)
+                            .setPositiveButton("Cerrar", null).show()
+                        return@post
+                    }
                 }
                 Log.e("MPM_PLAY_TRACE", "before recursive play")
                 play(uri, startPos)
@@ -1777,6 +1810,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val requestId = playbackRequestId.incrementAndGet()
+        isPreparingPlayback = true
         currentUri = uri
         if (playlistIndex < 0 || playlist.getOrNull(playlistIndex) != uri) {
             playlist.clear()
@@ -1845,6 +1879,7 @@ class MainActivity : AppCompatActivity() {
                     } catch (playError: Exception) {
                         try { preparedMedia.release() } catch (_: Exception) {}
                         releaseCurrentAssetDescriptor()
+                        isPreparingPlayback = false
                         playbackDiagnostics = "Excepción: ${playError.javaClass.name}\nMensaje: ${playError.message}\nURI: $uri"
                         Log.e("MPM_PLAYER", playbackDiagnostics, playError)
                         txtStatus.text = "No se pudo abrir el archivo"
@@ -1859,6 +1894,7 @@ class MainActivity : AppCompatActivity() {
                 try { afd?.close() } catch (_: Exception) {}
                 runOnUiThread {
                     if (!isFinishing && !isDestroyed && requestId == playbackRequestId.get()) {
+                        isPreparingPlayback = false
                         playbackDiagnostics = "Excepción: ${e.javaClass.name}\nMensaje: ${e.message}\nURI: $uri"
                         Log.e("MPM_PLAYER", playbackDiagnostics, e)
                         txtStatus.text = "No se pudo abrir el archivo"
@@ -2096,9 +2132,9 @@ class MainActivity : AppCompatActivity() {
         try {
             // No desmontar la superficie al volver del selector: hacerlo provoca
             // un parpadeo negro y puede reiniciar la salida de video.
-            if (!viewsAttached) {
-                player.attachViews(videoLayout, null, false, true)
-                viewsAttached = true
+            if (!viewsAttached || !player.getVLCVout().areViewsAttached()) {
+                player.attachViews(videoLayout, null, true, false)
+                viewsAttached = player.getVLCVout().areViewsAttached()
             }
             videoLayout.requestLayout()
             if (shouldResume && !player.isPlaying) player.play()
