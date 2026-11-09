@@ -41,14 +41,13 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Android SDK and NDK
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;21.4.7075529"
-          echo "ANDROID_SDK=$ANDROID_HOME" >> "$GITHUB_ENV"
-          echo "ANDROID_NDK=$ANDROID_HOME/ndk/21.4.7075529" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK=${ANDROID_HOME:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
+          yes | "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" "ndk;21.4.7075529"
+          echo "ANDROID_NDK=${ANDROID_HOME:-/usr/local/lib/android/sdk}/ndk/21.4.7075529" >> "$GITHUB_ENV"
 
       - name: Prepare VLC native sources and Gradle wrapper
         run: ./buildsystem/compile.sh --init
