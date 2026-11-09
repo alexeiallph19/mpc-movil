@@ -257,7 +257,10 @@ jobs:
                       android:paddingEnd="10dp" android:text="MPM" android:textColor="#69B2FF" android:textSize="13sp"
                       android:textStyle="bold" android:letterSpacing="0.06" />
                   <View android:layout_width="1dp" android:layout_height="19dp" android:background="#39434F" />
-                  <HorizontalScrollView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+                  <Button android:id="@+id/btnMainMenu" style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="48dp" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp"
+                      android:text="☰" android:textColor="#DCEBFA" android:textSize="20sp" />
+                  <HorizontalScrollView android:visibility="gone" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
                       android:scrollbars="none">
                       <LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent"
                           android:gravity="center_vertical" android:orientation="horizontal">
@@ -452,6 +455,28 @@ jobs:
                   intent?.data?.let { play(it) }
               }
           
+              private fun showMainMenu(anchor: View) {
+                  val popup = PopupMenu(this, anchor)
+                  popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
+                  popup.menu.add("Lista de reproducción").setOnMenuItemClickListener { showPlaylist(); true }
+                  popup.menu.add("Archivos recientes").setOnMenuItemClickListener { showRecentFiles(); true }
+                  popup.menu.add("Favoritos").setOnMenuItemClickListener { showFavorites(); true }
+                  popup.menu.add("Guardar en favoritos").setOnMenuItemClickListener { saveFavorite(); true }
+                  popup.menu.add("Información del medio").setOnMenuItemClickListener { showMediaInfo(); true }
+                  popup.menu.add("Relación de aspecto").setOnMenuItemClickListener { showAspectMenu(); true }
+                  popup.menu.add("Cambiar orientación").setOnMenuItemClickListener { cycleRotation(); true }
+                  popup.menu.add("Pistas de audio").setOnMenuItemClickListener { pickAudio(); true }
+                  popup.menu.add("Pistas de subtítulos").setOnMenuItemClickListener { pickSubtitles(); true }
+                  popup.menu.add("Abrir subtítulo externo").setOnMenuItemClickListener { pickExternalSubtitle(); true }
+                  popup.menu.add("Acerca de MPM Player").setOnMenuItemClickListener {
+                      AlertDialog.Builder(this).setTitle("MPM Player")
+                          .setMessage("Reproductor multimedia para Android")
+                          .setPositiveButton("Aceptar", null).show()
+                      true
+                  }
+                  popup.show()
+              }
+
               private fun showTopMenu(anchor: View, section: String) {
                   val popup = PopupMenu(this, anchor)
                   when (section) {
@@ -547,6 +572,7 @@ jobs:
                   findViewById<Button>(R.id.btnAudioTrack).setOnClickListener { pickAudio() }
                   findViewById<Button>(R.id.btnSubtitleTrack).setOnClickListener { pickSubtitles() }
           
+                  findViewById<Button>(R.id.btnMainMenu).setOnClickListener { showMainMenu(it) }
                   findViewById<Button>(R.id.topMenuFile).setOnClickListener { showTopMenu(it, "Archivo") }
                   findViewById<Button>(R.id.topMenuView).setOnClickListener { showTopMenu(it, "Ver") }
                   findViewById<Button>(R.id.topMenuPlay).setOnClickListener { showTopMenu(it, "Reproducir") }
@@ -1193,15 +1219,20 @@ jobs:
               private fun pickSubtitles() {
                   val tracks = mediaPlayer?.spuTracks ?: return
                   if (tracks.isEmpty()) return
-                  val names = tracks.map { it.name }.toTypedArray()
+                  val names = (listOf("Desactivados") + tracks.map { it.name }).toTypedArray()
                   val cur = mediaPlayer?.spuTrack ?: -1
-                  val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
+                  val sel = if (cur == -1) 0 else tracks.indexOfFirst { it.id == cur }.let { if (it < 0) 0 else it + 1 }
           
                   AlertDialog.Builder(this)
-                      .setTitle("Subtítulos (MPM Player)")
+                      .setTitle("Subtítulos")
                       .setSingleChoiceItems(names, sel) { d, i ->
-                          mediaPlayer?.spuTrack = tracks[i].id
-                          showOsd("Subtítulos: ${tracks[i].name}")
+                          if (i == 0) {
+                              mediaPlayer?.spuTrack = -1
+                              showOsd("Subtítulos desactivados")
+                          } else {
+                              mediaPlayer?.spuTrack = tracks[i - 1].id
+                              showOsd("Subtítulos: ${tracks[i - 1].name}")
+                          }
                           d.dismiss()
                       }
                       .setNegativeButton("Cerrar", null).show()
