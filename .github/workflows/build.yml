@@ -30,8 +30,22 @@ jobs:
         env:
           MPM_KEYSTORE_BASE64: ${{ secrets.MPM_KEYSTORE_BASE64 }}
         run: |
-          echo "$MPM_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mpm-player-release.jks"
-          test -s "$RUNNER_TEMP/mpm-player-release.jks"
+          if [ -z "$MPM_KEYSTORE_BASE64" ]; then
+            echo "::error::El secreto MPM_KEYSTORE_BASE64 está vacío o no está disponible."
+            exit 1
+          fi
+          ENCODED_LENGTH=$(printf '%s' "$MPM_KEYSTORE_BASE64" | tr -d '\r\n ' | wc -c)
+          echo "Longitud Base64 recibida: $ENCODED_LENGTH caracteres."
+          if ! printf '%s' "$MPM_KEYSTORE_BASE64" | tr -d '\r\n ' | base64 --decode > "$RUNNER_TEMP/mpm-player-release.jks"; then
+            echo "::error::No se pudo decodificar MPM_KEYSTORE_BASE64."
+            exit 1
+          fi
+          DECODED_SIZE=$(wc -c < "$RUNNER_TEMP/mpm-player-release.jks" | tr -d ' ')
+          echo "Tamaño del keystore reconstruido: $DECODED_SIZE bytes."
+          if [ "$DECODED_SIZE" -ne 2766 ]; then
+            echo "::error::El keystore recibido no tiene el tamaño esperado de 2766 bytes."
+            exit 1
+          fi
 
       - name: Validar firma permanente
         env:
