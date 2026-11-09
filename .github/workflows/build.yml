@@ -841,7 +841,8 @@ jobs:
               }
 
               private fun takeScreenshot() {
-                  if (currentUri == null || mediaPlayer == null) {
+                  val uri = currentUri
+                  if (uri == null || mediaPlayer == null) {
                       Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
                       return
                   }
@@ -850,17 +851,39 @@ jobs:
                       ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), screenshotRequestCode)
                       return
                   }
-                  val texture = findTextureView(videoLayout)
-                  if (texture == null || !texture.isAvailable) {
-                      Toast.makeText(this, "La captura no está disponible en este momento", Toast.LENGTH_SHORT).show()
-                      return
+                  val timestampUs = ((mediaPlayer?.time ?: 0L).coerceAtLeast(0L)) * 1000L
+                  Toast.makeText(this, "Capturando fotograma en calidad original…", Toast.LENGTH_SHORT).show()
+                  thumbnailExecutor.execute {
+                      var retriever: MediaMetadataRetriever? = null
+                      var bitmap: Bitmap? = null
+                      try {
+                          retriever = MediaMetadataRetriever()
+                          retriever.setDataSource(this, uri)
+                          bitmap = retriever.getFrameAtTime(timestampUs, MediaMetadataRetriever.OPTION_CLOSEST)
+                      } catch (e: Exception) {
+                          Log.w("MPM_PLAYER", "No se pudo extraer el fotograma original; se intentará capturar la salida de vídeo", e)
+                      } finally {
+                          try { retriever?.release() } catch (_: Exception) {}
+                      }
+                      if (bitmap == null) {
+                          runOnUiThread {
+                              val texture = findTextureView(videoLayout)
+                              val fallback = if (texture != null && texture.isAvailable) texture.getBitmap() else null
+                              if (fallback == null) {
+                                  Toast.makeText(this, "Este archivo no permite extraer el fotograma original", Toast.LENGTH_LONG).show()
+                              } else {
+                                  saveScreenshotBitmap(fallback, false)
+                              }
+                          }
+                      } else {
+                          val captured = bitmap
+                          runOnUiThread { saveScreenshotBitmap(captured, true) }
+                      }
                   }
-                  val bitmap = texture.getBitmap()
-                  if (bitmap == null) {
-                      Toast.makeText(this, "No se pudo capturar el fotograma", Toast.LENGTH_SHORT).show()
-                      return
-                  }
-                  val fileName = "MPM_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) + ".jpg"
+              }
+
+              private fun saveScreenshotBitmap(bitmap: Bitmap, originalResolution: Boolean) {
+                  val fileName = "MPM_" + SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(Date()) + ".jpg"
                   try {
                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                           val values = ContentValues().apply {
@@ -875,7 +898,7 @@ jobs:
                               val output = contentResolver.openOutputStream(imageUri)
                                   ?: throw IllegalStateException("No se pudo guardar la imagen")
                               output.use { stream ->
-                                  if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream)) {
+                                  if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)) {
                                       throw IllegalStateException("No se pudo codificar la captura")
                                   }
                               }
@@ -890,14 +913,15 @@ jobs:
                           if (!folder.exists() && !folder.mkdirs()) throw IllegalStateException("No se pudo crear la carpeta de capturas")
                           val file = File(folder, fileName)
                           FileOutputStream(file).use { stream ->
-                              if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream)) {
+                              if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)) {
                                   throw IllegalStateException("No se pudo codificar la captura")
                               }
                           }
                           MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/jpeg"), null)
                       }
-                      showOsd("Captura guardada en Imágenes/MPM Player")
-                      Toast.makeText(this, "Captura guardada en la galería", Toast.LENGTH_SHORT).show()
+                      val resolution = bitmap.width.toString() + "×" + bitmap.height
+                      showOsd("Captura guardada · " + resolution + if (originalResolution) " · resolución original" else " · captura de pantalla")
+                      Toast.makeText(this, "Captura guardada en Imágenes/MPM Player (" + resolution + ")", Toast.LENGTH_LONG).show()
                   } catch (e: Exception) {
                       Log.e("MPM_PLAYER", "Error al guardar la captura", e)
                       Toast.makeText(this, "No se pudo guardar la captura: " + (e.message ?: "error"), Toast.LENGTH_LONG).show()
@@ -933,6 +957,8 @@ jobs:
                   popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
                   popup.menu.add("Emitir a dispositivo…").setOnMenuItemClickListener { showCastDialog(); true }
                   popup.menu.add("Tomar captura de pantalla").setOnMenuItemClickListener { takeScreenshot(); true }
+                  popup.menu.add("Botón flotante de captura: " + if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) "Activado" else "Desactivado").setOnMenuItemClickListener { toggleFloatingScreenshot(); true }
+                  popup.menu.add("Intervalo de doble toque (" + seekIntervalSeconds + " s)").setOnMenuItemClickListener { showSeekIntervalDialog(); true }
                   popup.menu.add("Lista de reproducción").setOnMenuItemClickListener { showPlaylist(); true }
                   popup.menu.add("Archivos recientes").setOnMenuItemClickListener { showRecentFiles(); true }
                   popup.menu.add("Favoritos").setOnMenuItemClickListener { showFavorites(); true }
@@ -1041,6 +1067,8 @@ jobs:
                   txtStatus = findViewById(R.id.txtStatus)
                   txtDecoderInfo = findViewById(R.id.txtDecoderInfo)
                   txtTime = findViewById(R.id.txtTime)
+                  btnScreenshotFloat = findViewById(R.id.btnScreenshotFloat)
+                  seekIntervalSeconds = getSharedPreferences("mpm_player", MODE_PRIVATE).getInt("seek_interval_seconds", 5)
                   txtOsd = findViewById(R.id.txtOsd)
                   seekBar = findViewById(R.id.seekBar)
                   btnPlay = findViewById(R.id.btnPlay)
@@ -1059,6 +1087,8 @@ jobs:
                   findViewById<Button>(R.id.topMenuHelp).setOnClickListener { showTopMenu(it, "Ayuda") }
           
                   findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
+                  btnScreenshotFloat.setOnClickListener { takeScreenshot() }
+                  btnScreenshotFloat.visibility = if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true) && isControlsVisible) View.VISIBLE else View.GONE
                   findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
           
                   btnPlay.setOnClickListener {
@@ -1077,15 +1107,15 @@ jobs:
           
                   findViewById<Button>(R.id.btnBack).setOnClickListener {
                       mediaPlayer?.let { p ->
-                          p.time = (p.time - 10000L).coerceAtLeast(0L)
-                          showOsd("-10s (${formatTime(p.time)})")
+                          p.time = (p.time - seekIntervalSeconds * 1000L).coerceAtLeast(0L)
+                          showOsd("-${seekIntervalSeconds}s (${formatTime(p.time)})")
                       }
                   }
           
                   findViewById<Button>(R.id.btnForward).setOnClickListener {
                       mediaPlayer?.let { p ->
-                          p.time = (p.time + 10000L).coerceAtMost(p.length)
-                          showOsd("+10s (${formatTime(p.time)})")
+                          p.time = (p.time + seekIntervalSeconds * 1000L).let { if (p.length > 0) it.coerceAtMost(p.length) else it }
+                          showOsd("+${seekIntervalSeconds}s (${formatTime(p.time)})")
                       }
                   }
           
@@ -1728,65 +1758,107 @@ jobs:
               private fun initGestures() {
                   gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
                       override fun onDown(e: MotionEvent): Boolean {
-                                    val audio = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
-                                    gestureStartVolume = audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC)
-                                    gestureStartBrightness = window.attributes.screenBrightness.takeIf { it >= 0f } ?: 0.5f
-                                    gestureStartTime = mediaPlayer?.time ?: 0L
-                                    gestureMode = ""
-                                    return true
-                                }
-                                override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-                                    val start = e1 ?: return false
-                                    val dx = e2.x - start.x
-                                    val dy = e2.y - start.y
-                                    if (gestureMode.isEmpty()) gestureMode =
-                                        if (kotlin.math.abs(dx) > kotlin.math.abs(dy)) "seek"
-                                        else if (start.x > videoLayout.width / 2f) "volume" else "brightness"
-                                    when (gestureMode) {
-                                        "seek" -> {
-                                            val delta = (dx / videoLayout.width.coerceAtLeast(1) * 120000).toLong()
-                                            val target = (gestureStartTime + delta).coerceAtLeast(0L)
-                                            mediaPlayer?.let { p -> p.time = if (p.length > 0) target.coerceAtMost(p.length) else target }
-                                            showOsd("Búsqueda: " + formatTime(mediaPlayer?.time ?: target))
-                                        }
-                                        "volume" -> {
-                                            val audio = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
-                                            val max = audio.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
-                                            val value = (gestureStartVolume - dy / videoLayout.height.coerceAtLeast(1) * max * 1.5f).toInt().coerceIn(0, max)
-                                            audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, value, 0)
-                                            showOsd("Volumen: " + (value * 100 / max.coerceAtLeast(1)) + "%")
-                                        }
-                                        "brightness" -> {
-                                            val value = (gestureStartBrightness - dy / videoLayout.height.coerceAtLeast(1) * 1.5f).coerceIn(0.03f, 1f)
-                                            window.attributes = window.attributes.apply { screenBrightness = value }
-                                            showOsd("Brillo: " + (value * 100).toInt() + "%")
-                                        }
-                                    }
-                                    return true
-                                }
+                          val audio = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+                          gestureStartVolume = audio.getStreamVolume(android.media.AudioManager.STREAM_MUSIC)
+                          gestureStartBrightness = window.attributes.screenBrightness.takeIf { it >= 0f } ?: 0.5f
+                          gestureStartTime = mediaPlayer?.time ?: 0L
+                          gestureMode = ""
+                          return true
+                      }
+
+                      override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+                          val start = e1 ?: return false
+                          val dx = e2.x - start.x
+                          val dy = e2.y - start.y
+                          if (gestureMode.isEmpty()) gestureMode =
+                              if (kotlin.math.abs(dx) > kotlin.math.abs(dy)) "seek"
+                              else if (start.x > videoLayout.width / 2f) "volume" else "brightness"
+                          when (gestureMode) {
+                              "seek" -> {
+                                  val delta = (dx / videoLayout.width.coerceAtLeast(1) * 120000).toLong()
+                                  val target = (gestureStartTime + delta).coerceAtLeast(0L)
+                                  mediaPlayer?.let { p -> p.time = if (p.length > 0) target.coerceAtMost(p.length) else target }
+                                  showOsd("Búsqueda: " + formatTime(mediaPlayer?.time ?: target))
+                              }
+                              "volume" -> {
+                                  val audio = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+                                  val max = audio.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC)
+                                  val value = (gestureStartVolume - dy / videoLayout.height.coerceAtLeast(1) * max * 1.5f).toInt().coerceIn(0, max)
+                                  audio.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, value, 0)
+                                  showOsd("Volumen: " + (value * 100 / max.coerceAtLeast(1)) + "%")
+                              }
+                              "brightness" -> {
+                                  val value = (gestureStartBrightness - dy / videoLayout.height.coerceAtLeast(1) * 1.5f).coerceIn(0.03f, 1f)
+                                  window.attributes = window.attributes.apply { screenBrightness = value }
+                                  showOsd("Brillo: " + (value * 100).toInt() + "%")
+                              }
+                          }
+                          return true
+                      }
+
                       override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                           isControlsVisible = !isControlsVisible
-                          val v = if (isControlsVisible) View.VISIBLE else View.GONE
-                          topBar.visibility = v
-                          bottomBar.visibility = v
+                          val visibility = if (isControlsVisible) View.VISIBLE else View.GONE
+                          topBar.visibility = visibility
+                          bottomBar.visibility = visibility
+                          btnScreenshotFloat.visibility = if (isControlsVisible &&
+                              getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) View.VISIBLE else View.GONE
                           return true
                       }
+
                       override fun onDoubleTap(e: MotionEvent): Boolean {
-                          mediaPlayer?.let { p -> if (p.isPlaying) p.pause() else p.play() }
+                          val player = mediaPlayer ?: return true
+                          val delta = seekIntervalSeconds * 1000L
+                          when {
+                              e.x < videoLayout.width * 0.38f -> {
+                                  player.time = (player.time - delta).coerceAtLeast(0L)
+                                  showOsd("-${seekIntervalSeconds}s")
+                              }
+                              e.x > videoLayout.width * 0.62f -> {
+                                  player.time = (player.time + delta).let { if (player.length > 0) it.coerceAtMost(player.length) else it }
+                                  showOsd("+${seekIntervalSeconds}s")
+                              }
+                              else -> showOsd("Toca los laterales dos veces para buscar")
+                          }
                           return true
                       }
+
                       override fun onLongPress(e: MotionEvent) {
                           showAspectMenu()
                       }
                   })
-          
-                  videoLayout.setOnTouchListener { _, ev ->
-                      gestureDetector.onTouchEvent(ev)
+                  videoLayout.setOnTouchListener { _, event ->
+                      gestureDetector.onTouchEvent(event)
                       true
                   }
               }
-          
-                            private fun rememberRecent(uri: Uri) {
+
+              private fun toggleFloatingScreenshot() {
+                  val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
+                  val enabled = !prefs.getBoolean("floating_screenshot", true)
+                  prefs.edit().putBoolean("floating_screenshot", enabled).apply()
+                  btnScreenshotFloat.visibility = if (enabled && isControlsVisible) View.VISIBLE else View.GONE
+                  showOsd(if (enabled) "Botón flotante de captura activado" else "Botón flotante de captura desactivado")
+              }
+
+              private fun showSeekIntervalDialog() {
+                  val labels = arrayOf("5 segundos", "10 segundos", "15 segundos", "30 segundos")
+                  val values = intArrayOf(5, 10, 15, 30)
+                  val selected = values.indexOf(seekIntervalSeconds).coerceAtLeast(0)
+                  AlertDialog.Builder(this)
+                      .setTitle("Intervalo de doble toque")
+                      .setSingleChoiceItems(labels, selected) { dialog, which ->
+                          seekIntervalSeconds = values[which]
+                          getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                              .putInt("seek_interval_seconds", seekIntervalSeconds).apply()
+                          showOsd("Avance: ${seekIntervalSeconds} segundos")
+                          dialog.dismiss()
+                      }
+                      .setNegativeButton("Cancelar", null)
+                      .show()
+              }
+
+              private fun rememberRecent(uri: Uri) {
                             val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
                             val recent = prefs.getString("recent_files_ordered", "")?.split("\\n")?.filter { it.isNotBlank() }?.toMutableList()
                                 ?: prefs.getStringSet("recent_files", emptySet())?.toMutableList() ?: mutableListOf()
