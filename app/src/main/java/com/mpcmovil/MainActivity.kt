@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var libraryHeading: TextView
     private lateinit var librarySubtitle: TextView
     private var libraryMode = "Videos"
+    private var librarySearchQuery = ""
     private var selectedFolder = ""
     private val libraryVideos = mutableListOf<LibraryVideo>()
     private data class LibraryVideo(val uri: Uri, val name: String, val duration: Long, val folder: String)
@@ -1130,6 +1131,14 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnLibraryRecent).setOnClickListener { renderLibrary("Recientes") }
         findViewById<Button>(R.id.btnLibraryFavorites).setOnClickListener { renderLibrary("Favoritos") }
         findViewById<Button>(R.id.btnLibraryPlaylist).setOnClickListener { showPlaylist() }
+        findViewById<EditText>(R.id.librarySearch).addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+                librarySearchQuery = text?.toString()?.trim().orEmpty()
+                renderLibrary(libraryMode)
+            }
+            override fun afterTextChanged(editable: android.text.Editable?) = Unit
+        })
         btnScreenshotFloat.setOnClickListener { takeScreenshot() }
         btnScreenshotFloat.visibility = if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true) && isControlsVisible) View.VISIBLE else View.GONE
         findViewById<ImageButton>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
@@ -1232,10 +1241,14 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
         val recent = prefs.getString("recent_files_ordered", "")?.split("\\n")?.filter { it.isNotBlank() }.orEmpty()
         val favorites = prefs.getStringSet("favorites", emptySet()).orEmpty()
-        val chosen = when (mode) {
+        val chosenBase = when (mode) {
             "Recientes" -> { val map = libraryVideos.associateBy { it.uri.toString() }; recent.mapNotNull { map[it] } }
             "Favoritos" -> libraryVideos.filter { favorites.contains(it.uri.toString()) }
             else -> libraryVideos
+        }
+        val query = librarySearchQuery.lowercase(Locale.ROOT)
+        val chosen = if (query.isBlank()) chosenBase else chosenBase.filter {
+            it.name.lowercase(Locale.ROOT).contains(query) || it.folder.lowercase(Locale.ROOT).contains(query)
         }
         libraryHeading.text = when (mode) { "Carpetas" -> if (selectedFolder.isBlank()) "Carpetas" else selectedFolder.substringAfterLast('/'); "Recientes" -> "Reproducidos recientemente"; "Favoritos" -> "Favoritos"; else -> "Vídeos" }
         librarySubtitle.text = when (mode) { "Carpetas" -> "Explora tus archivos por ubicación"; "Recientes" -> "${chosen.size} archivos recientes"; "Favoritos" -> "${chosen.size} archivos guardados"; else -> "${libraryVideos.size} vídeos encontrados" }
@@ -1247,11 +1260,11 @@ class MainActivity : AppCompatActivity() {
                 libraryItems.addView(TextView(this).apply { text = "‹  Todas las carpetas"; setTextColor(0xFFFF8A35.toInt()); setPadding(dp(10), dp(14), 0, dp(14)); setOnClickListener { selectedFolder = ""; renderLibrary("Carpetas") } })
                 libraryVideos.filter { it.folder == selectedFolder }.forEach { addLibraryVideoRow(it) }
             } else {
-                val folders = libraryVideos.map { it.folder }.distinct().sorted()
+                val folders = libraryVideos.map { it.folder }.distinct().filter { query.isBlank() || it.lowercase(Locale.ROOT).contains(query) }.sorted()
                 if (folders.isEmpty()) showLibraryEmpty("No se encontraron carpetas con vídeos")
                 folders.forEach { folder ->
                     val row = TextView(this).apply { text = "▰   ${folder.substringAfterLast('/')}     ·     ${libraryVideos.count { it.folder == folder }} vídeos"; textSize = 14f; setTextColor(0xFFF1F3F5.toInt()); setPadding(dp(14), dp(18), 0, dp(18)); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF1A1F26.toInt()); cornerRadius = dp(10).toFloat() }; setOnClickListener { selectedFolder = folder; renderLibrary("Carpetas") } }
-                    val lp = LinearLayout.LayoutParams(-1, -2); lp.setMargins(0, dp(4), 0, dp(4)); libraryItems.addView(row, lp)
+                    val lp = LinearLayout.LayoutParams(-1, -2); lp.setMargins(0, dp(5), 0, dp(5)); libraryItems.addView(row, lp)
                 }
             }
             return
@@ -1260,10 +1273,10 @@ class MainActivity : AppCompatActivity() {
         chosen.forEach { addLibraryVideoRow(it) }
     }
     private fun addLibraryVideoRow(video: LibraryVideo) {
-        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL; setPadding(dp(7), dp(8), dp(8), dp(8)); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF191E25.toInt()); cornerRadius = dp(10).toFloat() } }
-        val thumb = ImageView(this).apply { layoutParams = LinearLayout.LayoutParams(dp(112), dp(70)); scaleType = ImageView.ScaleType.CENTER_CROP; setBackgroundColor(0xFF252B33.toInt()); setImageResource(android.R.drawable.ic_media_play) }
+        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(9), dp(10), dp(9)); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF191B20.toInt()); cornerRadius = dp(12).toFloat() } }
+        val thumb = ImageView(this).apply { layoutParams = LinearLayout.LayoutParams(dp(120), dp(76)); scaleType = ImageView.ScaleType.CENTER_CROP; setBackgroundColor(0xFF252B33.toInt()); setImageResource(android.R.drawable.ic_media_play) }
         val info = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(12), 0, dp(4), 0) }
-        info.addView(TextView(this).apply { text = video.name; textSize = 13.5f; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; setTextColor(0xFFF4F5F7.toInt()) })
+        info.addView(TextView(this).apply { text = video.name; textSize = 14f; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; setTextColor(0xFFF4F5F7.toInt()) })
         info.addView(TextView(this).apply { text = formatTime(video.duration) + "   ·   " + video.folder.substringAfterLast('/'); textSize = 10.5f; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; setTextColor(0xFF9AA4B0.toInt()); setPadding(0, dp(5), 0, 0) })
         row.addView(thumb); row.addView(info, LinearLayout.LayoutParams(0, -2, 1f))
         row.setOnClickListener { playlist.clear(); playlist.add(video.uri); playlistIndex = 0; play(video.uri) }
@@ -1278,7 +1291,7 @@ class MainActivity : AppCompatActivity() {
         }
         val lp = LinearLayout.LayoutParams(-1, -2); lp.setMargins(0, dp(4), 0, dp(4)); libraryItems.addView(row, lp)
         if (Build.VERSION.SDK_INT >= 29) thumbnailExecutor.execute {
-            try { val bmp = contentResolver.loadThumbnail(video.uri, android.util.Size(dp(112), dp(70)), null); runOnUiThread { if (!isDestroyed && thumb.parent != null) thumb.setImageBitmap(bmp) } }
+            try { val bmp = contentResolver.loadThumbnail(video.uri, android.util.Size(dp(120), dp(76)), null); runOnUiThread { if (!isDestroyed && thumb.parent != null) thumb.setImageBitmap(bmp) } }
             catch (e: Exception) { Log.d("MPM_PLAYER", "Miniatura no disponible: ${video.name}") }
         }
     }
