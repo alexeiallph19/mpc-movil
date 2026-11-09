@@ -83,8 +83,8 @@ jobs:
                   applicationId "com.mpmplayer.android"
                   minSdk 21
                   targetSdk 34
-                  versionCode 6
-                  versionName "4.1.0-MPM"
+                  versionCode 7
+                  versionName "4.2.0-MPM"
               }
 
               signingConfigs {
@@ -269,7 +269,10 @@ jobs:
 
                           <Button android:id="@+id/btnMenuFile" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Abrir" android:textColor="#FFFFFF" />
                           <Button android:id="@+id/btnMenuAudio" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Audio" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuSubtitles" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Subtítulos" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuSubtitles" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Pistas" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuExternalSubtitles" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Abrir subtítulo" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuFavorite" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="★ Guardar" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/btnMenuFavorites" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Favoritos" android:textColor="#FFFFFF" />
                           <Button android:id="@+id/btnMenuAspect" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Aspecto" android:textColor="#FFFFFF" />
                           <Button android:id="@+id/btnMenuRotate" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Rotación" android:textColor="#FFFFFF" />
                       </LinearLayout>
@@ -429,7 +432,21 @@ jobs:
                   ActivityResultContracts.StartActivityForResult()
               ) { res ->
                   if (res.resultCode == RESULT_OK) {
-                      res.data?.data?.let { play(it) }
+                      res.data?.data?.let { uri ->
+                          persistReadPermission(uri, res.data?.flags ?: 0)
+                          play(uri)
+                      }
+                  }
+              }
+
+              private val subtitleLauncher = registerForActivityResult(
+                  ActivityResultContracts.StartActivityForResult()
+              ) { res ->
+                  if (res.resultCode == RESULT_OK) {
+                      res.data?.data?.let { uri ->
+                          persistReadPermission(uri, res.data?.flags ?: 0)
+                          attachExternalSubtitle(uri)
+                      }
                   }
               }
 
@@ -461,6 +478,9 @@ jobs:
                   findViewById<Button>(R.id.btnMenuFile).setOnClickListener { pickFile() }
                   findViewById<Button>(R.id.btnMenuAudio).setOnClickListener { pickAudio() }
                   findViewById<Button>(R.id.btnMenuSubtitles).setOnClickListener { pickSubtitles() }
+                  findViewById<Button>(R.id.btnMenuExternalSubtitles).setOnClickListener { pickExternalSubtitle() }
+                  findViewById<Button>(R.id.btnMenuFavorite).setOnClickListener { saveFavorite() }
+                  findViewById<Button>(R.id.btnMenuFavorites).setOnClickListener { showFavorites() }
                   findViewById<Button>(R.id.btnMenuAspect).setOnClickListener { cycleAspect() }
 
                   val rotLambda = { cycleRotation() }
@@ -687,9 +707,111 @@ jobs:
               private fun pickFile() {
                   val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                       addCategory(Intent.CATEGORY_OPENABLE)
+                      addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                       type = "video/*"
                   }
                   fileLauncher.launch(intent)
+              }
+
+              private fun persistReadPermission(uri: Uri, flags: Int) {
+                  val granted = flags and Intent.FLAG_GRANT_READ_URI_PERMISSION
+                  if (granted != 0) {
+                      try {
+                          contentResolver.takePersistableUriPermission(uri, granted)
+                      } catch (e: Exception) {
+                          Log.w("MPM_PLAYER", "El proveedor no permite conservar el permiso del archivo", e)
+                      }
+                  }
+              }
+
+              private fun getDisplayName(uri: Uri): String {
+                  var name = uri.lastPathSegment ?: "Video"
+                  try {
+                      contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                          if (c.moveToFirst()) {
+                              val index = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                              if (index >= 0) name = c.getString(index) ?: name
+                          }
+                      }
+                  } catch (_: Exception) { }
+                  return name
+              }
+
+              private fun saveFavorite() {
+                  val uri = currentUri
+                  if (uri == null) {
+                      Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  val favorites = getSharedPreferences("mpm_player", MODE_PRIVATE)
+                      .getStringSet("favorites", emptySet())?.toMutableSet() ?: mutableSetOf()
+                  favorites.add(uri.toString())
+                  getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                      .putStringSet("favorites", favorites).apply()
+                  showOsd("Añadido a favoritos")
+              }
+
+              private fun showFavorites() {
+                  val favorites = getSharedPreferences("mpm_player", MODE_PRIVATE)
+                      .getStringSet("favorites", emptySet())?.toList().orEmpty()
+                  if (favorites.isEmpty()) {
+                      AlertDialog.Builder(this).setTitle("Favoritos")
+                          .setMessage("Todavía no has guardado videos")
+                          .setPositiveButton("Aceptar", null).show()
+                      return
+                  }
+                  val labels = favorites.map { getDisplayName(Uri.parse(it)) }.toTypedArray()
+                  var selected = 0
+                  AlertDialog.Builder(this).setTitle("Videos favoritos")
+                      .setSingleChoiceItems(labels, 0) { _, which -> selected = which }
+                      .setPositiveButton("Abrir") { _, _ -> play(Uri.parse(favorites[selected])) }
+                      .setNeutralButton("Quitar") { _, _ ->
+                          val updated = favorites.toMutableSet()
+                          updated.remove(favorites[selected])
+                          getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                              .putStringSet("favorites", updated).apply()
+                          showOsd("Favorito eliminado")
+                      }
+                      .setNegativeButton("Cerrar", null).show()
+              }
+
+              private fun pickExternalSubtitle() {
+                  if (currentUri == null) {
+                      Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                      addCategory(Intent.CATEGORY_OPENABLE)
+                      addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                      type = "*/*"
+                  }
+                  subtitleLauncher.launch(intent)
+              }
+
+              private fun attachExternalSubtitle(uri: Uri) {
+                  Thread {
+                      try {
+                          val displayName = getDisplayName(uri)
+                          val extension = displayName.substringAfterLast('.', "srt")
+                              .lowercase(Locale.ROOT).filter { it.isLetterOrDigit() }.take(8).ifBlank { "srt" }
+                          val subtitleFile = java.io.File(cacheDir, "mpm_subtitle_${System.currentTimeMillis()}.$extension")
+                          contentResolver.openInputStream(uri)?.use { input ->
+                              subtitleFile.outputStream().use { output -> input.copyTo(output) }
+                          } ?: throw IllegalStateException("No se pudo leer el subtítulo")
+                          runOnUiThread {
+                              val added = mediaPlayer?.addSlave(Media.Slave.Type.Subtitle, Uri.fromFile(subtitleFile), true) ?: false
+                              if (added) showOsd("Subtítulo cargado: $displayName")
+                              else Toast.makeText(this, "VLC no pudo cargar este subtítulo", Toast.LENGTH_LONG).show()
+                          }
+                      } catch (e: Exception) {
+                          Log.e("MPM_PLAYER", "Error al cargar subtítulo externo", e)
+                          runOnUiThread {
+                              AlertDialog.Builder(this).setTitle("Error de subtítulos")
+                                  .setMessage(e.message ?: "No se pudo cargar el archivo")
+                                  .setPositiveButton("Aceptar", null).show()
+                          }
+                      }
+                  }.start()
               }
 
               private fun cycleRotation() {
@@ -858,7 +980,7 @@ jobs:
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: MPM Player-Android-v4.0.1
+          name: MPM Player-Android-v4.2.0
           path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
@@ -868,7 +990,14 @@ jobs:
           tag_name: mpc-android-build-${{ github.run_number }}
           name: MPM Player Android - compilación #${{ github.run_number }}
           body: |
-            APK generado automáticamente por GitHub Actions.
+            MPM Player 4.2.0
+
+            Novedades:
+            - Favoritos guardados en el dispositivo.
+            - Apertura de subtítulos externos compatibles con VLC.
+            - Conservación de permisos de archivos para volver a abrirlos.
+            - Se mantiene el motor LibVLC y la firma permanente.
+
             Rama: ${{ github.ref_name }}
             Commit: ${{ github.sha }}
           prerelease: true
