@@ -31,8 +31,6 @@ jobs:
           mkdir -p /tmp/mpm-workflow
           cp .github/workflows/import-vlc.yml /tmp/mpm-workflow/import-vlc.yml
           rsync -a --delete --exclude='.git' --exclude='.github' /tmp/vlc-src/ ./
-          mkdir -p .github
-          rsync -a /tmp/vlc-src/.github/ .github/
           mkdir -p .github/workflows
           cp /tmp/mpm-workflow/import-vlc.yml .github/workflows/import-vlc.yml
           cp /tmp/vlc-source-commit.txt VLC_SOURCE_COMMIT.txt
