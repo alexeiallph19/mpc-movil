@@ -23,7 +23,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Configurar Gradle 8.2
+      - name: Configurar Gradle 9.4.1
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '9.4.1'
