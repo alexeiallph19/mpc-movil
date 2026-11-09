@@ -1,0 +1,4 @@
+<!-- Based on VLC for Android ic_pause_player.xml. Copyright © VideoLAN and VLC authors. GPL-2.0-or-later. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:pathData="M22.3333,17.3333L22.3333,30.6667L19,30.6667L19,17.3333L22.3333,17.3333ZM29,17.3333L29,30.6667L25.6667,30.6667L25.6667,17.3333L29,17.3333ZM24,4C12.96,4 4,12.96 4,24C4,35.04 12.96,44 24,44C35.04,44 44,35.04 44,24C44,12.96 35.04,4 24,4ZM24,41.5C14.3531,41.5 6.5,33.6469 6.5,24C6.5,14.3531 14.3531,6.5 24,6.5C33.6469,6.5 41.5,14.3531 41.5,24C41.5,35.04 33.6469,41.5 24,41.5Z" android:fillColor="#FFFFFFFF" android:strokeColor="#00000000" android:strokeWidth="1" />
+</vector>
