@@ -104,6 +104,8 @@ class MainActivity : AppCompatActivity() {
     private val thumbnailExecutor = Executors.newSingleThreadExecutor()
     private val playbackExecutor = Executors.newSingleThreadExecutor()
     private val playbackRequestId = java.util.concurrent.atomic.AtomicInteger(0)
+    private val libraryExecutor = Executors.newSingleThreadExecutor()
+    private val libraryRequestId = java.util.concurrent.atomic.AtomicInteger(0)
     private var lastProgressSaveAt = 0L
     private var isSeeking = false
     private lateinit var gestureDetector: GestureDetector
@@ -1382,22 +1384,38 @@ class MainActivity : AppCompatActivity() {
     }
     private fun refreshLibrary() {
         val permission = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_VIDEO else Manifest.permission.READ_EXTERNAL_STORAGE
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) { ensureLibraryPermission(); return }
-        val found = mutableListOf<LibraryVideo>()
-        val base = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        val cols = mutableListOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.DURATION)
-        if (Build.VERSION.SDK_INT >= 29) cols.add(MediaStore.Video.Media.RELATIVE_PATH)
-        try {
-            contentResolver.query(base, cols.toTypedArray(), null, null, MediaStore.Video.Media.DATE_ADDED + " DESC")?.use { cur ->
-                val id = cur.getColumnIndexOrThrow(MediaStore.Video.Media._ID); val name = cur.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME); val duration = cur.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-                val folder = if (Build.VERSION.SDK_INT >= 29) cur.getColumnIndex(MediaStore.Video.Media.RELATIVE_PATH) else -1
-                while (cur.moveToNext()) {
-                    val path = if (folder >= 0) cur.getString(folder).orEmpty().trimEnd('/') else "Almacenamiento interno"
-                    found.add(LibraryVideo(android.content.ContentUris.withAppendedId(base, cur.getLong(id)), cur.getString(name) ?: "Vídeo", cur.getLong(duration), path.ifBlank { "Almacenamiento interno" }))
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ensureLibraryPermission()
+            return
+        }
+        val requestId = libraryRequestId.incrementAndGet()
+        librarySubtitle.text = "Actualizando biblioteca…"
+        libraryExecutor.execute {
+            val found = mutableListOf<LibraryVideo>()
+            val base = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            val cols = mutableListOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.DURATION)
+            if (Build.VERSION.SDK_INT >= 29) cols.add(MediaStore.Video.Media.RELATIVE_PATH)
+            try {
+                contentResolver.query(base, cols.toTypedArray(), null, null, MediaStore.Video.Media.DATE_ADDED + " DESC")?.use { cur ->
+                    val id = cur.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+                    val name = cur.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+                    val duration = cur.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+                    val folder = if (Build.VERSION.SDK_INT >= 29) cur.getColumnIndex(MediaStore.Video.Media.RELATIVE_PATH) else -1
+                    while (cur.moveToNext()) {
+                        val path = if (folder >= 0) cur.getString(folder).orEmpty().trimEnd('/') else "Almacenamiento interno"
+                        found.add(LibraryVideo(android.content.ContentUris.withAppendedId(base, cur.getLong(id)), cur.getString(name) ?: "Vídeo", cur.getLong(duration), path.ifBlank { "Almacenamiento interno" }))
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("MPM_PLAYER", "Error al leer biblioteca", e)
             }
-        } catch (e: Exception) { Log.e("MPM_PLAYER", "Error al leer biblioteca", e) }
-        libraryVideos.clear(); libraryVideos.addAll(found); renderLibrary(libraryMode)
+            runOnUiThread {
+                if (isFinishing || isDestroyed || requestId != libraryRequestId.get()) return@runOnUiThread
+                libraryVideos.clear()
+                libraryVideos.addAll(found)
+                renderLibrary(libraryMode)
+            }
+        }
     }
     private fun renderLibrary(mode: String) {
         isLibraryVisible = true
@@ -1902,16 +1920,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getDisplayName(uri: Uri): String {
-        var name = uri.lastPathSegment ?: "Video"
-        try {
-            contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
-                if (c.moveToFirst()) {
-                    val index = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    if (index >= 0) name = c.getString(index) ?: name
-                }
-            }
-        } catch (_: Exception) { }
-        return name
+        // Never query a document provider synchronously from the UI thread.
+        return libraryVideos.firstOrNull { it.uri == uri }?.name
+            ?: uri.lastPathSegment?.substringAfterLast(':')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+            ?: "Vídeo"
     }
 
     private fun saveFavorite() {
