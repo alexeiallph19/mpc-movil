@@ -993,111 +993,161 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showMainMenu(anchor: View) {
-        val popup = PopupMenu(this, anchor)
-        popup.menu.add("Biblioteca").setOnMenuItemClickListener { welcomeScreen.visibility = View.VISIBLE; renderLibrary(libraryMode); true }
-        popup.menu.add("Abrir archivo…").setOnMenuItemClickListener { pickFile(); true }
-        popup.menu.add("Emitir a dispositivo…").setOnMenuItemClickListener { showCastDialog(); true }
-        popup.menu.add("Tomar captura de pantalla").setOnMenuItemClickListener { takeScreenshot(); true }
-        popup.menu.add("Botón flotante de captura: " + if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) "Activado" else "Desactivado").setOnMenuItemClickListener { toggleFloatingScreenshot(); true }
-        popup.menu.add("Intervalo de doble toque (" + seekIntervalSeconds + " s)").setOnMenuItemClickListener { showSeekIntervalDialog(); true }
-        popup.menu.add("Lista de reproducción").setOnMenuItemClickListener { showPlaylist(); true }
-        popup.menu.add("Archivos recientes").setOnMenuItemClickListener { showRecentFiles(); true }
-        popup.menu.add("Favoritos").setOnMenuItemClickListener { showFavorites(); true }
-        popup.menu.add("Guardar en favoritos").setOnMenuItemClickListener { saveFavorite(); true }
-        popup.menu.add("Información del medio").setOnMenuItemClickListener { showMediaInfo(); true }
-        popup.menu.add("Relación de aspecto").setOnMenuItemClickListener { showAspectMenu(); true }
-        popup.menu.add("Cambiar orientación").setOnMenuItemClickListener { cycleRotation(); true }
-        popup.menu.add("Audio y subtítulos").setOnMenuItemClickListener { showAudioSubsPanel("Audio"); true }
-        popup.menu.add("Imagen y pantalla").setOnMenuItemClickListener { showImagePanel(); true }
-        popup.menu.add("Herramientas de reproducción").setOnMenuItemClickListener { showPlaybackTools(); true }
-        popup.menu.add("Ajustes").setOnMenuItemClickListener { showPlayerSettings(); true }
-        popup.menu.add("Acerca de MPM Player").setOnMenuItemClickListener {
-            AlertDialog.Builder(this).setTitle("MPM Player")
-                .setMessage("Reproductor multimedia para Android")
-                .setPositiveButton("Aceptar", null).show()
-            true
-        }
-        popup.show()
+        showMpmMenu(anchor, "MPM PLAYER", listOf(
+            "Biblioteca" to { welcomeScreen.visibility = View.VISIBLE; renderLibrary(libraryMode); showSystemBars() },
+            "Abrir archivo…" to { pickFile() },
+            "Emitir a dispositivo…" to { showCastDialog() },
+            "Tomar captura de pantalla" to { takeScreenshot() },
+            ("Botón flotante de captura: " + if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) "Activado" else "Desactivado") to { toggleFloatingScreenshot() },
+            ("Intervalo de doble toque (" + seekIntervalSeconds + " s)") to { showSeekIntervalDialog() },
+            "Lista de reproducción" to { showPlaylist() },
+            "Archivos recientes" to { showRecentFiles() },
+            "Favoritos" to { showFavorites() },
+            "Guardar en favoritos" to { saveFavorite() },
+            "Información del medio" to { showMediaInfo() },
+            "Relación de aspecto" to { showAspectMenu() },
+            "Cambiar orientación" to { cycleRotation() },
+            "Audio y subtítulos" to { showAudioSubsPanel("Audio") },
+            "Imagen y pantalla" to { showImagePanel() },
+            "Herramientas de reproducción" to { showPlaybackTools() },
+            "Ajustes" to { showPlayerSettings() },
+            "Acerca de MPM Player" to {
+                AlertDialog.Builder(this).setTitle("MPM Player")
+                    .setMessage("Reproductor multimedia para Android")
+                    .setPositiveButton("Aceptar", null).show()
+            }
+        ))
     }
 
     private fun showTopMenu(anchor: View, section: String) {
-        val popup = PopupMenu(this, anchor)
+        val items = mutableListOf<Pair<String, () -> Unit>>()
         when (section) {
             "Archivo" -> {
-                popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
-                popup.menu.add("Abrir audio").setOnMenuItemClickListener { pickAudio(); true }
-                popup.menu.add("Abrir subtítulo").setOnMenuItemClickListener { pickExternalSubtitle(); true }
-                popup.menu.add("Lista de reproducción").setOnMenuItemClickListener { showPlaylist(); true }
-                popup.menu.add("Archivos recientes").setOnMenuItemClickListener { showRecentFiles(); true }
-                popup.menu.add("Información del medio").setOnMenuItemClickListener { showMediaInfo(); true }
+                items += "Abrir video" to { pickFile() }
+                items += "Abrir audio" to { pickAudio() }
+                items += "Abrir subtítulo" to { pickExternalSubtitle() }
+                items += "Lista de reproducción" to { showPlaylist() }
+                items += "Archivos recientes" to { showRecentFiles() }
+                items += "Información del medio" to { showMediaInfo() }
             }
             "Ver" -> {
-                popup.menu.add("Relación de aspecto").setOnMenuItemClickListener { showAspectMenu(); true }
-                popup.menu.add("Cambiar orientación").setOnMenuItemClickListener { cycleRotation(); true }
-                popup.menu.add("Mostrar video bajo notch").apply {
-                    isCheckable = true
-                    isChecked = displayUnderNotch
-                    setOnMenuItemClickListener {
-                        displayUnderNotch = !displayUnderNotch
-                        getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
-                            .putBoolean("display_under_notch", displayUnderNotch).apply()
-                        applyDisplayUnderNotch()
-                        showOsd(if (displayUnderNotch) "Video bajo el notch activado" else "Video bajo el notch desactivado")
-                        true
-                    }
+                items += "Relación de aspecto" to { showAspectMenu() }
+                items += "Cambiar orientación" to { cycleRotation() }
+                items += (if (displayUnderNotch) "✓  Video bajo el notch" else "Video bajo el notch") to {
+                    displayUnderNotch = !displayUnderNotch
+                    getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                        .putBoolean("display_under_notch", displayUnderNotch).apply()
+                    applyDisplayUnderNotch()
+                    showOsd(if (displayUnderNotch) "Video bajo el notch activado" else "Video bajo el notch desactivado")
                 }
-                popup.menu.add("Pantalla completa").setOnMenuItemClickListener { enterImmersiveMode(); true }
-                popup.menu.add("Emitir a dispositivo…").setOnMenuItemClickListener { showCastDialog(); true }
-                popup.menu.add("Tomar captura de pantalla").setOnMenuItemClickListener { takeScreenshot(); true }
+                items += "Pantalla completa" to { enterImmersiveMode() }
+                items += "Emitir a dispositivo…" to { showCastDialog() }
+                items += "Tomar captura de pantalla" to { takeScreenshot() }
             }
             "Reproducir" -> {
-                popup.menu.add("Reproducir / Pausar").setOnMenuItemClickListener {
+                items += "Reproducir / Pausar" to {
                     mediaPlayer?.let { player -> if (player.isPlaying) player.pause() else player.play() }
-                    true
                 }
-                popup.menu.add("Detener").setOnMenuItemClickListener {
+                items += "Detener" to {
                     savePlaybackProgress()
                     mediaPlayer?.stop()
                     releaseCurrentAssetDescriptor()
                     welcomeScreen.visibility = View.VISIBLE
+                    renderLibrary(libraryMode)
                     txtStatus.text = "Detenido"
-                    true
                 }
-                popup.menu.add("Velocidad").setOnMenuItemClickListener {
+                items += "Velocidad" to {
                     speedIndex = (speedIndex + 1) % speeds.size
                     val speed = speeds[speedIndex]
                     mediaPlayer?.rate = speed
                     btnSpeed.text = "${speed}X"
                     showOsd("Velocidad: ${speed}X")
-                    true
                 }
             }
             "Navegar" -> {
-                popup.menu.add("Retroceder 10 segundos").setOnMenuItemClickListener {
+                items += "Retroceder 10 segundos" to {
                     mediaPlayer?.let { player -> player.time = (player.time - 10000L).coerceAtLeast(0L) }
-                    true
                 }
-                popup.menu.add("Avanzar 10 segundos").setOnMenuItemClickListener {
+                items += "Avanzar 10 segundos" to {
                     mediaPlayer?.let { player -> player.time = (player.time + 10000L).coerceAtMost(player.length) }
-                    true
                 }
-                popup.menu.add("Pistas de audio").setOnMenuItemClickListener { pickAudio(); true }
-                popup.menu.add("Pistas de subtítulos").setOnMenuItemClickListener { pickSubtitles(); true }
+                items += "Pistas de audio" to { pickAudio() }
+                items += "Pistas de subtítulos" to { pickSubtitles() }
             }
             "Favoritos" -> {
-                popup.menu.add("Guardar video actual").setOnMenuItemClickListener { saveFavorite(); true }
-                popup.menu.add("Abrir favoritos").setOnMenuItemClickListener { showFavorites(); true }
+                items += "Guardar video actual" to { saveFavorite() }
+                items += "Abrir favoritos" to { showFavorites() }
             }
-            "Ayuda" -> {
-                popup.menu.add("Acerca de MPM Player").setOnMenuItemClickListener {
-                    AlertDialog.Builder(this).setTitle("MPM Player")
-                        .setMessage("Reproductor multimedia para Android.\n\nUsa Archivo para abrir videos y subtítulos, Ver para ajustar la pantalla, y Reproducir o Navegar para controlar la reproducción.")
-                        .setPositiveButton("Aceptar", null).show()
-                    true
-                }
+            "Ayuda" -> items += "Acerca de MPM Player" to {
+                AlertDialog.Builder(this).setTitle("MPM Player")
+                    .setMessage("Reproductor multimedia para Android.\\n\\nUsa Archivo para abrir videos y subtítulos, Ver para ajustar la pantalla, y Reproducir o Navegar para controlar la reproducción.")
+                    .setPositiveButton("Aceptar", null).show()
             }
         }
-        popup.show()
+        showMpmMenu(anchor, section.uppercase(), items)
+    }
+
+    private fun showMpmMenu(anchor: View, heading: String, items: List<Pair<String, () -> Unit>>) {
+        if (items.isEmpty()) return
+        val dialog = android.app.Dialog(this)
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(0xFF151B24.toInt())
+                cornerRadius = dp(20).toFloat()
+                setStroke(dp(1), 0xFF344153.toInt())
+            }
+        }
+        panel.addView(TextView(this).apply {
+            text = heading
+            setTextColor(0xFFFF8738.toInt())
+            textSize = 11f
+            letterSpacing = 0.12f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(dp(10), dp(8), dp(10), dp(12))
+        })
+        val scroll = android.widget.ScrollView(this).apply { isFillViewport = false }
+        val rows = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        items.forEachIndexed { index, item ->
+            val row = TextView(this).apply {
+                text = item.first
+                setTextColor(0xFFE8EDF4.toInt())
+                textSize = 14f
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding(dp(12), dp(11), dp(12), dp(11))
+                minHeight = dp(44)
+                isClickable = true
+                isFocusable = true
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xFF1D2632.toInt())
+                    cornerRadius = dp(10).toFloat()
+                }
+                setOnClickListener {
+                    dialog.dismiss()
+                    item.second.invoke()
+                }
+            }
+            rows.addView(row, LinearLayout.LayoutParams(-1, -2).apply {
+                if (index > 0) topMargin = dp(5)
+            })
+        }
+        scroll.addView(rows)
+        panel.addView(scroll, LinearLayout.LayoutParams(-1, -2))
+        dialog.setContentView(panel)
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x00000000))
+        dialog.show()
+        val maxHeight = (resources.displayMetrics.heightPixels * 0.78f).toInt()
+        dialog.window?.setLayout(minOf(dp(320), resources.displayMetrics.widthPixels - dp(28)), maxHeight)
+        dialog.window?.setGravity(android.view.Gravity.END or android.view.Gravity.CENTER_VERTICAL)
+        dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.48f }
+    }
+
+    private fun getPlayerTitle(uri: Uri): String {
+        val name = getDisplayName(uri).substringBeforeLast('.', getDisplayName(uri)).trim()
+        if (name.length <= 48) return name
+        return name.take(22) + "…" + name.takeLast(22)
     }
 
     private fun setControlsVisible(visible: Boolean) {
@@ -1564,7 +1614,7 @@ class MainActivity : AppCompatActivity() {
                 MediaPlayer.Event.Playing -> {
                     isLibraryVisible = false
                     welcomeScreen.visibility = View.GONE
-                    txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Reproduciendo"
+                    txtStatus.text = currentUri?.let { getPlayerTitle(it) } ?: "Reproduciendo"
                     btnPlay.setImageResource(R.drawable.vlc_ic_pause_player)
                     btnPlay.contentDescription = "Pausar"
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
@@ -1574,7 +1624,7 @@ class MainActivity : AppCompatActivity() {
                     if (isLibraryVisible) {
                         setControlsVisible(false)
                     } else {
-                    txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Pausa"
+                    txtStatus.text = currentUri?.let { getPlayerTitle(it) } ?: "Pausa"
                     btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     btnPlay.contentDescription = "Reproducir"
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
