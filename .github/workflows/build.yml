@@ -5,6 +5,12 @@ permissions:
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publicar APK en GitHub Releases"
+        required: false
+        type: boolean
+        default: false
   push:
     branches: ["desarrollo/interfaz-mpc"]
 
@@ -2141,6 +2147,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publicar APK en GitHub Releases
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: mpc-android-build-${{ github.run_number }}
