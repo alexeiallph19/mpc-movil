@@ -1735,10 +1735,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun play(uri: Uri, startPos: Long = -1L) {
+        Log.e("MPM_PLAY_TRACE", "play() entry startPos=$startPos uri=$uri thread=${Thread.currentThread().name}")
         isLibraryVisible = false
         videoLayout.visibility = View.VISIBLE
         if (startPos < 0L) {
+            Log.e("MPM_PLAY_TRACE", "before getPlaybackProgress thread=${Thread.currentThread().name}")
             val saved = getPlaybackProgress(uri)
+            Log.e("MPM_PLAY_TRACE", "after getPlaybackProgress saved=$saved")
             if (saved > 10_000L) {
                 val name = getDisplayName(uri)
                 AlertDialog.Builder(this)
@@ -1757,12 +1760,17 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (!viewsAttached) {
+            Log.e("MPM_PLAY_TRACE", "before videoLayout.post thread=${Thread.currentThread().name}")
             videoLayout.post {
+                Log.e("MPM_PLAY_TRACE", "inside videoLayout.post thread=${Thread.currentThread().name} viewsAttached=$viewsAttached")
                 if (isFinishing || isDestroyed) return@post
                 if (!viewsAttached) {
+                    Log.e("MPM_PLAY_TRACE", "before attachViews")
                     mediaPlayer?.attachViews(videoLayout, null, false, true)
+                    Log.e("MPM_PLAY_TRACE", "after attachViews")
                     viewsAttached = true
                 }
+                Log.e("MPM_PLAY_TRACE", "before recursive play")
                 play(uri, startPos)
             }
             return
