@@ -414,7 +414,7 @@ jobs:
               android:layout_marginEnd="14dp" android:backgroundTint="#CC202020" android:visibility="gone"
               android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▣"
               android:textColor="#FFFFFF" android:textSize="21sp" />
-          </FrameLayout>          </FrameLayout>
+          </FrameLayout>
           EOF
 
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
