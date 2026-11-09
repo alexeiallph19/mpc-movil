@@ -204,6 +204,7 @@ jobs:
               <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
               <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
               <uses-permission android:name="android.permission.WAKE_LOCK" />
+          <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
               <application
                   android:allowBackup="true"
@@ -386,6 +387,10 @@ jobs:
               private var lastProgressSaveAt = 0L
               private var isSeeking = false
               private lateinit var gestureDetector: GestureDetector
+              private var gestureStartVolume = 0
+              private var gestureStartBrightness = 0.5f
+              private var gestureStartTime = 0L
+              private var gestureMode = ""
           
               private val fileLauncher = registerForActivityResult(
                   ActivityResultContracts.StartActivityForResult()
@@ -1270,8 +1275,7 @@ jobs:
                                         details.append("Archivo: ").append(getDisplayName(uri)).append("\n")
                                         details.append("Duración: ").append(formatTime(meta(MediaMetadataRetriever.METADATA_KEY_DURATION, "0").toLongOrNull() ?: 0L)).append("\n")
                                         details.append("Resolución: ").append(meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)).append(" × ").append(meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)).append("\n")
-                                        details.append("Códec de video: ").append(meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_CODEC)).append("\n")
-                                        details.append("Códec de audio: ").append(meta(MediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC)).append("\n")
+                                        details.append("Códecs: información no disponible en esta versión de Android\\n")
                                         details.append("Bitrate: ").append(meta(MediaMetadataRetriever.METADATA_KEY_BITRATE)).append(" bps")
                                     } finally { retriever.release() }
                                 } catch (e: Exception) { details.append("No se pudo leer toda la información del medio.\n").append(e.message ?: "Error desconocido") }
