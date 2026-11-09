@@ -308,7 +308,7 @@ jobs:
 
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
           package com.mpcmovil
-
+          
           import android.app.AlertDialog
           import android.content.Intent
           import android.content.res.AssetFileDescriptor
@@ -341,9 +341,9 @@ jobs:
           import java.io.File
           import java.io.FileOutputStream
           import java.util.concurrent.Executors
-
+          
           class MainActivity : AppCompatActivity() {
-
+          
               private lateinit var videoLayout: VLCVideoLayout
               private lateinit var welcomeScreen: View
               private lateinit var topBar: View
@@ -356,10 +356,12 @@ jobs:
               private lateinit var btnPlay: Button
               private lateinit var btnHwSw: Button
               private lateinit var btnSpeed: Button
-
+          
               private var libVLC: LibVLC? = null
               private var mediaPlayer: MediaPlayer? = null
               private var currentUri: Uri? = null
+              private val playlist = mutableListOf<Uri>()
+              private var playlistIndex = -1
               private var currentAssetDescriptor: AssetFileDescriptor? = null
               private var viewsAttached = false
               private var playbackDiagnostics = ""
@@ -378,29 +380,35 @@ jobs:
               private var speedIndex = 2
               private val aspects = arrayOf("Original / automático", "16:9", "4:3", "1:1", "2.35:1", "Rellenar")
               private val aspectValues = arrayOf<String?>(null, "16:9", "4:3", "1:1", "2.35:1", "fill")
-
+          
               private val handler = Handler(Looper.getMainLooper())
               private val thumbnailExecutor = Executors.newSingleThreadExecutor()
               private var lastProgressSaveAt = 0L
               private var isSeeking = false
               private lateinit var gestureDetector: GestureDetector
-
+          
               private val fileLauncher = registerForActivityResult(
                   ActivityResultContracts.StartActivityForResult()
               ) { res ->
-                  val uri = if (res.resultCode == RESULT_OK) res.data?.data else null
+                  val data = res.data
+                  val selected = mutableListOf<Uri>()
+                  if (res.resultCode == RESULT_OK && data != null) {
+                      data.clipData?.let { clip -> for (i in 0 until clip.itemCount) selected.add(clip.getItemAt(i).uri) }
+                      if (selected.isEmpty()) data.data?.let { selected.add(it) }
+                  }
                   val shouldResume = resumeAfterFilePicker
                   filePickerPending = false
                   resumeAfterFilePicker = false
                   videoLayout.postDelayed({
-                      restoreVideoOutput(uri == null && shouldResume)
-                      if (uri != null) {
-                          persistReadPermission(uri, res.data?.flags ?: 0)
-                          play(uri)
+                      restoreVideoOutput(selected.isEmpty() && shouldResume)
+                      if (selected.isNotEmpty()) {
+                          selected.forEach { persistReadPermission(it, data?.flags ?: 0) }
+                          playlist.clear(); playlist.addAll(selected); playlistIndex = 0
+                          showOsd("Lista: " + playlist.size + " archivos"); play(playlist[0])
                       }
                   }, 300)
               }
-
+          
               private val subtitleLauncher = registerForActivityResult(
                   ActivityResultContracts.StartActivityForResult()
               ) { res ->
@@ -411,7 +419,7 @@ jobs:
                       attachExternalSubtitle(uri)
                   }
               }
-
+          
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -426,7 +434,7 @@ jobs:
                   initPlayer()
                   intent?.data?.let { play(it) }
               }
-
+          
               private fun showTopMenu(anchor: View, section: String) {
                   val popup = PopupMenu(this, anchor)
                   when (section) {
@@ -434,6 +442,9 @@ jobs:
                           popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
                           popup.menu.add("Abrir audio").setOnMenuItemClickListener { pickAudio(); true }
                           popup.menu.add("Abrir subtítulo").setOnMenuItemClickListener { pickExternalSubtitle(); true }
+                          popup.menu.add("Lista de reproducción").setOnMenuItemClickListener { showPlaylist(); true }
+                          popup.menu.add("Archivos recientes").setOnMenuItemClickListener { showRecentFiles(); true }
+                          popup.menu.add("Información del medio").setOnMenuItemClickListener { showMediaInfo(); true }
                       }
                       "Ver" -> {
                           popup.menu.add("Relación de aspecto").setOnMenuItemClickListener { showAspectMenu(); true }
@@ -501,7 +512,7 @@ jobs:
                   }
                   popup.show()
               }
-
+          
               private fun initViews() {
                   videoLayout = findViewById(R.id.videoLayout)
                   welcomeScreen = findViewById(R.id.welcomeScreen)
@@ -515,22 +526,22 @@ jobs:
                   btnPlay = findViewById(R.id.btnPlay)
                   btnHwSw = findViewById(R.id.btnHwSw)
                   btnSpeed = findViewById(R.id.btnSpeed)
-
+          
                   findViewById<Button>(R.id.topMenuFile).setOnClickListener { showTopMenu(it, "Archivo") }
                   findViewById<Button>(R.id.topMenuView).setOnClickListener { showTopMenu(it, "Ver") }
                   findViewById<Button>(R.id.topMenuPlay).setOnClickListener { showTopMenu(it, "Reproducir") }
                   findViewById<Button>(R.id.topMenuNavigate).setOnClickListener { showTopMenu(it, "Navegar") }
                   findViewById<Button>(R.id.topMenuFavorites).setOnClickListener { showTopMenu(it, "Favoritos") }
                   findViewById<Button>(R.id.topMenuHelp).setOnClickListener { showTopMenu(it, "Ayuda") }
-
+          
                   findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
                   findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
-
+          
                   btnPlay.setOnClickListener {
                       mediaPlayer?.let { p -> if (p.isPlaying) p.pause() else p.play() }
                   }
                   findViewById<Button>(R.id.btnPause).setOnClickListener { mediaPlayer?.pause() }
-
+          
                   findViewById<Button>(R.id.btnStop).setOnClickListener {
                       mediaPlayer?.stop()
                       releaseCurrentAssetDescriptor()
@@ -539,21 +550,21 @@ jobs:
                       txtTime.text = "00:00:00 / 00:00:00"
                       seekBar.progress = 0
                   }
-
+          
                   findViewById<Button>(R.id.btnBack).setOnClickListener {
                       mediaPlayer?.let { p ->
                           p.time = (p.time - 10000L).coerceAtLeast(0L)
                           showOsd("-10s (${formatTime(p.time)})")
                       }
                   }
-
+          
                   findViewById<Button>(R.id.btnForward).setOnClickListener {
                       mediaPlayer?.let { p ->
                           p.time = (p.time + 10000L).coerceAtMost(p.length)
                           showOsd("+10s (${formatTime(p.time)})")
                       }
                   }
-
+          
                   btnSpeed.setOnClickListener {
                       speedIndex = (speedIndex + 1) % speeds.size
                       val spd = speeds[speedIndex]
@@ -561,7 +572,7 @@ jobs:
                       btnSpeed.text = "${spd}X"
                       showOsd("Velocidad: ${spd}X")
                   }
-
+          
                   btnHwSw.setOnClickListener {
                       isHw = !isHw
                       updateDecoderUi()
@@ -572,7 +583,7 @@ jobs:
                           play(u, pos)
                       }
                   }
-
+          
                   seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                       override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                           if (fromUser && mediaPlayer != null) {
@@ -592,7 +603,7 @@ jobs:
                       }
                   })
               }
-
+          
               private fun initPlayer() {
                   val opts = ArrayList<String>()
                   opts.add("--file-caching=2000")
@@ -604,10 +615,10 @@ jobs:
                   if (!isHw) {
                       opts.add("--avcodec-hw=none")
                   }
-
+          
                   libVLC = LibVLC(this, opts)
                   mediaPlayer = MediaPlayer(libVLC)
-
+          
                   mediaPlayer?.setEventListener { ev ->
                       val eventName = when (ev.type) {
                           MediaPlayer.Event.Opening -> "Opening"
@@ -653,6 +664,11 @@ jobs:
                           }
                           MediaPlayer.Event.EndReached -> {
                               currentUri?.let { clearPlaybackProgress(it) }
+                              if (playlistIndex >= 0 && playlistIndex < playlist.lastIndex) {
+                                  playlistIndex++
+                                  val next = playlist[playlistIndex]
+                                  handler.post { play(next, 0L); showOsd("Siguiente: " + getDisplayName(next)) }
+                              } else handler.post { txtStatus.text = "Lista finalizada" }
                           }
                           MediaPlayer.Event.EncounteredError -> {
                               txtStatus.text = "Error al abrir"
@@ -668,7 +684,7 @@ jobs:
                   }
                   updateDecoderUi()
               }
-
+          
               private fun rebuildPlayer() {
                   mediaPlayer?.stop()
                   releaseCurrentAssetDescriptor()
@@ -680,7 +696,7 @@ jobs:
                   libVLC?.release()
                   initPlayer()
               }
-
+          
               private fun play(uri: Uri, startPos: Long = -1L) {
                   if (startPos < 0L) {
                       val saved = getPlaybackProgress(uri)
@@ -715,6 +731,10 @@ jobs:
                   mediaPlayer?.stop()
                   releaseCurrentAssetDescriptor()
                   currentUri = uri
+                  if (playlistIndex < 0 || playlist.getOrNull(playlistIndex) != uri) {
+                      playlist.clear(); playlist.add(uri); playlistIndex = 0
+                  }
+                  rememberRecent(uri)
                   lastProgressSaveAt = 0L
                   playbackEvents.clear()
                   try {
@@ -759,12 +779,12 @@ jobs:
                       AlertDialog.Builder(this).setTitle("Error al abrir archivo").setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
                   }
               }
-
+          
               private fun progressKey(uri: Uri): String = "progress_" + uri.toString().hashCode().toString()
-
+          
               private fun getPlaybackProgress(uri: Uri): Long =
                   getSharedPreferences("mpm_player", MODE_PRIVATE).getLong(progressKey(uri), 0L)
-
+          
               private fun savePlaybackProgress() {
                   val uri = currentUri ?: return
                   val player = mediaPlayer ?: return
@@ -775,12 +795,12 @@ jobs:
                           .putLong(progressKey(uri), position).apply()
                   }
               }
-
+          
               private fun clearPlaybackProgress(uri: Uri) {
                   getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
                       .remove(progressKey(uri)).apply()
               }
-
+          
               private fun releaseCurrentAssetDescriptor() {
                   try {
                       currentAssetDescriptor?.close()
@@ -790,14 +810,15 @@ jobs:
                       currentAssetDescriptor = null
                   }
               }
-
+          
               private fun pickFile() {
                   filePickerPending = true
                   resumeAfterFilePicker = mediaPlayer?.isPlaying == true
                   val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                       addCategory(Intent.CATEGORY_OPENABLE)
                       addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-                      type = "video/*"
+                      putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                                type = "video/*"
                   }
                   try {
                       fileLauncher.launch(intent)
@@ -807,7 +828,7 @@ jobs:
                       Toast.makeText(this, "No se pudo abrir el selector de archivos", Toast.LENGTH_LONG).show()
                   }
               }
-
+          
               private fun persistReadPermission(uri: Uri, flags: Int) {
                   val granted = flags and Intent.FLAG_GRANT_READ_URI_PERMISSION
                   if (granted != 0) {
@@ -818,7 +839,7 @@ jobs:
                       }
                   }
               }
-
+          
               private fun getDisplayName(uri: Uri): String {
                   var name = uri.lastPathSegment ?: "Video"
                   try {
@@ -831,7 +852,7 @@ jobs:
                   } catch (_: Exception) { }
                   return name
               }
-
+          
               private fun saveFavorite() {
                   val uri = currentUri
                   if (uri == null) {
@@ -845,7 +866,7 @@ jobs:
                       .putStringSet("favorites", favorites).apply()
                   showOsd("Añadido a favoritos")
               }
-
+          
               private fun showFavorites() {
                   val favorites = getSharedPreferences("mpm_player", MODE_PRIVATE)
                       .getStringSet("favorites", emptySet())?.toList().orEmpty()
@@ -935,7 +956,7 @@ jobs:
                       }
                       .setNegativeButton("Cerrar", null).show()
               }
-
+          
               private fun pickExternalSubtitle() {
                   if (currentUri == null) {
                       Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
@@ -955,14 +976,14 @@ jobs:
                       Toast.makeText(this, "No se pudo abrir el selector de subtítulos", Toast.LENGTH_LONG).show()
                   }
               }
-
+          
               private fun finishSubtitlePicker() {
                   subtitlePickerPending = false
                   val shouldResume = resumeAfterSubtitlePicker
                   resumeAfterSubtitlePicker = false
                   videoLayout.postDelayed({ restoreVideoOutput(shouldResume) }, 250)
               }
-
+          
               private fun restoreVideoOutput(shouldResume: Boolean) {
                   val player = mediaPlayer ?: return
                   if (currentUri == null) return
@@ -976,7 +997,7 @@ jobs:
                       Log.w("MPM_PLAYER", "No se pudo restaurar la salida de video", e)
                   }
               }
-
+          
               private fun attachExternalSubtitle(uri: Uri) {
                   Thread {
                       try {
@@ -1002,7 +1023,7 @@ jobs:
                       }
                   }.start()
               }
-
+          
               private fun cycleRotation() {
                   rotationMode = (rotationMode + 1) % 3
                   when (rotationMode) {
@@ -1022,7 +1043,7 @@ jobs:
                   enterImmersiveMode()
                   videoLayout.post { videoLayout.requestLayout() }
               }
-
+          
               private fun applyDisplayUnderNotch() {
                   WindowCompat.setDecorFitsSystemWindows(window, false)
                   window.statusBarColor = android.graphics.Color.TRANSPARENT
@@ -1039,7 +1060,7 @@ jobs:
                   window.decorView.requestLayout()
                   enterImmersiveMode()
               }
-
+          
               private fun enterImmersiveMode() {
                   immersiveMode = true
                   WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -1049,7 +1070,7 @@ jobs:
                           WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                   }
               }
-
+          
               private fun applyPreferredRefreshRate() {
                   // No fijar la pantalla a su Hz máximo: LibVLC conserva la cadencia
                   // original del video y Android puede gestionar el refresco disponible.
@@ -1065,7 +1086,7 @@ jobs:
                       }
                   }
               }
-
+          
               private fun displayRefreshRateLabel(): String {
                   return try {
                       // Mostrar el refresco actual, no el máximo que admite el dispositivo.
@@ -1074,24 +1095,24 @@ jobs:
                       "Hz automático"
                   }
               }
-
+          
               private fun dp(value: Int): Int =
                   (value * resources.displayMetrics.density).toInt()
-
+          
               override fun onWindowFocusChanged(hasFocus: Boolean) {
                   super.onWindowFocusChanged(hasFocus)
                   if (hasFocus && immersiveMode) {
                       window.decorView.post { enterImmersiveMode() }
                   }
               }
-
+          
               override fun onResume() {
                   super.onResume()
                   if (immersiveMode) {
                       window.decorView.post { enterImmersiveMode() }
                   }
               }
-
+          
               override fun onConfigurationChanged(newConfig: Configuration) {
                   super.onConfigurationChanged(newConfig)
                   videoLayout.post {
@@ -1099,17 +1120,17 @@ jobs:
                       if (immersiveMode) enterImmersiveMode()
                   }
               }
-
+          
               private fun applyAspect(index: Int) {
                   aspectIndex = index.coerceIn(aspects.indices)
                   mediaPlayer?.aspectRatio = aspectValues[aspectIndex]
                   showOsd("Aspecto: ${aspects[aspectIndex]}")
               }
-
+          
               private fun cycleAspect() {
                   applyAspect((aspectIndex + 1) % aspects.size)
               }
-
+          
               private fun showAspectMenu() {
                   AlertDialog.Builder(this)
                       .setTitle("Relación de aspecto")
@@ -1120,14 +1141,14 @@ jobs:
                       .setNegativeButton("Cerrar", null)
                       .show()
               }
-
+          
               private fun pickAudio() {
                   val tracks = mediaPlayer?.audioTracks ?: return
                   if (tracks.isEmpty()) return
                   val names = tracks.map { it.name }.toTypedArray()
                   val cur = mediaPlayer?.audioTrack ?: -1
                   val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
-
+          
                   AlertDialog.Builder(this)
                       .setTitle("Audio (MPM Player)")
                       .setSingleChoiceItems(names, sel) { d, i ->
@@ -1137,14 +1158,14 @@ jobs:
                       }
                       .setNegativeButton("Cerrar", null).show()
               }
-
+          
               private fun pickSubtitles() {
                   val tracks = mediaPlayer?.spuTracks ?: return
                   if (tracks.isEmpty()) return
                   val names = tracks.map { it.name }.toTypedArray()
                   val cur = mediaPlayer?.spuTrack ?: -1
                   val sel = tracks.indexOfFirst { it.id == cur }.coerceAtLeast(0)
-
+          
                   AlertDialog.Builder(this)
                       .setTitle("Subtítulos (MPM Player)")
                       .setSingleChoiceItems(names, sel) { d, i ->
@@ -1154,7 +1175,7 @@ jobs:
                       }
                       .setNegativeButton("Cerrar", null).show()
               }
-
+          
               private fun initGestures() {
                   gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
                       override fun onDown(e: MotionEvent): Boolean = true
@@ -1173,22 +1194,64 @@ jobs:
                           showAspectMenu()
                       }
                   })
-
+          
                   videoLayout.setOnTouchListener { _, ev ->
                       gestureDetector.onTouchEvent(ev)
                       true
                   }
               }
-
-              private fun showOsd(msg: String) {
+          
+                            private fun rememberRecent(uri: Uri) {
+                            val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
+                            val recent = prefs.getStringSet("recent_files", emptySet())?.toMutableList() ?: mutableListOf()
+                            recent.remove(uri.toString()); recent.add(0, uri.toString())
+                            prefs.edit().putStringSet("recent_files", recent.take(30).toSet()).apply()
+                        }
+                        private fun showRecentFiles() {
+                            val recent = getSharedPreferences("mpm_player", MODE_PRIVATE).getStringSet("recent_files", emptySet())?.toList().orEmpty()
+                            if (recent.isEmpty()) { AlertDialog.Builder(this).setTitle("Archivos recientes").setMessage("Todavía no hay archivos recientes.").setPositiveButton("Aceptar", null).show(); return }
+                            val ordered = recent.sortedByDescending { it }
+                            AlertDialog.Builder(this).setTitle("Archivos recientes").setItems(ordered.map { getDisplayName(Uri.parse(it)) }.toTypedArray()) { _, which ->
+                                val uri = Uri.parse(ordered[which]); playlist.clear(); playlist.add(uri); playlistIndex = 0; play(uri)
+                            }.setNegativeButton("Cerrar", null).show()
+                        }
+                        private fun showPlaylist() {
+                            if (playlist.isEmpty()) { AlertDialog.Builder(this).setTitle("Lista de reproducción").setMessage("Selecciona varios videos desde Archivo > Abrir video para crear una lista.").setPositiveButton("Aceptar", null).show(); return }
+                            val names = playlist.mapIndexed { index, uri -> (if (index == playlistIndex) "▶  " else "") + getDisplayName(uri) }.toTypedArray()
+                            AlertDialog.Builder(this).setTitle("Lista de reproducción (" + playlist.size + ")").setItems(names) { _, which ->
+                                playlistIndex = which; play(playlist[which], 0L)
+                            }.setNegativeButton("Cerrar", null).show()
+                        }
+                        private fun showMediaInfo() {
+                            val uri = currentUri ?: run { Toast.makeText(this, "Primero abre un archivo", Toast.LENGTH_SHORT).show(); return }
+                            Thread {
+                                val details = StringBuilder()
+                                try {
+                                    val retriever = MediaMetadataRetriever()
+                                    try {
+                                        retriever.setDataSource(this, uri)
+                                        fun meta(key: Int, fallback: String = "No disponible"): String = retriever.extractMetadata(key)?.takeIf { it.isNotBlank() } ?: fallback
+                                        details.append("Archivo: ").append(getDisplayName(uri)).append("\n")
+                                        details.append("Duración: ").append(formatTime(meta(MediaMetadataRetriever.METADATA_KEY_DURATION, "0").toLongOrNull() ?: 0L)).append("\n")
+                                        details.append("Resolución: ").append(meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)).append(" × ").append(meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)).append("\n")
+                                        details.append("Códec de video: ").append(meta(MediaMetadataRetriever.METADATA_KEY_VIDEO_CODEC)).append("\n")
+                                        details.append("Códec de audio: ").append(meta(MediaMetadataRetriever.METADATA_KEY_AUDIO_CODEC)).append("\n")
+                                        details.append("Bitrate: ").append(meta(MediaMetadataRetriever.METADATA_KEY_BITRATE)).append(" bps")
+                                    } finally { retriever.release() }
+                                } catch (e: Exception) { details.append("No se pudo leer toda la información del medio.\n").append(e.message ?: "Error desconocido") }
+                                runOnUiThread { AlertDialog.Builder(this).setTitle("Información del medio").setMessage(details.toString()).setPositiveButton("Cerrar", null).show() }
+                            }.start()
+                        }
+          
+          private fun showOsd(msg: String) {
                   txtOsd.text = msg
                   txtOsd.visibility = View.VISIBLE
                   handler.removeCallbacks(osdRunnable)
                   handler.postDelayed(osdRunnable, 1600)
               }
-
+          
               private val osdRunnable = Runnable { txtOsd.visibility = View.GONE }
-
+          
               private fun updateDecoderUi() {
                   val refresh = displayRefreshRateLabel()
                   if (isHw) {
@@ -1201,14 +1264,14 @@ jobs:
                       txtDecoderInfo.text = "[SW | " + refresh + "]"
                   }
               }
-
+          
               private fun formatTime(ms: Long): String {
                   val s = (ms / 1000) % 60
                   val m = (ms / 60000) % 60
                   val h = ms / 3600000
                   return String.format(Locale.US, "%02d:%02d:%02d", h, m, s)
               }
-
+          
               override fun onPause() {
                   super.onPause()
                   savePlaybackProgress()
@@ -1220,7 +1283,7 @@ jobs:
                   }
                   mediaPlayer?.pause()
               }
-
+          
               override fun onDestroy() {
                   super.onDestroy()
                   mediaPlayer?.stop()
