@@ -1400,6 +1400,9 @@ class MainActivity : AppCompatActivity() {
     private fun renderLibrary(mode: String) {
         isLibraryVisible = true
         handler.removeCallbacks(controlsHideRunnable)
+        // Keep the paused LibVLC session alive, but remove its surface and touch target
+        // completely while the library is the active screen.
+        videoLayout.visibility = View.GONE
         libraryMode = mode; libraryItems.removeAllViews()
         topBar.visibility = View.GONE
         bottomBar.visibility = View.GONE
@@ -1713,6 +1716,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun play(uri: Uri, startPos: Long = -1L) {
         isLibraryVisible = false
+        videoLayout.visibility = View.VISIBLE
         if (startPos < 0L) {
             val saved = getPlaybackProgress(uri)
             if (saved > 10_000L) {
@@ -2315,8 +2319,13 @@ class MainActivity : AppCompatActivity() {
             }
         })
         videoLayout.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            true
+            // Ignore player gestures unless the video surface is the active screen.
+            if (isLibraryVisible || videoLayout.visibility != View.VISIBLE) {
+                false
+            } else {
+                gestureDetector.onTouchEvent(event)
+                true
+            }
         }
     }
 
