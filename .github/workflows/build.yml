@@ -25,6 +25,16 @@ jobs:
           sed -i "/^[[:space:]]*devApi project(':medialibrary')/d" third_party/vlc-android/application/resources/build.gradle
           sed -i "/^[[:space:]]*devApi project(':libvlcjni:libvlc')/d" third_party/vlc-android/application/vlc-android/build.gradle
           sed -i "/^[[:space:]]*devApi project(':medialibrary')/d" third_party/vlc-android/application/vlc-android/build.gradle
+          # The upstream VLC library references these colors from its own R class.
+          # In the standalone VLC app they are supplied by the app module; MPM embeds
+          # the library without that app module, so provide the two shared resources here.
+          mkdir -p third_party/vlc-android/application/vlc-android/res/values
+          cat > third_party/vlc-android/application/vlc-android/res/values/mpm_vlc_compat_colors.xml <<'EOF'
+          <resources>
+              <color name="black_transparent_10">#1a000000</color>
+              <color name="white_transparent_10">#1affffff</color>
+          </resources>
+          EOF
 
       - name: Configurar JDK 17
         uses: actions/setup-java@v6
