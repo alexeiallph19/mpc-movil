@@ -190,8 +190,8 @@ jobs:
           <resources>
               <style name="Theme.MPMPlayer" parent="Theme.AppCompat.NoActionBar">
                   <item name="android:windowBackground">#121212</item>
-                  <item name="android:statusBarColor">#1A1A1A</item>
-                  <item name="android:navigationBarColor">#1A1A1A</item>
+                  <item name="android:statusBarColor">#00000000</item>
+                  <item name="android:navigationBarColor">#00000000</item>
                   <item name="android:windowLightStatusBar">false</item>
               </style>
           </resources>
@@ -281,8 +281,8 @@ jobs:
                   android:layout_gravity="top"
                   android:background="#E6202020"
                   android:gravity="center_vertical"
-                  android:orientation="vertical"
-                  android:padding="6dp">
+                  android:orientation="horizontal"
+                  android:padding="2dp">
 
                   <HorizontalScrollView
                       android:layout_width="match_parent"
@@ -298,28 +298,6 @@ jobs:
                           <Button android:id="@+id/topMenuNavigate" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Navegar" android:textColor="#FFFFFF" />
                           <Button android:id="@+id/topMenuFavorites" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Favoritos" android:textColor="#FFFFFF" />
                           <Button android:id="@+id/topMenuHelp" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Ayuda" android:textColor="#FFFFFF" />
-                      </LinearLayout>
-                  </HorizontalScrollView>
-
-                  <HorizontalScrollView
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:fillViewport="false"
-                      android:scrollbars="none">
-
-                      <LinearLayout
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:orientation="horizontal">
-
-                          <Button android:id="@+id/btnMenuFile" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Abrir" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuAudio" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Audio" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuSubtitles" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Pistas" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuExternalSubtitles" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Abrir subtítulo" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuFavorite" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="★ Guardar" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuFavorites" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Favoritos" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuAspect" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Aspecto" android:textColor="#FFFFFF" />
-                          <Button android:id="@+id/btnMenuRotate" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Rotación" android:textColor="#FFFFFF" />
                       </LinearLayout>
                   </HorizontalScrollView>
               </LinearLayout>
@@ -432,6 +410,7 @@ jobs:
           import android.view.View
           import android.view.WindowManager
           import android.widget.*
+          import androidx.core.view.WindowCompat
           import androidx.core.view.WindowInsetsCompat
           import androidx.core.view.WindowInsetsControllerCompat
           import androidx.activity.result.contract.ActivityResultContracts
@@ -467,11 +446,15 @@ jobs:
               private var immersiveMode = false
               private var subtitlePickerPending = false
               private var resumeAfterSubtitlePicker = false
+              private var filePickerPending = false
+              private var resumeAfterFilePicker = false
+              private var displayUnderNotch = true
               private var aspectIndex = 0
               private var rotationMode = 0
               private val speeds = floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
               private var speedIndex = 2
-              private val aspects = arrayOf("Auto", "16:9", "4:3", "Rellenar", "Estirar")
+              private val aspects = arrayOf("Original / automático", "16:9", "4:3", "1:1", "2.35:1", "Rellenar")
+              private val aspectValues = arrayOf<String?>(null, "16:9", "4:3", "1:1", "2.35:1", "fill")
 
               private val handler = Handler(Looper.getMainLooper())
               private var isSeeking = false
@@ -480,12 +463,17 @@ jobs:
               private val fileLauncher = registerForActivityResult(
                   ActivityResultContracts.StartActivityForResult()
               ) { res ->
-                  if (res.resultCode == RESULT_OK) {
-                      res.data?.data?.let { uri ->
+                  val uri = if (res.resultCode == RESULT_OK) res.data?.data else null
+                  val shouldResume = resumeAfterFilePicker
+                  filePickerPending = false
+                  resumeAfterFilePicker = false
+                  videoLayout.postDelayed({
+                      restoreVideoOutput(uri == null && shouldResume)
+                      if (uri != null) {
                           persistReadPermission(uri, res.data?.flags ?: 0)
                           play(uri)
                       }
-                  }
+                  }, 300)
               }
 
               private val subtitleLauncher = registerForActivityResult(
@@ -502,12 +490,8 @@ jobs:
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                      window.attributes = window.attributes.apply {
-                          layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                      }
-                  }
                   setContentView(R.layout.activity_main)
+                  applyDisplayUnderNotch()
                   enterImmersiveMode()
                   applyPreferredRefreshRate()
                   initViews()
@@ -525,8 +509,18 @@ jobs:
                           popup.menu.add("Abrir subtítulo").setOnMenuItemClickListener { pickExternalSubtitle(); true }
                       }
                       "Ver" -> {
-                          popup.menu.add("Cambiar aspecto").setOnMenuItemClickListener { cycleAspect(); true }
+                          popup.menu.add("Relación de aspecto").setOnMenuItemClickListener { showAspectMenu(); true }
                           popup.menu.add("Cambiar orientación").setOnMenuItemClickListener { cycleRotation(); true }
+                          popup.menu.add("Mostrar video bajo notch").apply {
+                              isCheckable = true
+                              isChecked = displayUnderNotch
+                              setOnMenuItemClickListener {
+                                  displayUnderNotch = !displayUnderNotch
+                                  applyDisplayUnderNotch()
+                                  showOsd(if (displayUnderNotch) "Video bajo el notch activado" else "Video bajo el notch desactivado")
+                                  true
+                              }
+                          }
                           popup.menu.add("Pantalla completa").setOnMenuItemClickListener { enterImmersiveMode(); true }
                       }
                       "Reproducir" -> {
@@ -600,17 +594,7 @@ jobs:
                   findViewById<Button>(R.id.topMenuHelp).setOnClickListener { showTopMenu(it, "Ayuda") }
 
                   findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
-                  findViewById<Button>(R.id.btnMenuFile).setOnClickListener { pickFile() }
-                  findViewById<Button>(R.id.btnMenuAudio).setOnClickListener { pickAudio() }
-                  findViewById<Button>(R.id.btnMenuSubtitles).setOnClickListener { pickSubtitles() }
-                  findViewById<Button>(R.id.btnMenuExternalSubtitles).setOnClickListener { pickExternalSubtitle() }
-                  findViewById<Button>(R.id.btnMenuFavorite).setOnClickListener { saveFavorite() }
-                  findViewById<Button>(R.id.btnMenuFavorites).setOnClickListener { showFavorites() }
-                  findViewById<Button>(R.id.btnMenuAspect).setOnClickListener { cycleAspect() }
-
-                  val rotLambda = { cycleRotation() }
-                  findViewById<Button>(R.id.btnMenuRotate).setOnClickListener { rotLambda() }
-                  findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { rotLambda() }
+                  findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
 
                   btnPlay.setOnClickListener {
                       mediaPlayer?.let { p -> if (p.isPlaying) p.pause() else p.play() }
@@ -830,12 +814,21 @@ jobs:
               }
 
               private fun pickFile() {
+                  filePickerPending = true
+                  resumeAfterFilePicker = mediaPlayer?.isPlaying == true
                   val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                       addCategory(Intent.CATEGORY_OPENABLE)
                       addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                       type = "video/*"
                   }
-                  fileLauncher.launch(intent)
+                  try {
+                      fileLauncher.launch(intent)
+                  } catch (e: Exception) {
+                      filePickerPending = false
+                      resumeAfterFilePicker = false
+                      restoreVideoOutput(resumeAfterFilePicker)
+                      Toast.makeText(this, "No se pudo abrir el selector de archivos", Toast.LENGTH_LONG).show()
+                  }
               }
 
               private fun persistReadPermission(uri: Uri, flags: Int) {
@@ -1027,8 +1020,26 @@ jobs:
                   videoLayout.post { videoLayout.requestLayout() }
               }
 
+              private fun applyDisplayUnderNotch() {
+                  WindowCompat.setDecorFitsSystemWindows(window, false)
+                  window.statusBarColor = android.graphics.Color.TRANSPARENT
+                  window.navigationBarColor = android.graphics.Color.TRANSPARENT
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                      window.attributes = window.attributes.apply {
+                          layoutInDisplayCutoutMode = if (displayUnderNotch) {
+                              WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                          } else {
+                              WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                          }
+                      }
+                  }
+                  window.decorView.requestLayout()
+                  enterImmersiveMode()
+              }
+
               private fun enterImmersiveMode() {
                   immersiveMode = true
+                  WindowCompat.setDecorFitsSystemWindows(window, false)
                   WindowInsetsControllerCompat(window, window.decorView).let { controller ->
                       controller.hide(WindowInsetsCompat.Type.systemBars())
                       controller.systemBarsBehavior =
@@ -1086,16 +1097,25 @@ jobs:
                   }
               }
 
-              private fun cycleAspect() {
-                  aspectIndex = (aspectIndex + 1) % aspects.size
-                  when (aspectIndex) {
-                      0 -> mediaPlayer?.aspectRatio = null
-                      1 -> mediaPlayer?.aspectRatio = "16:9"
-                      2 -> mediaPlayer?.aspectRatio = "4:3"
-                      3 -> mediaPlayer?.aspectRatio = "18:9"
-                      4 -> mediaPlayer?.aspectRatio = "fill"
-                  }
+              private fun applyAspect(index: Int) {
+                  aspectIndex = index.coerceIn(aspects.indices)
+                  mediaPlayer?.aspectRatio = aspectValues[aspectIndex]
                   showOsd("Aspecto: ${aspects[aspectIndex]}")
+              }
+
+              private fun cycleAspect() {
+                  applyAspect((aspectIndex + 1) % aspects.size)
+              }
+
+              private fun showAspectMenu() {
+                  AlertDialog.Builder(this)
+                      .setTitle("Relación de aspecto")
+                      .setSingleChoiceItems(aspects, aspectIndex) { dialog, which ->
+                          applyAspect(which)
+                          dialog.dismiss()
+                      }
+                      .setNegativeButton("Cerrar", null)
+                      .show()
               }
 
               private fun pickAudio() {
@@ -1145,6 +1165,9 @@ jobs:
                           mediaPlayer?.let { p -> if (p.isPlaying) p.pause() else p.play() }
                           return true
                       }
+                      override fun onLongPress(e: MotionEvent) {
+                          showAspectMenu()
+                      }
                   })
 
                   videoLayout.setOnTouchListener { _, ev ->
@@ -1185,7 +1208,10 @@ jobs:
               override fun onPause() {
                   super.onPause()
                   if (subtitlePickerPending) {
-                      resumeAfterSubtitlePicker = mediaPlayer?.isPlaying == true
+                      resumeAfterSubtitlePicker = mediaPlayer?.isPlaying == true || resumeAfterSubtitlePicker
+                  }
+                  if (filePickerPending) {
+                      resumeAfterFilePicker = mediaPlayer?.isPlaying == true || resumeAfterFilePicker
                   }
                   mediaPlayer?.pause()
               }
