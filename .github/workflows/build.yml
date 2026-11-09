@@ -31,6 +31,14 @@ jobs:
           echo "$MPM_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mpm-player-release.jks"
           test -s "$RUNNER_TEMP/mpm-player-release.jks"
 
+      - name: Validar firma permanente
+        env:
+          MPM_KEYSTORE_PASSWORD: ${{ secrets.MPM_KEYSTORE_PASSWORD }}
+          MPM_KEY_ALIAS: ${{ secrets.MPM_KEY_ALIAS }}
+        run: |
+          keytool -list -keystore "$RUNNER_TEMP/mpm-player-release.jks" -storepass "$MPM_KEYSTORE_PASSWORD" -alias "$MPM_KEY_ALIAS" >/dev/null
+          echo "Keystore y alias válidos."
+
       - name: Generar proyecto MPM Player
         env:
           MPM_KEYSTORE_PATH: ${{ runner.temp }}/mpm-player-release.jks
