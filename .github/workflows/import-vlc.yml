@@ -1,0 +1,47 @@
+name: Import complete VLC Android source
+
+on:
+  push:
+    branches:
+      - migracion-vlc-base
+    paths:
+      - .github/workflows/import-vlc.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: migracion-vlc-base
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clone official VideoLAN repository
+        run: |
+          git clone --depth 1 https://github.com/videolan/vlc-android.git /tmp/vlc-src
+          git -C /tmp/vlc-src rev-parse HEAD | tee /tmp/vlc-source-commit.txt
+
+      - name: Replace project tree with VLC Android
+        run: |
+          mkdir -p /tmp/mpm-workflow
+          cp .github/workflows/import-vlc.yml /tmp/mpm-workflow/import-vlc.yml
+          rsync -a --delete --exclude='.git' --exclude='.github' /tmp/vlc-src/ ./
+          mkdir -p .github
+          rsync -a /tmp/vlc-src/.github/ .github/
+          mkdir -p .github/workflows
+          cp /tmp/mpm-workflow/import-vlc.yml .github/workflows/import-vlc.yml
+          cp /tmp/vlc-source-commit.txt VLC_SOURCE_COMMIT.txt
+          printf '\n\nImported from https://github.com/videolan/vlc-android\n' >> README.md
+
+      - name: Commit complete upstream source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Import complete official VLC Android project"
+          git push origin migracion-vlc-base
