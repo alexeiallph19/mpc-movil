@@ -1145,7 +1145,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPlayerTitle(uri: Uri): String {
-        val name = getDisplayName(uri).substringBeforeLast('.', getDisplayName(uri)).trim()
+        val fullName = getDisplayName(uri)
+        val name = fullName.substringBeforeLast('.', fullName).trim()
         if (name.length <= 48) return name
         return name.take(22) + "…" + name.takeLast(22)
     }
