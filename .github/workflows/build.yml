@@ -235,41 +235,45 @@ jobs:
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/mpm_seekbar_track.xml
-          <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-              <item android:id="@android:id/background">
-                  <shape android:shape="rectangle">
-                      <size android:height="3dp" />
-                      <corners android:radius="3dp" />
-                      <solid android:color="#66717E" />
-                  </shape>
-              </item>
-              <item android:id="@android:id/secondaryProgress">
-                  <scale android:scaleWidth="100%">
-                      <shape android:shape="rectangle">
-                          <size android:height="3dp" />
-                          <corners android:radius="3dp" />
-                          <solid android:color="#6686BCE8" />
-                      </shape>
-                  </scale>
-              </item>
-              <item android:id="@android:id/progress">
-                  <scale android:scaleWidth="100%">
-                      <shape android:shape="rectangle">
-                          <size android:height="3dp" />
-                          <corners android:radius="3dp" />
-                          <solid android:color="#59AFFF" />
-                      </shape>
-                  </scale>
-              </item>
-          </layer-list>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <size android:height="2dp" />
+            <corners android:radius="2dp" />
+            <solid android:color="#80FFFFFF" />
+        </shape>
+    </item>
+    <item android:id="@android:id/secondaryProgress">
+        <scale android:scaleWidth="100%">
+            <shape android:shape="rectangle">
+                <size android:height="2dp" />
+                <corners android:radius="2dp" />
+                <solid android:color="#B3FFFFFF" />
+            </shape>
+        </scale>
+    </item>
+    <item android:id="@android:id/progress">
+        <scale android:scaleWidth="100%">
+            <shape android:shape="rectangle">
+                <size android:height="2dp" />
+                <corners android:radius="2dp" />
+                <solid android:color="#FFFF610A" />
+            </shape>
+        </scale>
+    </item>
+</layer-list>
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/mpm_seekbar_thumb.xml
-          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
-              <size android:width="11dp" android:height="11dp" />
-              <solid android:color="#FFFFFF" />
-              <stroke android:width="2dp" android:color="#59AFFF" />
-          </shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="14"
+    android:viewportHeight="14">
+    <path
+        android:fillColor="#FFFF610A"
+        android:pathData="M7,4a3,3 0,1 0,0 6a3,3 0,1 0,0 -6" />
+</vector>
           EOF
 
                     cat << 'EOF' > app/src/main/res/layout/activity_main.xml
@@ -331,11 +335,12 @@ jobs:
                           android:text="-00:00:00" android:textColor="#AEB9C6"
                           android:textSize="10sp" android:fontFamily="monospace" />
                   </LinearLayout>
-                  <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="20dp"
-                      android:max="1000" android:minHeight="16dp" android:maxHeight="16dp"
-                      android:paddingStart="5dp" android:paddingEnd="5dp"
+                  <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="30dp"
+                      android:max="1000" android:minHeight="2dp" android:maxHeight="2dp"
+                      android:paddingStart="0dp" android:paddingEnd="0dp"
                       android:progressDrawable="@drawable/mpm_seekbar_track"
-                      android:thumb="@drawable/mpm_seekbar_thumb" android:splitTrack="false" />
+                      android:thumb="@drawable/mpm_seekbar_thumb" android:thumbOffset="14dp"
+                      android:splitTrack="false" android:contentDescription="Barra de progreso del video" />
                   <LinearLayout android:layout_width="match_parent" android:layout_height="43dp"
                       android:gravity="center" android:orientation="horizontal">
                       <Button android:id="@+id/btnBack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="42dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="↶" android:textColor="#E8EEF5" android:textSize="19sp" />
