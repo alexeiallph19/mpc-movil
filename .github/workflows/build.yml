@@ -38,7 +38,19 @@ jobs:
           MPM_KEYSTORE_PASSWORD: ${{ secrets.MPM_KEYSTORE_PASSWORD }}
           MPM_KEY_ALIAS: ${{ secrets.MPM_KEY_ALIAS }}
         run: |
-          keytool -list -keystore "$RUNNER_TEMP/mpm-player-release.jks" -storepass "$MPM_KEYSTORE_PASSWORD" -alias "$MPM_KEY_ALIAS" >/dev/null
+          if [ -z "$MPM_KEYSTORE_PASSWORD" ]; then
+            echo "::error::Falta el secreto MPM_KEYSTORE_PASSWORD."
+            exit 1
+          fi
+          if [ -z "$MPM_KEY_ALIAS" ]; then
+            echo "::error::Falta el secreto MPM_KEY_ALIAS."
+            exit 1
+          fi
+          if ! keytool -list -keystore "$RUNNER_TEMP/mpm-player-release.jks" -storepass "$MPM_KEYSTORE_PASSWORD" -alias "$MPM_KEY_ALIAS" > "$RUNNER_TEMP/keystore-check.log" 2>&1; then
+            echo "::error::No se pudo validar la firma. Detalle de keytool:"
+            cat "$RUNNER_TEMP/keystore-check.log"
+            exit 1
+          fi
           echo "Keystore y alias válidos."
 
       - name: Generar proyecto MPM Player
