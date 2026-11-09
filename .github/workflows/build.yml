@@ -822,10 +822,9 @@ jobs:
                       }
                   }
                   listView.adapter = adapter
-                  listView.emptyView = empty
                   root.addView(listView, LinearLayout.LayoutParams(-1, dp(300)))
                   root.addView(empty, LinearLayout.LayoutParams(-1, dp(300)))
-                  empty.visibility = View.GONE
+                  listView.emptyView = empty
 
                   val dialog = AlertDialog.Builder(this)
                       .setTitle("Emitir a dispositivo")
