@@ -102,6 +102,8 @@ class MainActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private val thumbnailExecutor = Executors.newSingleThreadExecutor()
+    private val playbackExecutor = Executors.newSingleThreadExecutor()
+    private val playbackRequestId = java.util.concurrent.atomic.AtomicInteger(0)
     private var lastProgressSaveAt = 0L
     private var isSeeking = false
     private lateinit var gestureDetector: GestureDetector
@@ -1747,55 +1749,94 @@ class MainActivity : AppCompatActivity() {
             }
             return
         }
+
+        val requestId = playbackRequestId.incrementAndGet()
         mediaPlayer?.stop()
         releaseCurrentAssetDescriptor()
         currentUri = uri
         if (playlistIndex < 0 || playlist.getOrNull(playlistIndex) != uri) {
-            playlist.clear(); playlist.add(uri); playlistIndex = 0
+            playlist.clear()
+            playlist.add(uri)
+            playlistIndex = 0
         }
         rememberRecent(uri)
         lastProgressSaveAt = 0L
         playbackEvents.clear()
-        try {
-            var displayName = "desconocido"
-            var fileSize = "desconocido"
-            var mimeType = contentResolver.getType(uri) ?: "desconocido"
-            var cursor: Cursor? = null
+        txtStatus.text = "Preparando vídeo…"
+        welcomeScreen.visibility = View.GONE
+
+        // SAF providers and media probing can block, so prepare media off the UI thread.
+        playbackExecutor.execute {
+            var afd: AssetFileDescriptor? = null
+            var media: Media? = null
             try {
-                cursor = contentResolver.query(uri, null, null, null, null)
-                cursor?.use { c ->
-                    if (c.moveToFirst()) {
-                        val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                        val sizeIndex = c.getColumnIndex(OpenableColumns.SIZE)
-                        if (nameIndex >= 0) displayName = c.getString(nameIndex) ?: displayName
-                        if (sizeIndex >= 0) fileSize = c.getString(sizeIndex) ?: fileSize
+                var displayName = "desconocido"
+                var fileSize = "desconocido"
+                val mimeType = contentResolver.getType(uri) ?: "desconocido"
+                try {
+                    contentResolver.query(uri, null, null, null, null)?.use { c ->
+                        if (c.moveToFirst()) {
+                            val nameIndex = c.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            val sizeIndex = c.getColumnIndex(OpenableColumns.SIZE)
+                            if (nameIndex >= 0) displayName = c.getString(nameIndex) ?: displayName
+                            if (sizeIndex >= 0) fileSize = c.getString(sizeIndex) ?: fileSize
+                        }
+                    }
+                } catch (queryError: Exception) {
+                    Log.w("MPM_PLAYER", "No se pudieron consultar los metadatos del archivo", queryError)
+                }
+                val activeVlc = libVLC ?: throw IllegalStateException("El motor VLC no está disponible")
+                afd = contentResolver.openAssetFileDescriptor(uri, "r")
+                    ?: throw IllegalStateException("Android no pudo abrir el descriptor del archivo")
+                media = Media(activeVlc, afd)
+                media.addOption(":file-caching=2000")
+
+                val preparedAfd = afd
+                val preparedMedia = media
+                val diagnostics = "Archivo: $displayName\nTamaño: $fileSize bytes\nTipo: $mimeType\nURI: $uri\nEsquema: ${uri.scheme}\nHW/SW: ${if (isHw) "HW" else "SW"}"
+                runOnUiThread {
+                    if (isFinishing || isDestroyed || requestId != playbackRequestId.get()) {
+                        preparedMedia.release()
+                        try { preparedAfd.close() } catch (_: Exception) {}
+                        return@runOnUiThread
+                    }
+                    try {
+                        playbackDiagnostics = diagnostics
+                        Log.d("MPM_PLAYER", diagnostics)
+                        currentAssetDescriptor = preparedAfd
+                        mediaPlayer?.media = preparedMedia
+                        preparedMedia.release()
+                        mediaPlayer?.play()
+                        if (startPos > 0L) {
+                            handler.postDelayed({
+                                if (requestId == playbackRequestId.get()) mediaPlayer?.time = startPos
+                            }, 500L)
+                        }
+                    } catch (playError: Exception) {
+                        try { preparedMedia.release() } catch (_: Exception) {}
+                        releaseCurrentAssetDescriptor()
+                        playbackDiagnostics = "Excepción: ${playError.javaClass.name}\nMensaje: ${playError.message}\nURI: $uri"
+                        Log.e("MPM_PLAYER", playbackDiagnostics, playError)
+                        txtStatus.text = "No se pudo abrir el archivo"
+                        AlertDialog.Builder(this).setTitle("Error al abrir archivo")
+                            .setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
                     }
                 }
-            } catch (queryError: Exception) {
-                Log.e("MPM_PLAYER", "No se pudo consultar el archivo", queryError)
+                afd = null
+                media = null
+            } catch (e: Exception) {
+                try { media?.release() } catch (_: Exception) {}
+                try { afd?.close() } catch (_: Exception) {}
+                runOnUiThread {
+                    if (!isFinishing && !isDestroyed && requestId == playbackRequestId.get()) {
+                        playbackDiagnostics = "Excepción: ${e.javaClass.name}\nMensaje: ${e.message}\nURI: $uri"
+                        Log.e("MPM_PLAYER", playbackDiagnostics, e)
+                        txtStatus.text = "No se pudo abrir el archivo"
+                        AlertDialog.Builder(this).setTitle("Error al abrir archivo")
+                            .setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
+                    }
+                }
             }
-            playbackDiagnostics = "Archivo: $displayName\nTamaño: $fileSize bytes\nTipo: $mimeType\nURI: $uri\nEsquema: ${uri.scheme}\nHW/SW: ${if (isHw) "HW" else "SW"}"
-            Log.d("MPM_PLAYER", playbackDiagnostics)
-            // Abrir el URI SAF como AssetFileDescriptor y entregarle el descriptor
-            // directamente a LibVLC, evitando que VLC intente resolver content:// por su cuenta.
-            val afd = contentResolver.openAssetFileDescriptor(uri, "r")
-                ?: throw IllegalStateException("Android no pudo abrir el descriptor del archivo")
-            currentAssetDescriptor = afd
-            val m = Media(libVLC, afd)
-            m.addOption(":file-caching=2000")
-            mediaPlayer?.media = m
-            m.release()
-            mediaPlayer?.play()
-            if (startPos > 0) {
-                handler.postDelayed({ mediaPlayer?.time = startPos }, 500)
-            }
-            welcomeScreen.visibility = View.GONE
-        } catch (e: Exception) {
-            releaseCurrentAssetDescriptor()
-            txtStatus.text = "No se pudo abrir el archivo"
-            playbackDiagnostics = "Excepción: ${e.javaClass.name}\nMensaje: ${e.message}\nURI: $uri"
-            Log.e("MPM_PLAYER", playbackDiagnostics, e)
-            AlertDialog.Builder(this).setTitle("Error al abrir archivo").setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
         }
     }
 
