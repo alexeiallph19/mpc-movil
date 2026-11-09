@@ -9,48 +9,75 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="#101114"
-        android:paddingTop="0dp">
+        android:background="#0D1015">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="58dp"
+            android:layout_height="68dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="20dp"
-            android:paddingEnd="12dp"
-            android:background="#15171B">
+            android:paddingEnd="16dp"
+            android:background="#11151C">
             <TextView
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:gravity="center"
+                android:background="@drawable/vlc_osd_background"
+                android:text="▶"
+                android:textColor="#FF7A24"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-black" />
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="MPM"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.04" />
+                android:orientation="vertical"
+                android:paddingStart="11dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MPM"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.08" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="VIDEO PLAYER"
+                    android:textColor="#8993A1"
+                    android:textSize="9sp"
+                    android:letterSpacing="0.18" />
+            </LinearLayout>
             <Button
                 android:id="@+id/btnLibraryRefresh"
                 style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="44dp"
+                android:layout_width="42dp"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="⟳"
-                android:textColor="#E7E9EC"
+                android:textColor="#DCE2EA"
                 android:textSize="22sp"
-                android:background="?attr/selectableItemBackgroundBorderless" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Actualizar biblioteca" />
             <Button
                 android:id="@+id/btnLibrarySettings"
                 style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="44dp"
+                android:layout_width="42dp"
                 android:layout_height="44dp"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="⚙"
-                android:textColor="#E7E9EC"
+                android:textColor="#DCE2EA"
                 android:textSize="19sp"
-                android:background="?attr/selectableItemBackgroundBorderless" />
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Ajustes" />
         </LinearLayout>
 
         <LinearLayout
@@ -59,64 +86,64 @@
             android:orientation="vertical"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="12dp">
+            android:paddingTop="22dp"
+            android:paddingBottom="15dp">
             <TextView
                 android:id="@+id/libraryHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Vídeos"
-                android:textColor="#FFFFFF"
-                android:textSize="26sp"
+                android:text="Tu biblioteca"
+                android:textColor="#F7F8FA"
+                android:textSize="28sp"
                 android:fontFamily="sans-serif-medium" />
             <TextView
                 android:id="@+id/librarySubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Archivos de vídeo del dispositivo"
-                android:textColor="#A5A9B0"
+                android:layout_marginTop="5dp"
+                android:text="Tus vídeos, siempre a mano"
+                android:textColor="#929CAB"
                 android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="46dp"
+            android:layout_height="48dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingEnd="10dp"
+            android:paddingStart="13dp"
+            android:paddingEnd="12dp"
             android:background="@drawable/library_search_background">
             <TextView
                 android:layout_width="28dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="⌕"
-                android:textColor="#AEB4BD"
-                android:textSize="23sp" />
+                android:textColor="#AAB4C2"
+                android:textSize="24sp" />
             <EditText
                 android:id="@+id/librarySearch"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:hint="Buscar vídeos y carpetas"
+                android:hint="Buscar en tu biblioteca"
                 android:singleLine="true"
                 android:textColor="#FFFFFF"
-                android:textColorHint="#858B94"
+                android:textColorHint="#7F8998"
                 android:textSize="14sp"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:paddingStart="4dp"
+                android:paddingStart="5dp"
                 android:paddingEnd="4dp" />
         </LinearLayout>
 
         <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="58dp"
+            android:layout_marginTop="7dp"
             android:scrollbars="none"
             android:fillViewport="false">
             <LinearLayout
@@ -130,41 +157,61 @@
                     android:id="@+id/btnLibraryVideos"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="38dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="17dp"
+                    android:paddingEnd="17dp"
                     android:text="Vídeos"
                     android:textAllCaps="false"
-                    android:textColor="#FF7A1A"
-                    android:textSize="14sp"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
+                    android:textColor="#FF8738"
+                    android:textSize="13sp"
+                    android:background="@drawable/library_tab_active" />
                 <Button
                     android:id="@+id/btnLibraryFolders"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="38dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="17dp"
+                    android:paddingEnd="17dp"
                     android:text="Carpetas"
                     android:textAllCaps="false"
-                    android:textColor="#B9BEC6"
-                    android:textSize="14sp"
+                    android:textColor="#AAB3C0"
+                    android:textSize="13sp"
                     android:background="?attr/selectableItemBackgroundBorderless" />
                 <Button
                     android:id="@+id/btnLibraryRecent"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="38dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="17dp"
+                    android:paddingEnd="17dp"
                     android:text="Recientes"
                     android:textAllCaps="false"
-                    android:textColor="#B9BEC6"
-                    android:textSize="14sp"
+                    android:textColor="#AAB3C0"
+                    android:textSize="13sp"
                     android:background="?attr/selectableItemBackgroundBorderless" />
                 <Button
                     android:id="@+id/btnLibraryFavorites"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="38dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingStart="17dp"
+                    android:paddingEnd="17dp"
                     android:text="Favoritos"
                     android:textAllCaps="false"
-                    android:textColor="#B9BEC6"
-                    android:textSize="14sp"
+                    android:textColor="#AAB3C0"
+                    android:textSize="13sp"
                     android:background="?attr/selectableItemBackgroundBorderless" />
             </LinearLayout>
         </HorizontalScrollView>
@@ -172,7 +219,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#292C31" />
+            android:background="#222934" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -185,45 +232,53 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="14dp" />
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="18dp" />
         </ScrollView>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="58dp"
-            android:gravity="center"
+            android:layout_height="68dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:background="#17191D">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="#11151C">
             <Button
                 android:id="@+id/btnLibraryOpen"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="48dp"
                 android:layout_weight="1"
-                android:text="＋  Abrir archivo"
+                android:minHeight="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="＋   Abrir archivo"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp" />
-            <View
-                android:layout_width="1dp"
-                android:layout_height="28dp"
-                android:background="#34373D" />
+                android:textColor="#17191D"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:background="@drawable/library_primary_button" />
             <Button
                 android:id="@+id/btnLibraryPlaylist"
                 style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_width="94dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="9dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="☷  Lista"
                 android:textAllCaps="false"
-                android:textColor="#D4D7DC"
-                android:textSize="14sp" />
+                android:textColor="#E1E6ED"
+                android:textSize="13sp"
+                android:background="@drawable/library_secondary_button" />
         </LinearLayout>
     </LinearLayout>
-    <LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="48dp"
+<LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="48dp"
     android:layout_gravity="top" android:background="@drawable/vlc_hud_top" android:gravity="center_vertical"
     android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="12dp"
     android:paddingTop="2dp" android:paddingBottom="2dp">
