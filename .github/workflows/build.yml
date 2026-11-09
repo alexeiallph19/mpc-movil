@@ -775,7 +775,7 @@ jobs:
                   dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.58f }
               }
 
-              private fun showImagePanel()              private fun showImagePanel() {
+              private fun showImagePanel() {
                   val items = arrayOf("Relación de aspecto", "Cambiar orientación", "Rellenar pantalla", "Alternar video bajo notch")
                   AlertDialog.Builder(this).setTitle("Imagen y pantalla").setItems(items) { _, which ->
                       when (which) {
@@ -947,7 +947,7 @@ jobs:
                   dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.58f }
               }
 
-              private fun showCastDialog()              private fun showCastDialog() {
+              private fun showCastDialog() {
                   if (currentUri == null) {
                       Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
                       return
