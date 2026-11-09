@@ -284,13 +284,22 @@ jobs:
                   android:orientation="vertical"
                   android:padding="6dp">
 
-                  <TextView
-                      android:layout_width="wrap_content"
+                  <HorizontalScrollView
+                      android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:padding="4dp"
-                      android:text="Archivo     Ver     Reproducir     Navegar     Favoritos     Ayuda"
-                      android:textColor="#FFFFFF"
-                      android:textSize="12sp" />
+                      android:scrollbars="none">
+                      <LinearLayout
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+                          <Button android:id="@+id/topMenuFile" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Archivo" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/topMenuView" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Ver" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/topMenuPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Reproducir" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/topMenuNavigate" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Navegar" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/topMenuFavorites" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Favoritos" android:textColor="#FFFFFF" />
+                          <Button android:id="@+id/topMenuHelp" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Ayuda" android:textColor="#FFFFFF" />
+                      </LinearLayout>
+                  </HorizontalScrollView>
 
                   <HorizontalScrollView
                       android:layout_width="match_parent"
@@ -507,6 +516,68 @@ jobs:
                   intent?.data?.let { play(it) }
               }
 
+              private fun showTopMenu(anchor: View, section: String) {
+                  val popup = PopupMenu(this, anchor)
+                  when (section) {
+                      "Archivo" -> {
+                          popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
+                          popup.menu.add("Abrir audio").setOnMenuItemClickListener { pickAudio(); true }
+                          popup.menu.add("Abrir subtítulo").setOnMenuItemClickListener { pickExternalSubtitle(); true }
+                      }
+                      "Ver" -> {
+                          popup.menu.add("Cambiar aspecto").setOnMenuItemClickListener { cycleAspect(); true }
+                          popup.menu.add("Cambiar orientación").setOnMenuItemClickListener { cycleRotation(); true }
+                          popup.menu.add("Pantalla completa").setOnMenuItemClickListener { enterImmersiveMode(); true }
+                      }
+                      "Reproducir" -> {
+                          popup.menu.add("Reproducir / Pausar").setOnMenuItemClickListener {
+                              mediaPlayer?.let { player -> if (player.isPlaying) player.pause() else player.play() }
+                              true
+                          }
+                          popup.menu.add("Detener").setOnMenuItemClickListener {
+                              mediaPlayer?.stop()
+                              releaseCurrentAssetDescriptor()
+                              welcomeScreen.visibility = View.VISIBLE
+                              txtStatus.text = "Detenido"
+                              true
+                          }
+                          popup.menu.add("Velocidad").setOnMenuItemClickListener {
+                              speedIndex = (speedIndex + 1) % speeds.size
+                              val speed = speeds[speedIndex]
+                              mediaPlayer?.rate = speed
+                              btnSpeed.text = "${speed}X"
+                              showOsd("Velocidad: ${speed}X")
+                              true
+                          }
+                      }
+                      "Navegar" -> {
+                          popup.menu.add("Retroceder 10 segundos").setOnMenuItemClickListener {
+                              mediaPlayer?.let { player -> player.time = (player.time - 10000L).coerceAtLeast(0L) }
+                              true
+                          }
+                          popup.menu.add("Avanzar 10 segundos").setOnMenuItemClickListener {
+                              mediaPlayer?.let { player -> player.time = (player.time + 10000L).coerceAtMost(player.length) }
+                              true
+                          }
+                          popup.menu.add("Pistas de audio").setOnMenuItemClickListener { pickAudio(); true }
+                          popup.menu.add("Pistas de subtítulos").setOnMenuItemClickListener { pickSubtitles(); true }
+                      }
+                      "Favoritos" -> {
+                          popup.menu.add("Guardar video actual").setOnMenuItemClickListener { saveFavorite(); true }
+                          popup.menu.add("Abrir favoritos").setOnMenuItemClickListener { showFavorites(); true }
+                      }
+                      "Ayuda" -> {
+                          popup.menu.add("Acerca de MPM Player").setOnMenuItemClickListener {
+                              AlertDialog.Builder(this).setTitle("MPM Player")
+                                  .setMessage("Reproductor multimedia para Android.\n\nUsa Archivo para abrir videos y subtítulos, Ver para ajustar la pantalla, y Reproducir o Navegar para controlar la reproducción.")
+                                  .setPositiveButton("Aceptar", null).show()
+                              true
+                          }
+                      }
+                  }
+                  popup.show()
+              }
+
               private fun initViews() {
                   videoLayout = findViewById(R.id.videoLayout)
                   welcomeScreen = findViewById(R.id.welcomeScreen)
@@ -520,6 +591,13 @@ jobs:
                   btnPlay = findViewById(R.id.btnPlay)
                   btnHwSw = findViewById(R.id.btnHwSw)
                   btnSpeed = findViewById(R.id.btnSpeed)
+
+                  findViewById<Button>(R.id.topMenuFile).setOnClickListener { showTopMenu(it, "Archivo") }
+                  findViewById<Button>(R.id.topMenuView).setOnClickListener { showTopMenu(it, "Ver") }
+                  findViewById<Button>(R.id.topMenuPlay).setOnClickListener { showTopMenu(it, "Reproducir") }
+                  findViewById<Button>(R.id.topMenuNavigate).setOnClickListener { showTopMenu(it, "Navegar") }
+                  findViewById<Button>(R.id.topMenuFavorites).setOnClickListener { showTopMenu(it, "Favoritos") }
+                  findViewById<Button>(R.id.topMenuHelp).setOnClickListener { showTopMenu(it, "Ayuda") }
 
                   findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
                   findViewById<Button>(R.id.btnMenuFile).setOnClickListener { pickFile() }
