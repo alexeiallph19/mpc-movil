@@ -324,18 +324,6 @@
     <TextView android:id="@+id/txtDecoderInfo" android:layout_width="wrap_content" android:layout_height="1dp"
         android:visibility="gone" android:text="[HW]" android:textColor="#78D6A1" android:textSize="1sp" />
 </LinearLayout>
-<Button android:id="@+id/btnHwSw" style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone"
-        android:minWidth="0dp" android:minHeight="0dp" android:text="HW" />
-    <Button android:id="@+id/btnPause" style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone"
-        android:minWidth="0dp" android:minHeight="0dp" />
-    <Button android:id="@+id/btnStop" style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone"
-        android:minWidth="0dp" android:minHeight="0dp" />
-    <TextView android:id="@+id/txtDecoderInfo" android:layout_width="wrap_content" android:layout_height="1dp"
-        android:visibility="gone" android:text="[HW]" android:textColor="#78D6A1" android:textSize="1sp" />
-</LinearLayout>
 <Button android:id="@+id/btnScreenshotFloat" style="@style/Widget.AppCompat.Button.Borderless"
     android:layout_width="46dp" android:layout_height="46dp" android:layout_gravity="center_vertical|end"
     android:layout_marginEnd="14dp" android:backgroundTint="#CC202020" android:visibility="gone"
