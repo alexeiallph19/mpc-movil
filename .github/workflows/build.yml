@@ -826,7 +826,6 @@ jobs:
                   } catch (e: Exception) {
                       filePickerPending = false
                       resumeAfterFilePicker = false
-                      restoreVideoOutput(resumeAfterFilePicker)
                       Toast.makeText(this, "No se pudo abrir el selector de archivos", Toast.LENGTH_LONG).show()
                   }
               }
