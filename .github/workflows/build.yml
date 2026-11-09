@@ -281,13 +281,25 @@ jobs:
                   <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="22dp"
                       android:max="1000" android:paddingStart="0dp" android:paddingEnd="0dp"
                       android:progressTint="#55A8FF" android:progressBackgroundTint="#46515E" android:thumbTint="#EAF4FF" />
+                  <LinearLayout android:layout_width="match_parent" android:layout_height="42dp"
+                      android:gravity="center" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                      <Button android:id="@+id/btnAudioTrack" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                          android:minWidth="0dp" android:minHeight="0dp" android:text="♫  Audio"
+                          android:textAllCaps="false" android:textColor="#DCEBFA" android:textSize="14sp" />
+                      <View android:layout_width="1dp" android:layout_height="22dp" android:background="#3B4652" />
+                      <Button android:id="@+id/btnSubtitleTrack" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                          android:minWidth="0dp" android:minHeight="0dp" android:text="CC  Subs"
+                          android:textAllCaps="false" android:textColor="#DCEBFA" android:textSize="14sp" />
+                  </LinearLayout>
                   <TextView android:id="@+id/txtTime" android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:gravity="center" android:paddingTop="1dp" android:paddingBottom="3dp"
                       android:text="00:00:00 / 00:00:00" android:textColor="#B9C4D0" android:textSize="11sp" android:fontFamily="monospace" />
-                  <LinearLayout android:layout_width="match_parent" android:layout_height="42dp"
+                  <LinearLayout android:layout_width="match_parent" android:layout_height="54dp"
                       android:gravity="center" android:orientation="horizontal">
                       <Button android:id="@+id/btnBack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="−10" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
-                      <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="48dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▶" android:textAllCaps="false" android:textColor="#72B7FF" android:textSize="19sp" />
+                      <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="58dp" android:layout_height="50dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▶" android:textAllCaps="false" android:textColor="#72B7FF" android:textSize="19sp" />
                       <Button android:id="@+id/btnPause" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="Ⅱ" android:textAllCaps="false" android:textColor="#DCE4EC" android:textSize="16sp" />
                       <Button android:id="@+id/btnStop" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="40dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="■" android:textAllCaps="false" android:textColor="#DCE4EC" android:textSize="14sp" />
                       <Button android:id="@+id/btnForward" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="+10" android:textAllCaps="false" android:textColor="#C9D2DC" android:textSize="11sp" />
@@ -531,6 +543,9 @@ jobs:
                   btnPlay = findViewById(R.id.btnPlay)
                   btnHwSw = findViewById(R.id.btnHwSw)
                   btnSpeed = findViewById(R.id.btnSpeed)
+          
+                  findViewById<Button>(R.id.btnAudioTrack).setOnClickListener { pickAudio() }
+                  findViewById<Button>(R.id.btnSubtitleTrack).setOnClickListener { pickSubtitles() }
           
                   findViewById<Button>(R.id.topMenuFile).setOnClickListener { showTopMenu(it, "Archivo") }
                   findViewById<Button>(R.id.topMenuView).setOnClickListener { showTopMenu(it, "Ver") }
@@ -914,7 +929,8 @@ jobs:
                           image.setImageDrawable(null)
                           image.setImageResource(android.R.drawable.ic_menu_report_image)
                           val expectedTag = "favorite_thumbnail:" + uri.toString()
-                          image.tag = expectedTag
+                          image.tag = "favorite_thumbnail"
+                          image.contentDescription = expectedTag
                           val cacheFile = File(cacheDir, "favorite_" + uri.toString().hashCode() + ".jpg")
                           if (cacheFile.exists() && cacheFile.length() > 0L) {
                               BitmapFactory.decodeFile(cacheFile.absolutePath)?.let { image.setImageBitmap(it) }
@@ -940,7 +956,7 @@ jobs:
                                       Log.w("MPM_PLAYER", "No se pudo generar miniatura del favorito", e)
                                   }
                                   runOnUiThread {
-                                      if (target.tag == expectedTag && bitmap != null) {
+                                      if (target.contentDescription == expectedTag && bitmap != null) {
                                           target.setImageBitmap(bitmap)
                                       }
                                   }
@@ -950,14 +966,24 @@ jobs:
                       }
                   }
                   AlertDialog.Builder(this).setTitle("Videos favoritos")
-                      .setSingleChoiceItems(adapter, 0) { _, which -> selected = which }
-                      .setPositiveButton("Abrir") { _, _ -> play(Uri.parse(favorites[selected])) }
+                      .setSingleChoiceItems(adapter, 0) { _, which -> selected = which.coerceIn(favorites.indices) }
+                      .setPositiveButton("Abrir") { _, _ ->
+                          favorites.getOrNull(selected)?.let { value ->
+                              val uri = Uri.parse(value)
+                              try {
+                                  contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                              } catch (_: Exception) { }
+                              play(uri)
+                          }
+                      }
                       .setNeutralButton("Quitar") { _, _ ->
-                          val updated = favorites.toMutableSet()
-                          updated.remove(favorites[selected])
-                          getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
-                              .putStringSet("favorites", updated).apply()
-                          showOsd("Favorito eliminado")
+                          favorites.getOrNull(selected)?.let { value ->
+                              val updated = favorites.toMutableSet()
+                              updated.remove(value)
+                              getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                                  .putStringSet("favorites", updated).apply()
+                              showOsd("Favorito eliminado")
+                          }
                       }
                       .setNegativeButton("Cerrar", null).show()
               }
