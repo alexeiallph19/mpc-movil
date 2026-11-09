@@ -419,6 +419,7 @@ jobs:
               private lateinit var txtStatus: TextView
               private lateinit var txtDecoderInfo: TextView
               private lateinit var txtTime: TextView
+              private lateinit var txtRemaining: TextView
               private lateinit var txtOsd: TextView
               private lateinit var seekBar: SeekBar
               private lateinit var btnPlay: Button
@@ -1113,6 +1114,7 @@ jobs:
                   txtStatus = findViewById(R.id.txtStatus)
                   txtDecoderInfo = findViewById(R.id.txtDecoderInfo)
                   txtTime = findViewById(R.id.txtTime)
+                  txtRemaining = findViewById(R.id.txtRemaining)
                   btnScreenshotFloat = findViewById(R.id.btnScreenshotFloat)
                   seekIntervalSeconds = getSharedPreferences("mpm_player", MODE_PRIVATE).getInt("seek_interval_seconds", 5)
                   txtOsd = findViewById(R.id.txtOsd)
@@ -1147,7 +1149,8 @@ jobs:
                       releaseCurrentAssetDescriptor()
                       welcomeScreen.visibility = View.VISIBLE
                       txtStatus.text = "Detenido"
-                      txtTime.text = "00:00:00 / 00:00:00"
+                      txtTime.text = "00:00:00"
+                      txtRemaining.text = "-00:00:00"
                       seekBar.progress = 0
                   }
           
@@ -1190,7 +1193,8 @@ jobs:
                               val len = mediaPlayer!!.length
                               if (len > 0) {
                                   val t = (len * (progress / 1000f)).toLong()
-                                  txtTime.text = "${formatTime(t)} / ${formatTime(len)}"
+                                  txtTime.text = formatTime(t)
+                                  txtRemaining.text = "-${formatTime((len - t).coerceAtLeast(0L))}"
                               }
                           }
                       }
@@ -1254,7 +1258,8 @@ jobs:
                               if (l > 0) {
                                   if (!isSeeking) {
                                       seekBar.progress = ((t.toFloat() / l) * 1000).toInt()
-                                      txtTime.text = "${formatTime(t)} / ${formatTime(l)}"
+                                      txtTime.text = formatTime(t)
+                                      txtRemaining.text = "-${formatTime((l - t).coerceAtLeast(0L))}"
                                   }
                                   val a = repeatA
                                   val b = repeatB
