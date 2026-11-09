@@ -538,6 +538,7 @@ jobs:
                   val dialog = AlertDialog.Builder(this).setTitle("Audio y subtítulos").setView(root)
                       .setNegativeButton("Cerrar", null).create()
                   var currentTab = if (initial == "Subs") "Subs" else "Audio"
+                  var subtitleTrackSignature = ""
                   fun add(label: String, action: () -> Unit) {
                       body.addView(Button(this).apply {
                           text = label
@@ -547,6 +548,12 @@ jobs:
                   }
                   fun render(tab: String) {
                       currentTab = tab
+                      if (tab == "Subs") {
+                          val signature = mediaPlayer?.spuTracks.orEmpty()
+                              .joinToString("|") { it.id.toString() + ":" + (it.name ?: "") }
+                          if (signature == subtitleTrackSignature && body.childCount > 0) return
+                          subtitleTrackSignature = signature
+                      }
                       body.removeAllViews()
                       if (tab == "Audio") {
                           val tracks = mediaPlayer?.audioTracks.orEmpty()
@@ -587,9 +594,15 @@ jobs:
                   render(currentTab)
                   dialog.show()
                   if (currentTab == "Subs") {
-                      handler.postDelayed({
-                          if (dialog.isShowing && currentTab == "Subs") render("Subs")
-                      }, 650)
+                      fun refreshSubtitleTracks(attempt: Int) {
+                          handler.postDelayed({
+                              if (dialog.isShowing && currentTab == "Subs" && attempt < 12) {
+                                  render("Subs")
+                                  refreshSubtitleTracks(attempt + 1)
+                              }
+                          }, 450)
+                      }
+                      refreshSubtitleTracks(0)
                   }
               }
 
@@ -1640,6 +1653,9 @@ jobs:
                                       try {
                                           retriever.setDataSource(this@MainActivity, uri)
                                           bitmap = retriever.getFrameAtTime(1_000_000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                              ?: retriever.getFrameAtTime(3_000_000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                              ?: retriever.getFrameAtTime(500_000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                              ?: retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                                               ?: retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                                       } finally {
                                           retriever.release()
