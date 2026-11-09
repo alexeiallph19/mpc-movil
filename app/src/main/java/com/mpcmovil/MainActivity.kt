@@ -1060,14 +1060,29 @@ class MainActivity : AppCompatActivity() {
     private fun applyResponsiveControls() {
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val bottom = bottomBar as? LinearLayout ?: return
-        bottom.setPadding(dp(if (landscape) 18 else 12), dp(if (landscape) 3 else 6),
-            dp(if (landscape) 18 else 12), dp(if (landscape) 3 else 6))
+        bottom.setPadding(dp(if (landscape) 16 else 12), dp(2), dp(if (landscape) 16 else 12), dp(2))
         bottom.getChildAt(0)?.let { row ->
             row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 18 else 20) }
         }
-        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 28 else 32) }
+        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 24 else 28) }
         bottom.findViewById<View>(R.id.playerControlsRow)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 48 else 52) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 46 else 50) }
+        if (!landscape) {
+            val compactGroups = listOf(
+                R.id.playerControlsLeft to intArrayOf(34, 34),
+                R.id.playerControlsCenter to intArrayOf(38, 46, 38),
+                R.id.playerControlsRight to intArrayOf(32, 32, 40, 32)
+            )
+            compactGroups.forEach { (groupId, widths) ->
+                bottom.findViewById<LinearLayout>(groupId)?.let { group ->
+                    widths.forEachIndexed { index, width ->
+                        group.getChildAt(index)?.let { child ->
+                            child.layoutParams = child.layoutParams.apply { this.width = dp(width) }
+                        }
+                    }
+                }
+            }
+        }
         }
         topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 48 else 56) }
     }
@@ -1329,7 +1344,7 @@ class MainActivity : AppCompatActivity() {
                     setControlsVisible(true)
                 }
                 MediaPlayer.Event.Paused -> {
-                    txtStatus.text = currentUri?.let { "Pausa · " + getDisplayName(it) } ?: "Pausa"
+                    txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Pausa"
                     btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     btnPlay.contentDescription = "Reproducir"
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
