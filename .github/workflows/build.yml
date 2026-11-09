@@ -466,7 +466,7 @@ jobs:
                   root.addView(tabs)
                   val trackScroll = ScrollView(this).apply {
                       isFillViewport = true
-                      addView(body, ScrollView.LayoutParams(-1, -2))
+                      addView(body, android.widget.FrameLayout.LayoutParams(-1, -2))
                   }
                   root.addView(trackScroll, LinearLayout.LayoutParams(-1, dp(300)))
                   val dialog = AlertDialog.Builder(this).setTitle("Audio y subtítulos").setView(root)
