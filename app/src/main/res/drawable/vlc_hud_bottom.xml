@@ -1,4 +1,0 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- VLC-style short bottom fade keeps the picture visible behind the controls. -->
-    <gradient android:angle="90" android:startColor="#00000000" android:centerColor="#44000000" android:endColor="#99000000" />
-</shape>
