@@ -23,6 +23,7 @@ include ':application:tools', ':application:resources', ':application:mediadb', 
 include ':application:vlc-android'
 
 // Keep the upstream VLC checkout nested under third_party.
+project(':application').projectDir = file('third_party/vlc-android/application')
 project(':medialibrary').projectDir = file('third_party/vlc-android/medialibrary')
 project(':application:tools').projectDir = file('third_party/vlc-android/application/tools')
 project(':application:resources').projectDir = file('third_party/vlc-android/application/resources')
