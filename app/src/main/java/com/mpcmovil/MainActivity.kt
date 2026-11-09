@@ -1133,7 +1133,7 @@ class MainActivity : AppCompatActivity() {
             })
         }
         scroll.addView(rows)
-        panel.addView(scroll, LinearLayout.LayoutParams(-1, -2))
+        panel.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         dialog.setContentView(panel)
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x00000000))
         dialog.show()
@@ -1172,17 +1172,17 @@ class MainActivity : AppCompatActivity() {
         bottom.setPadding(dp(if (landscape) 12 else 10), dp(if (landscape) 0 else 1),
             dp(if (landscape) 12 else 10), dp(if (landscape) 0 else 1))
         bottom.getChildAt(0)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 14 else 18) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 13 else 18) }
         }
-        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 14 else 20) }
+        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 11 else 18) }
         bottom.findViewById<View>(R.id.playerControlsRow)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 32 else 42) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 30 else 40) }
         }
 
         val compactGroups = if (landscape) listOf(
-            R.id.playerControlsLeft to intArrayOf(38, 38),
-            R.id.playerControlsCenter to intArrayOf(38, 44, 38),
-            R.id.playerControlsRight to intArrayOf(36, 36, 42, 34)
+            R.id.playerControlsLeft to intArrayOf(32, 32),
+            R.id.playerControlsCenter to intArrayOf(34, 38, 34),
+            R.id.playerControlsRight to intArrayOf(30, 30, 36, 30)
         ) else listOf(
             R.id.playerControlsLeft to intArrayOf(34, 34),
             R.id.playerControlsCenter to intArrayOf(38, 46, 38),
@@ -1194,13 +1194,13 @@ class MainActivity : AppCompatActivity() {
                     group.getChildAt(index)?.let { child ->
                         child.layoutParams = child.layoutParams.apply {
                             this.width = dp(width)
-                            if (landscape) this.height = dp(36)
+                            if (landscape) this.height = dp(30)
                         }
                     }
                 }
             }
         }
-        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 40 else 48) }
+        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 38 else 46) }
     }
 
     private fun togglePlayback() {
