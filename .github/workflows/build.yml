@@ -660,6 +660,8 @@ jobs:
               private var gestureMode = ""
               private var repeatA: Long? = null
               private var repeatB: Long? = null
+              // 0 = normal, 1 = repetir lista, 2 = repetir vídeo, 3 = aleatorio.
+              private var playbackMode = 0
               private var sleepTimerRunnable: Runnable? = null
               private val rendererDiscoverers = mutableListOf<RendererDiscoverer>()
               private val rendererItems = mutableListOf<RendererItem>()
@@ -924,7 +926,7 @@ jobs:
               }
 
               private fun showPlaybackTools() {
-                  val items = arrayOf("Ir a un tiempo…", "Temporizador de apagado", "Marcar punto A", "Marcar punto B y repetir", "Desactivar repetición A-B", "Velocidad")
+                  val items = arrayOf("Ir a un tiempo…", "Temporizador de apagado", "Marcar punto A", "Marcar punto B y repetir", "Desactivar repetición A-B", "Velocidad", "Modo de reproducción: ${playbackModeLabel()}")
                   AlertDialog.Builder(this).setTitle("Herramientas de reproducción").setItems(items) { _, which ->
                       when (which) {
                           0 -> showJumpToTime()
@@ -945,8 +947,29 @@ jobs:
                           }
                           4 -> { repeatA = null; repeatB = null; showOsd("Repetición A-B desactivada") }
                           5 -> showSpeedMenu()
+                          6 -> showPlaybackModeMenu()
                       }
                   }.setNegativeButton("Cerrar", null).show()
+              }
+
+              private fun playbackModeLabel(): String = when (playbackMode) {
+                  1 -> "Repetir lista"
+                  2 -> "Repetir vídeo"
+                  3 -> "Aleatorio"
+                  else -> "Normal"
+              }
+
+              private fun showPlaybackModeMenu() {
+                  val labels = arrayOf("Normal", "Repetir toda la lista", "Repetir el vídeo actual", "Aleatorio")
+                  AlertDialog.Builder(this).setTitle("Modo de reproducción")
+                      .setSingleChoiceItems(labels, playbackMode) { dialog, which ->
+                          playbackMode = which
+                          getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                              .putInt("playback_mode", playbackMode).apply()
+                          showOsd("Modo: ${playbackModeLabel()}")
+                          dialog.dismiss()
+                      }
+                      .setNegativeButton("Cerrar", null).show()
               }
 
               private fun showSpeedMenu() {
@@ -1637,6 +1660,7 @@ jobs:
                   centerControls.visibility = View.GONE
                   btnScreenshotFloat.visibility = View.GONE
                   seekIntervalSeconds = getSharedPreferences("mpm_player", MODE_PRIVATE).getInt("seek_interval_seconds", 5)
+                  playbackMode = getSharedPreferences("mpm_player", MODE_PRIVATE).getInt("playback_mode", 0).coerceIn(0, 3)
                   txtOsd = findViewById(R.id.txtOsd)
                   seekBar = findViewById(R.id.seekBar)
                   btnPlay = findViewById(R.id.btnPlay)
@@ -1880,10 +1904,25 @@ jobs:
                           }
                           MediaPlayer.Event.EndReached -> {
                               currentUri?.let { clearPlaybackProgress(it) }
-                              if (playlistIndex >= 0 && playlistIndex < playlist.lastIndex) {
-                                  playlistIndex++
-                                  val next = playlist[playlistIndex]
-                                  handler.post { play(next, 0L); showOsd("Siguiente: " + getDisplayName(next)) }
+                              val currentIndex = playlistIndex
+                              val nextIndex = when {
+                                  playlist.isEmpty() || currentIndex !in playlist.indices -> -1
+                                  playbackMode == 2 -> currentIndex
+                                  playbackMode == 3 && playlist.size > 1 -> {
+                                      val candidates = playlist.indices.filter { it != currentIndex }
+                                      candidates.random()
+                                  }
+                                  currentIndex < playlist.lastIndex -> currentIndex + 1
+                                  playbackMode == 1 -> 0
+                                  else -> -1
+                              }
+                              if (nextIndex >= 0) {
+                                  playlistIndex = nextIndex
+                                  val next = playlist[nextIndex]
+                                  handler.post {
+                                      play(next, 0L)
+                                      showOsd(if (playbackMode == 2) "Repitiendo vídeo" else "Siguiente: " + getDisplayName(next))
+                                  }
                               } else handler.post { txtStatus.text = "Lista finalizada" }
                           }
                           MediaPlayer.Event.EncounteredError -> {
