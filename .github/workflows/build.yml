@@ -328,58 +328,88 @@ jobs:
                       <Button android:id="@+id/btnLibraryPlaylist" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:text="☷  Lista" android:textAllCaps="false" android:textColor="#D0D5DC" />
                   </LinearLayout>
               </LinearLayout>
-              <LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="44dp"
-              android:layout_gravity="top" android:background="#B30B0B0B" android:gravity="center_vertical"
-              android:orientation="horizontal" android:paddingStart="12dp" android:paddingEnd="6dp">
-              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingEnd="12dp"
-                  android:text="MPM" android:textColor="#FFFF6A00" android:textSize="15sp" android:textStyle="bold" />
-              <TextView android:id="@+id/txtStatus" android:layout_width="0dp" android:layout_height="wrap_content"
-                  android:layout_weight="1" android:maxLines="1" android:ellipsize="middle" android:text="Listo"
-                  android:textColor="#F2F2F2" android:textSize="12sp" />
+              <LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="48dp"
+              android:layout_gravity="top" android:background="#E6101010" android:gravity="center_vertical"
+              android:orientation="horizontal" android:paddingStart="16dp" android:paddingEnd="8dp">
               <Button android:id="@+id/btnMainMenu" style="@style/Widget.AppCompat.Button.Borderless"
-                  android:layout_width="44dp" android:layout_height="42dp" android:minWidth="0dp" android:minHeight="0dp"
-                  android:text="⋮" android:textColor="#FFFFFF" android:textSize="23sp" />
+                  android:layout_width="40dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                  android:text="‹" android:textColor="#FFFFFF" android:textSize="30sp" />
+              <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+                  android:gravity="center_vertical" android:orientation="vertical" android:paddingStart="8dp">
+                  <TextView android:text="MPM PLAYER" android:textColor="#FFFF6A00" android:textSize="10sp" android:textStyle="bold"
+                      android:letterSpacing="0.12" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                  <TextView android:id="@+id/txtStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+                      android:maxLines="1" android:ellipsize="middle" android:text="Listo"
+                      android:textColor="#FFFFFF" android:textSize="13sp" />
+              </LinearLayout>
+              <Button android:id="@+id/btnMainMenu" android:visibility="gone" android:layout_width="1dp" android:layout_height="1dp"
+                  android:minWidth="0dp" android:minHeight="0dp" />
+              <Button android:id="@+id/btnMainMenu" android:visibility="gone" android:layout_width="1dp" android:layout_height="1dp"
+                  android:minWidth="0dp" android:minHeight="0dp" />
           </LinearLayout>
-          <LinearLayout android:id="@+id/centerControls" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:gravity="center" android:orientation="horizontal" android:padding="6dp" android:background="#33000000">
-              <Button android:id="@+id/btnCenterPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="68dp" android:layout_height="68dp" android:minWidth="0dp" android:minHeight="0dp" android:background="@drawable/mpm_control_primary" android:text="▶" android:textColor="#FFFFFF" android:textSize="26sp" />
+          <LinearLayout android:id="@+id/centerControls" android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:layout_gravity="center" android:gravity="center" android:orientation="horizontal"
+              android:visibility="gone">
+              <Button android:id="@+id/btnCenterPlay" style="@style/Widget.AppCompat.Button.Borderless"
+                  android:layout_width="64dp" android:layout_height="64dp" android:minWidth="0dp" android:minHeight="0dp"
+                  android:background="@drawable/mpm_control_primary" android:text="▶" android:textColor="#FFFFFF" android:textSize="25sp" />
           </LinearLayout>
           <TextView android:id="@+id/txtOsd" android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:layout_gravity="center_horizontal|top" android:layout_marginTop="58dp"
-              android:background="#DD171717" android:paddingStart="16dp" android:paddingEnd="16dp"
-              android:paddingTop="9dp" android:paddingBottom="9dp" android:textColor="#FFFFFF" android:textSize="13sp"
+              android:layout_gravity="center_horizontal|top" android:layout_marginTop="62dp"
+              android:background="#E6202020" android:paddingStart="16dp" android:paddingEnd="16dp"
+              android:paddingTop="10dp" android:paddingBottom="10dp" android:textColor="#FFFFFF" android:textSize="13sp"
               android:visibility="gone" />
           <LinearLayout android:id="@+id/bottomBar" android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:layout_gravity="bottom" android:background="#CC090909" android:orientation="vertical"
-              android:paddingStart="10dp" android:paddingEnd="10dp" android:paddingTop="5dp" android:paddingBottom="4dp">
-              <LinearLayout android:layout_width="match_parent" android:layout_height="18dp"
+              android:layout_gravity="bottom" android:background="#E6101010" android:orientation="vertical"
+              android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="8dp" android:paddingBottom="7dp">
+              <LinearLayout android:layout_width="match_parent" android:layout_height="20dp"
                   android:gravity="center_vertical" android:orientation="horizontal">
-                  <TextView android:id="@+id/txtTime" android:layout_width="0dp" android:layout_height="wrap_content"
-                      android:layout_weight="1" android:text="00:00:00" android:textColor="#FFFFFF"
-                      android:textSize="10sp" android:fontFamily="monospace" />
-                  <TextView android:id="@+id/txtRemaining" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:text="-00:00:00" android:textColor="#BDBDBD"
-                      android:textSize="10sp" android:fontFamily="monospace" />
+                  <TextView android:id="@+id/txtTime" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:text="00:00" android:textColor="#FFFFFF" android:textSize="11sp" android:fontFamily="monospace" />
+                  <TextView android:id="@+id/txtRemaining" android:layout_width="0dp" android:layout_height="wrap_content"
+                      android:layout_weight="1" android:gravity="end" android:text="-00:00" android:textColor="#C7C7C7"
+                      android:textSize="11sp" android:fontFamily="monospace" />
               </LinearLayout>
-              <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="28dp"
-                  android:max="1000" android:minHeight="2dp" android:maxHeight="2dp"
+              <SeekBar android:id="@+id/seekBar" android:layout_width="match_parent" android:layout_height="30dp"
+                  android:max="1000" android:minHeight="3dp" android:maxHeight="3dp"
                   android:paddingStart="0dp" android:paddingEnd="0dp"
                   android:progressDrawable="@drawable/mpm_seekbar_track"
-                  android:thumb="@drawable/mpm_seekbar_thumb" android:thumbOffset="14dp"
+                  android:thumb="@drawable/mpm_seekbar_thumb" android:thumbOffset="12dp"
                   android:splitTrack="false" android:contentDescription="Barra de progreso del video" />
-              <LinearLayout android:layout_width="match_parent" android:layout_height="42dp"
-                  android:gravity="center" android:orientation="horizontal">
-                  <Button android:id="@+id/btnBack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="36dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="−10" android:textColor="#EEEEEE" android:textSize="12sp" />
-                  <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▶" android:textColor="#FFFFFF" android:textSize="21sp" />
-                  <Button android:id="@+id/btnForward" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="36dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="+10" android:textColor="#EEEEEE" android:textSize="12sp" />
-                  <Button android:id="@+id/btnAudioTrack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="36dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="♫" android:textColor="#EEEEEE" android:textSize="17sp" />
-                  <Button android:id="@+id/btnSubtitleTrack" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="36dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="CC" android:textColor="#EEEEEE" android:textSize="12sp" />
-                  <Button android:id="@+id/btnCastBottom" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="36dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▣" android:textColor="#EEEEEE" android:textSize="17sp" />
-                  <Button android:id="@+id/btnSpeed" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="42dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="1.0x" android:textColor="#EEEEEE" android:textSize="11sp" />
-                  <Button android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="36dp" android:layout_height="40dp" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="⟳" android:textColor="#EEEEEE" android:textSize="19sp" />
-                  <Button android:id="@+id/btnHwSw" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="HW" />
-                  <Button android:id="@+id/btnPause" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" />
-                  <Button android:id="@+id/btnStop" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" />
-              </LinearLayout>
+              <HorizontalScrollView android:layout_width="match_parent" android:layout_height="46dp"
+                  android:scrollbars="none" android:fillViewport="true">
+                  <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+                      android:gravity="center" android:orientation="horizontal">
+                      <Button android:id="@+id/btnBack" android:visibility="gone" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="1dp" android:layout_height="1dp" android:minWidth="0dp" android:minHeight="0dp" />
+                      <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="52dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                          android:text="Ⅱ" android:textColor="#FFFFFF" android:textSize="24sp" />
+                      <Button android:id="@+id/btnForward" android:visibility="gone" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="1dp" android:layout_height="1dp" android:minWidth="0dp" android:minHeight="0dp" />
+                      <Button android:id="@+id/btnAudioTrack" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="48dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                          android:text="♫" android:textColor="#EEEEEE" android:textSize="20sp" />
+                      <Button android:id="@+id/btnSubtitleTrack" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="48dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                          android:text="CC" android:textColor="#EEEEEE" android:textSize="13sp" />
+                      <Button android:id="@+id/btnCastBottom" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="48dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                          android:text="▣" android:textColor="#EEEEEE" android:textSize="20sp" />
+                      <Button android:id="@+id/btnSpeed" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="52dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                          android:text="1.0x" android:textColor="#EEEEEE" android:textSize="12sp" />
+                      <Button android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="48dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
+                          android:text="⟳" android:textColor="#EEEEEE" android:textSize="21sp" />
+                      <Button android:id="@+id/btnHwSw" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" android:text="HW" />
+                      <Button android:id="@+id/btnPause" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" />
+                      <Button android:id="@+id/btnStop" style="@style/Widget.AppCompat.Button.Borderless"
+                          android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone" android:minWidth="0dp" android:minHeight="0dp" />
+                  </LinearLayout>
+              </HorizontalScrollView>
               <TextView android:id="@+id/txtDecoderInfo" android:layout_width="wrap_content" android:layout_height="1dp"
                   android:visibility="gone" android:text="[HW]" android:textColor="#78D6A1" android:textSize="1sp" />
           </LinearLayout>
@@ -388,7 +418,7 @@ jobs:
               android:layout_marginEnd="14dp" android:backgroundTint="#CC202020" android:visibility="gone"
               android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text="▣"
               android:textColor="#FFFFFF" android:textSize="21sp" />
-          </FrameLayout>
+          </FrameLayout>          </FrameLayout>
           EOF
 
           cat << 'EOF' > app/src/main/java/com/mpcmovil/MainActivity.kt
@@ -565,89 +595,188 @@ jobs:
           
 
               private fun showAudioSubsPanel(initial: String) {
-                  val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(8), dp(16), dp(8)) }
-                  val tabs = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+                  val dialog = android.app.Dialog(this)
+                  val root = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(dp(18), dp(12), dp(18), dp(12))
+                      setBackgroundColor(0xFF171717.toInt())
+                  }
+                  val header = LinearLayout(this).apply { gravity = android.view.Gravity.CENTER_VERTICAL; orientation = LinearLayout.HORIZONTAL }
+                  val title = TextView(this).apply {
+                      text = if (initial == "Subs") "Subtítulos" else "Audio"
+                      setTextColor(0xFFFFFFFF.toInt()); textSize = 20f; setTypeface(null, android.graphics.Typeface.BOLD)
+                  }
+                  header.addView(title, LinearLayout.LayoutParams(0, dp(48), 1f))
+                  val close = TextView(this).apply {
+                      text = "✕"; textSize = 20f; gravity = android.view.Gravity.CENTER
+                      setTextColor(0xFFDDDDDD.toInt()); setPadding(dp(12), dp(8), dp(8), dp(8))
+                      setOnClickListener { dialog.dismiss() }
+                  }
+                  header.addView(close, LinearLayout.LayoutParams(dp(44), dp(48)))
+                  root.addView(header)
+                  val tabs = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(4), 0, dp(10)) }
                   val body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
                   root.addView(tabs)
-                  val trackScroll = ScrollView(this).apply {
+                  val scroll = ScrollView(this).apply {
                       isFillViewport = true
                       addView(body, android.widget.FrameLayout.LayoutParams(-1, -2))
                   }
-                  root.addView(trackScroll, LinearLayout.LayoutParams(-1, dp(300)))
-                  val dialog = AlertDialog.Builder(this).setTitle("Audio y subtítulos").setView(root)
-                      .setNegativeButton("Cerrar", null).create()
+                  root.addView(scroll, LinearLayout.LayoutParams(-1, dp(310)))
+                  val footer = TextView(this).apply {
+                      text = "Pistas gestionadas por LibVLC · motor de VLC"
+                      textSize = 11f; setTextColor(0xFF999999.toInt())
+                      setPadding(dp(4), dp(12), dp(4), dp(4))
+                  }
+                  root.addView(footer)
                   var currentTab = if (initial == "Subs") "Subs" else "Audio"
-                  var subtitleTrackSignature = ""
-                  var lastRenderedTrackTab = ""
-                  fun add(label: String, action: () -> Unit) {
-                      body.addView(Button(this).apply {
-                          text = label
-                          isAllCaps = false
-                          setOnClickListener { action() }
-                      }, LinearLayout.LayoutParams(-1, dp(46)))
+                  fun row(label: String, selected: Boolean = false, action: () -> Unit) {
+                      val item = LinearLayout(this).apply {
+                          orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL
+                          setPadding(dp(14), 0, dp(14), 0)
+                          background = android.graphics.drawable.GradientDrawable().apply {
+                              setColor(if (selected) 0xFF332319.toInt() else 0xFF242424.toInt())
+                              cornerRadius = dp(12).toFloat()
+                          }
+                          isClickable = true; isFocusable = true; setOnClickListener { action() }
+                      }
+                      val labelView = TextView(this).apply {
+                          text = label; textSize = 14f; setTextColor(if (selected) 0xFFFF8A3D.toInt() else 0xFFF1F1F1.toInt())
+                      }
+                      item.addView(labelView, LinearLayout.LayoutParams(0, -1, 1f))
+                      if (selected) item.addView(TextView(this).apply {
+                          text = "✓"; textSize = 18f; setTextColor(0xFFFF6A00.toInt()); gravity = android.view.Gravity.CENTER
+                      }, LinearLayout.LayoutParams(dp(28), -1))
+                      body.addView(item, LinearLayout.LayoutParams(-1, dp(50)).apply { bottomMargin = dp(7) })
                   }
                   fun render(tab: String) {
                       currentTab = tab
-                      if (tab == "Subs") {
-                          val signature = mediaPlayer?.spuTracks.orEmpty()
-                              .joinToString("|") { it.id.toString() + ":" + (it.name ?: "") } + "|selected=" + (mediaPlayer?.spuTrack ?: -1)
-                          if (lastRenderedTrackTab == "Subs" && signature == subtitleTrackSignature) return
-                          subtitleTrackSignature = signature
-                      }
-                      lastRenderedTrackTab = tab
+                      title.text = if (tab == "Subs") "Subtítulos" else "Audio"
                       body.removeAllViews()
                       if (tab == "Audio") {
                           val tracks = mediaPlayer?.audioTracks.orEmpty()
-                          if (tracks.isEmpty()) add("No hay pistas de audio disponibles") {}
+                          if (tracks.isEmpty()) row("No hay pistas de audio disponibles") {}
                           tracks.forEach { track ->
-                              val prefix = if (track.id == (mediaPlayer?.audioTrack ?: -1)) "✓  " else ""
-                              add(prefix + (track.name ?: ("Pista " + track.id))) {
+                              row(track.name ?: "Pista ${track.id}", track.id == (mediaPlayer?.audioTrack ?: -1)) {
                                   mediaPlayer?.audioTrack = track.id
                                   showOsd("Pista de audio cambiada")
                                   dialog.dismiss()
                               }
                           }
                       } else {
-                          add("Desactivar subtítulos") {
+                          row("Desactivar subtítulos", (mediaPlayer?.spuTrack ?: -1) == -1) {
                               mediaPlayer?.spuTrack = -1
                               showOsd("Subtítulos desactivados")
                               dialog.dismiss()
                           }
                           val tracks = mediaPlayer?.spuTracks.orEmpty()
+                          if (tracks.isEmpty()) row("Buscando pistas de subtítulos…") {}
                           tracks.forEach { track ->
-                              val prefix = if (track.id == (mediaPlayer?.spuTrack ?: -1)) "✓  " else ""
-                              add(prefix + (track.name ?: ("Subtítulo " + track.id))) {
+                              row(track.name ?: "Subtítulo ${track.id}", track.id == (mediaPlayer?.spuTrack ?: -1)) {
                                   mediaPlayer?.spuTrack = track.id
-                                  showOsd("Pista de subtítulos cambiada")
+                                  showOsd("Subtítulo seleccionado")
                                   dialog.dismiss()
                               }
                           }
-                          add("Cargar subtítulo externo…") { dialog.dismiss(); pickExternalSubtitle() }
+                          row("Cargar archivo externo…") { dialog.dismiss(); pickExternalSubtitle() }
+                          row("Sincronización de subtítulos…") { dialog.dismiss(); showSubtitleDelayDialog() }
                       }
-                  }
-                  listOf("Audio", "Subs").forEach { tab ->
-                      tabs.addView(Button(this).apply {
-                          text = tab
-                          isAllCaps = false
-                          setOnClickListener { render(tab) }
-                      }, LinearLayout.LayoutParams(0, dp(46), 1f))
+                      tabs.removeAllViews()
+                      listOf("Audio", "Subs").forEach { tabName ->
+                          val active = tabName == tab
+                          tabs.addView(TextView(this).apply {
+                              text = if (tabName == "Subs") "SUBTÍTULOS" else "AUDIO"
+                              gravity = android.view.Gravity.CENTER
+                              textSize = 12f; setTypeface(null, android.graphics.Typeface.BOLD)
+                              setTextColor(if (active) 0xFFFF8A3D.toInt() else 0xFFAAAAAA.toInt())
+                              background = android.graphics.drawable.GradientDrawable().apply {
+                                  setColor(if (active) 0xFF3A281D.toInt() else 0xFF252525.toInt())
+                                  cornerRadius = dp(10).toFloat()
+                              }
+                              setOnClickListener { render(tabName) }
+                          }, LinearLayout.LayoutParams(0, dp(42), 1f).apply {
+                              if (tabName == "Audio") marginEnd = dp(6) else marginStart = dp(6)
+                          })
+                      }
                   }
                   render(currentTab)
+                  dialog.setContentView(root)
                   dialog.show()
+                  dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x00000000))
+                  dialog.window?.setLayout(-1, -2)
+                  dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+                  dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                  dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.58f }
                   if (currentTab == "Subs") {
-                      fun refreshSubtitleTracks(attempt: Int) {
+                      fun refresh(attempt: Int) {
                           handler.postDelayed({
-                              if (dialog.isShowing && currentTab == "Subs" && attempt < 20) {
+                              if (dialog.isShowing && currentTab == "Subs" && attempt < 12) {
                                   render("Subs")
-                                  refreshSubtitleTracks(attempt + 1)
+                                  refresh(attempt + 1)
                               }
-                          }, 450)
+                          }, 400L)
                       }
-                      refreshSubtitleTracks(0)
+                      refresh(0)
                   }
               }
 
-              private fun showImagePanel() {
+              private fun showSubtitleDelayDialog() {
+                  val dialog = android.app.Dialog(this)
+                  val root = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(dp(22), dp(18), dp(22), dp(18))
+                      setBackgroundColor(0xFF1B1B1B.toInt())
+                  }
+                  root.addView(TextView(this).apply {
+                      text = "Sincronización de subtítulos"
+                      textSize = 19f; setTextColor(0xFFFFFFFF.toInt())
+                      setTypeface(null, android.graphics.Typeface.BOLD)
+                  }, LinearLayout.LayoutParams(-1, dp(48)))
+                  val value = TextView(this).apply {
+                      gravity = android.view.Gravity.CENTER
+                      textSize = 25f; setTextColor(0xFFFF8A3D.toInt())
+                  }
+                  fun refreshValue() {
+                      val micros = mediaPlayer?.getSpuDelay() ?: 0L
+                      value.text = String.format(Locale.US, "%+.1f s", micros / 1_000_000.0)
+                  }
+                  root.addView(value, LinearLayout.LayoutParams(-1, dp(66)))
+                  val controls = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER }
+                  fun control(label: String, action: () -> Unit) {
+                      controls.addView(TextView(this).apply {
+                          text = label; gravity = android.view.Gravity.CENTER; textSize = 19f
+                          setTextColor(0xFFFFFFFF.toInt())
+                          background = android.graphics.drawable.GradientDrawable().apply {
+                              setColor(0xFF303030.toInt()); cornerRadius = dp(12).toFloat()
+                          }
+                          setOnClickListener { action(); refreshValue() }
+                      }, LinearLayout.LayoutParams(0, dp(48), 1f).apply { marginEnd = dp(5); marginStart = dp(5) })
+                  }
+                  control("−0.1") { mediaPlayer?.let { it.setSpuDelay(it.getSpuDelay() - 100_000L) } }
+                  control("＋0.1") { mediaPlayer?.let { it.setSpuDelay(it.getSpuDelay() + 100_000L) } }
+                  root.addView(controls, LinearLayout.LayoutParams(-1, dp(54)))
+                  val reset = TextView(this).apply {
+                      text = "RESTABLECER"; gravity = android.view.Gravity.CENTER
+                      setTextColor(0xFFFF8A3D.toInt()); textSize = 12f
+                      setOnClickListener { mediaPlayer?.setSpuDelay(0L); refreshValue() }
+                  }
+                  root.addView(reset, LinearLayout.LayoutParams(-1, dp(46)))
+                  val close = TextView(this).apply {
+                      text = "CERRAR"; gravity = android.view.Gravity.CENTER
+                      setTextColor(0xFFCCCCCC.toInt()); textSize = 12f
+                      setOnClickListener { dialog.dismiss() }
+                  }
+                  root.addView(close, LinearLayout.LayoutParams(-1, dp(42)))
+                  refreshValue()
+                  dialog.setContentView(root)
+                  dialog.show()
+                  dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x00000000))
+                  dialog.window?.setLayout(-1, -2)
+                  dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+                  dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                  dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.58f }
+              }
+
+              private fun showImagePanel()              private fun showImagePanel() {
                   val items = arrayOf("Relación de aspecto", "Cambiar orientación", "Rellenar pantalla", "Alternar video bajo notch")
                   AlertDialog.Builder(this).setTitle("Imagen y pantalla").setItems(items) { _, which ->
                       when (which) {
@@ -748,26 +877,75 @@ jobs:
               }
 
               private fun showPlayerSettings() {
-                  val sections = arrayOf("Reproducción", "Audio", "Subtítulos", "Imagen y pantalla", "Interfaz", "Biblioteca")
-                  AlertDialog.Builder(this).setTitle("Ajustes").setItems(sections) { _, which ->
-                      when (which) {
-                          0 -> showPlaybackTools()
-                          1 -> showAudioSubsPanel("Audio")
-                          2 -> showAudioSubsPanel("Subs")
-                          3 -> showImagePanel()
-                          4 -> {
-                              isControlsVisible = !isControlsVisible
-                              val v = if (isControlsVisible) View.VISIBLE else View.GONE
-                              topBar.visibility = v
-                              bottomBar.visibility = v
+                  val dialog = android.app.Dialog(this)
+                  val root = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(dp(18), dp(14), dp(18), dp(16))
+                      setBackgroundColor(0xFF171717.toInt())
+                  }
+                  val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
+                  header.addView(TextView(this).apply {
+                      text = "Ajustes del reproductor"
+                      textSize = 20f; setTextColor(0xFFFFFFFF.toInt())
+                      setTypeface(null, android.graphics.Typeface.BOLD)
+                  }, LinearLayout.LayoutParams(0, dp(52), 1f))
+                  header.addView(TextView(this).apply {
+                      text = "✕"; textSize = 20f; gravity = android.view.Gravity.CENTER
+                      setTextColor(0xFFDDDDDD.toInt())
+                      setOnClickListener { dialog.dismiss() }
+                  }, LinearLayout.LayoutParams(dp(42), dp(48)))
+                  root.addView(header)
+                  root.addView(TextView(this).apply {
+                      text = "REPRODUCCIÓN Y PANTALLA"; textSize = 10f
+                      setTextColor(0xFFFF8A3D.toInt()); setTypeface(null, android.graphics.Typeface.BOLD)
+                      setPadding(dp(4), dp(8), 0, dp(8))
+                  })
+                  val scroll = ScrollView(this)
+                  val items = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+                  scroll.addView(items)
+                  root.addView(scroll, LinearLayout.LayoutParams(-1, dp(360)))
+                  fun action(label: String, detail: String, callback: () -> Unit) {
+                      val row = LinearLayout(this).apply {
+                          orientation = LinearLayout.VERTICAL
+                          gravity = android.view.Gravity.CENTER_VERTICAL
+                          setPadding(dp(14), dp(8), dp(14), dp(8))
+                          background = android.graphics.drawable.GradientDrawable().apply {
+                              setColor(0xFF252525.toInt()); cornerRadius = dp(12).toFloat()
                           }
-                          5 -> { welcomeScreen.visibility = View.VISIBLE; renderLibrary("Videos") }
+                          isClickable = true; isFocusable = true
+                          setOnClickListener { dialog.dismiss(); callback() }
                       }
-                  }.setNegativeButton("Cerrar", null).show()
+                      row.addView(TextView(this).apply {
+                          text = label; textSize = 14f; setTextColor(0xFFF5F5F5.toInt())
+                          setTypeface(null, android.graphics.Typeface.BOLD)
+                      })
+                      row.addView(TextView(this).apply {
+                          text = detail; textSize = 11f; setTextColor(0xFFAAAAAA.toInt())
+                      })
+                      items.addView(row, LinearLayout.LayoutParams(-1, dp(62)).apply { bottomMargin = dp(7) })
+                  }
+                  action("Reproducción", "Velocidad, búsqueda y temporizador") { showPlaybackTools() }
+                  action("Audio", "Seleccionar pista de sonido") { showAudioSubsPanel("Audio") }
+                  action("Subtítulos", "Pistas VLC, archivos externos y sincronización") { showAudioSubsPanel("Subs") }
+                  action("Imagen y pantalla", "Relación de aspecto, orientación y notch") { showImagePanel() }
+                  action("Interfaz", "Mostrar u ocultar los controles del reproductor") {
+                      setControlsVisible(!isControlsVisible)
+                  }
+                  action("Biblioteca", "Volver a tus vídeos, carpetas y favoritos") {
+                      welcomeScreen.visibility = View.VISIBLE
+                      setControlsVisible(false)
+                      renderLibrary("Videos")
+                  }
+                  dialog.setContentView(root)
+                  dialog.show()
+                  dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0x00000000))
+                  dialog.window?.setLayout(-1, -2)
+                  dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+                  dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                  dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.58f }
               }
 
-
-              private fun showCastDialog() {
+              private fun showCastDialog()              private fun showCastDialog() {
                   if (currentUri == null) {
                       Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
                       return
@@ -1265,8 +1443,8 @@ jobs:
                   val state = if (visible) View.VISIBLE else View.GONE
                   topBar.visibility = state
                   bottomBar.visibility = state
-                  centerControls.visibility = state
-                  btnScreenshotFloat.visibility = if (visible &&
+                  centerControls.visibility = if (visible && mediaPlayer?.isPlaying != true && currentUri != null) View.VISIBLE else View.GONE
+                  btnScreenshotFloat.visibility = if (visible && currentUri != null &&
                       getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) View.VISIBLE else View.GONE
                   handler.removeCallbacks(controlsHideRunnable)
                   if (visible && mediaPlayer?.isPlaying == true) handler.postDelayed(controlsHideRunnable, 3500L)
@@ -1321,6 +1499,10 @@ jobs:
                   txtTime = findViewById(R.id.txtTime)
                   txtRemaining = findViewById(R.id.txtRemaining)
                   btnScreenshotFloat = findViewById(R.id.btnScreenshotFloat)
+                  topBar.visibility = View.GONE
+                  bottomBar.visibility = View.GONE
+                  centerControls.visibility = View.GONE
+                  btnScreenshotFloat.visibility = View.GONE
                   seekIntervalSeconds = getSharedPreferences("mpm_player", MODE_PRIVATE).getInt("seek_interval_seconds", 5)
                   txtOsd = findViewById(R.id.txtOsd)
                   seekBar = findViewById(R.id.seekBar)
@@ -1524,7 +1706,7 @@ jobs:
                               welcomeScreen.visibility = View.GONE
                               txtStatus.text = "Reproduciendo"
                               btnPlay.text = "❚❚"
-                              btnCenterPlay.text = "❚❚"
+                              btnCenterPlay.text = "▶"
                               setControlsVisible(true)
                           }
                           MediaPlayer.Event.Paused -> {
@@ -1535,8 +1717,10 @@ jobs:
                           }
                           MediaPlayer.Event.Stopped -> {
                               welcomeScreen.visibility = View.VISIBLE
+                              setControlsVisible(false)
                               txtStatus.text = "Detenido"
                               btnPlay.text = "▶"
+                              btnCenterPlay.text = "▶"
                           }
                           MediaPlayer.Event.TimeChanged -> {
                               val t = ev.timeChanged
