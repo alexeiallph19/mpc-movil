@@ -539,6 +539,7 @@ jobs:
                       .setNegativeButton("Cerrar", null).create()
                   var currentTab = if (initial == "Subs") "Subs" else "Audio"
                   var subtitleTrackSignature = ""
+                  var lastRenderedTrackTab = ""
                   fun add(label: String, action: () -> Unit) {
                       body.addView(Button(this).apply {
                           text = label
@@ -551,9 +552,10 @@ jobs:
                       if (tab == "Subs") {
                           val signature = mediaPlayer?.spuTracks.orEmpty()
                               .joinToString("|") { it.id.toString() + ":" + (it.name ?: "") }
-                          if (signature == subtitleTrackSignature && body.childCount > 0) return
+                          if (lastRenderedTrackTab == "Subs" && signature == subtitleTrackSignature) return
                           subtitleTrackSignature = signature
                       }
+                      lastRenderedTrackTab = tab
                       body.removeAllViews()
                       if (tab == "Audio") {
                           val tracks = mediaPlayer?.audioTracks.orEmpty()
