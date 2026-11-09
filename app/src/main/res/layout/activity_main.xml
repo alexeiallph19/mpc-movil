@@ -278,7 +278,7 @@
                 android:background="@drawable/library_secondary_button" />
         </LinearLayout>
     </LinearLayout>
-<LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="48dp"
+<LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="52dp"
     android:layout_gravity="top" android:background="@drawable/vlc_hud_top" android:gravity="center_vertical"
     android:orientation="horizontal" android:paddingStart="8dp" android:paddingEnd="12dp"
     android:paddingTop="2dp" android:paddingBottom="2dp">
@@ -317,7 +317,7 @@
             android:textColor="#CCFFFFFF" android:textSize="12sp" android:fontFamily="sans-serif-medium" />
     </LinearLayout>
     <com.mpcmovil.VlcAccessibleSeekBar android:id="@+id/seekBar"
-        android:layout_width="match_parent" android:layout_height="24dp"
+        android:layout_width="match_parent" android:layout_height="28dp"
         android:max="1000" android:minHeight="4dp" android:maxHeight="4dp"
         android:paddingStart="0dp" android:paddingEnd="0dp"
         android:progressDrawable="@drawable/vlc_seekbar_track" android:thumb="@drawable/vlc_seekbar_thumb"
@@ -329,11 +329,11 @@
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
             <ImageButton android:id="@+id/btnAudioTrack" style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="42dp" android:layout_height="44dp" android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="42dp" android:layout_height="42dp" android:background="@drawable/player_transport_button"
                 android:src="@drawable/vlc_ic_audiotrack" android:scaleType="fitCenter" android:padding="9dp"
                 android:contentDescription="Pistas de audio" />
             <ImageButton android:id="@+id/btnSubtitleTrack" style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="42dp" android:layout_height="44dp" android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="42dp" android:layout_height="42dp" android:background="@drawable/player_transport_button"
                 android:src="@drawable/vlc_ic_subtitle" android:scaleType="fitCenter" android:padding="9dp"
                 android:contentDescription="Subtítulos" />
         </LinearLayout>
@@ -343,34 +343,34 @@
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent">
             <Button android:id="@+id/btnBack" style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="44dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
-                android:text="↶" android:textAllCaps="false" android:textColor="#F2FFFFFF" android:textSize="22sp"
-                android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="Retroceder" />
+                android:text="↶" android:textAllCaps="false" android:textColor="#EAF0F7" android:textSize="21sp"
+                android:background="@drawable/player_transport_button" android:contentDescription="Retroceder" />
             <ImageButton android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="46dp" android:layout_height="46dp" android:minWidth="0dp" android:minHeight="0dp"
-                android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/vlc_ic_pause_player"
-                android:scaleType="fitCenter" android:padding="8dp" android:contentDescription="Pausar" />
+                android:background="@drawable/player_play_button" android:src="@drawable/vlc_ic_pause_player"
+                android:scaleType="fitCenter" android:padding="10dp" android:contentDescription="Pausar" />
             <Button android:id="@+id/btnForward" style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="44dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
-                android:text="↷" android:textAllCaps="false" android:textColor="#F2FFFFFF" android:textSize="22sp"
-                android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="Avanzar" />
+                android:text="↷" android:textAllCaps="false" android:textColor="#EAF0F7" android:textSize="21sp"
+                android:background="@drawable/player_transport_button" android:contentDescription="Avanzar" />
         </LinearLayout>
         <LinearLayout android:id="@+id/playerControlsRight" android:layout_width="wrap_content" android:layout_height="match_parent"
             android:gravity="center_vertical|end" android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
             <ImageButton android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="40dp" android:layout_height="44dp" android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="40dp" android:layout_height="42dp" android:background="@drawable/player_transport_button"
                 android:src="@drawable/vlc_ic_rotate" android:scaleType="fitCenter" android:padding="9dp" android:contentDescription="Rotación" />
             <ImageButton android:id="@+id/btnCastBottom" style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="40dp" android:layout_height="44dp" android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="40dp" android:layout_height="42dp" android:background="@drawable/player_transport_button"
                 android:src="@drawable/vlc_ic_cast" android:scaleType="fitCenter" android:padding="9dp" android:contentDescription="Emitir" />
             <Button android:id="@+id/btnSpeed" style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="48dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
-                android:background="?attr/selectableItemBackgroundBorderless" android:text="1.0x"
+                android:background="@drawable/player_transport_button" android:text="1.0x"
                 android:textAllCaps="false" android:textColor="#F2FFFFFF" android:textSize="12sp" />
             <Button android:id="@+id/btnMainMenu" style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="40dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp"
-                android:background="?attr/selectableItemBackgroundBorderless" android:text="⋮"
+                android:background="@drawable/player_transport_button" android:text="⋮"
                 android:textColor="#FFFFFFFF" android:textSize="23sp" android:contentDescription="Más opciones" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

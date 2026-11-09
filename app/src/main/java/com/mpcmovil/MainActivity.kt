@@ -485,8 +485,8 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(18), dp(14), dp(18), dp(16))
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF101318.toInt()); cornerRadius = dp(22).toFloat()
-                setStroke(dp(1), 0xFF303944.toInt())
+                setColor(0xFF151B24.toInt()); cornerRadius = dp(22).toFloat()
+                setStroke(dp(1), 0xFF303B49.toInt())
             }
         }
         val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
@@ -502,8 +502,8 @@ class MainActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(dp(42), dp(48)))
         root.addView(header)
         root.addView(TextView(this).apply {
-            text = "REPRODUCCIÓN Y PANTALLA"; textSize = 10f
-            setTextColor(0xFFFF8A3D.toInt()); setTypeface(null, android.graphics.Typeface.BOLD)
+            text = "CONFIGURACIÓN"; textSize = 10f
+            setTextColor(0xFFFF8738.toInt()); setTypeface(null, android.graphics.Typeface.BOLD)
             setPadding(dp(4), dp(8), 0, dp(8))
         })
         val scroll = ScrollView(this)
@@ -516,7 +516,7 @@ class MainActivity : AppCompatActivity() {
                 gravity = android.view.Gravity.CENTER_VERTICAL
                 setPadding(dp(14), dp(8), dp(14), dp(8))
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xFF252525.toInt()); cornerRadius = dp(12).toFloat()
+                    setColor(0xFF202936.toInt()); cornerRadius = dp(12).toFloat()
                 }
                 isClickable = true; isFocusable = true
                 setOnClickListener { dialog.dismiss(); callback() }
