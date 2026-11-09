@@ -1786,13 +1786,14 @@ class MainActivity : AppCompatActivity() {
                     Log.w("MPM_PLAYER", "No se pudieron consultar los metadatos del archivo", queryError)
                 }
                 val activeVlc = libVLC ?: throw IllegalStateException("El motor VLC no está disponible")
-                afd = contentResolver.openAssetFileDescriptor(uri, "r")
+                val openedAfd = contentResolver.openAssetFileDescriptor(uri, "r")
                     ?: throw IllegalStateException("Android no pudo abrir el descriptor del archivo")
-                media = Media(activeVlc, afd)
-                media.addOption(":file-caching=2000")
+                afd = openedAfd
+                val preparedMedia = Media(activeVlc, openedAfd)
+                media = preparedMedia
+                preparedMedia.addOption(":file-caching=2000")
 
-                val preparedAfd = afd
-                val preparedMedia = media
+                val preparedAfd = openedAfd
                 val diagnostics = "Archivo: $displayName\nTamaño: $fileSize bytes\nTipo: $mimeType\nURI: $uri\nEsquema: ${uri.scheme}\nHW/SW: ${if (isHw) "HW" else "SW"}"
                 runOnUiThread {
                     if (isFinishing || isDestroyed || requestId != playbackRequestId.get()) {
