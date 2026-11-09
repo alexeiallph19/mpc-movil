@@ -21,5 +21,12 @@ android {
 include ':libvlcjni:libvlc', ':medialibrary'
 include ':application:tools', ':application:resources', ':application:mediadb', ':application:live-plot-graph'
 include ':application:vlc-android'
-include ':application:moviepedia'
-include ':application:remote-access-client'
+
+// Keep the upstream VLC checkout nested under third_party.
+project(':libvlcjni:libvlc').projectDir = file('third_party/vlc-android/libvlcjni/libvlc')
+project(':medialibrary').projectDir = file('third_party/vlc-android/medialibrary')
+project(':application:tools').projectDir = file('third_party/vlc-android/application/tools')
+project(':application:resources').projectDir = file('third_party/vlc-android/application/resources')
+project(':application:mediadb').projectDir = file('third_party/vlc-android/application/mediadb')
+project(':application:live-plot-graph').projectDir = file('third_party/vlc-android/application/live-plot-graph')
+project(':application:vlc-android').projectDir = file('third_party/vlc-android/application/vlc-android')
