@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
     private var playbackEvents = mutableListOf<String>()
     private var isHw = true
     private var isControlsVisible = true
+    private var isLibraryVisible = true
     private val controlsHideRunnable = Runnable {
         if (mediaPlayer?.isPlaying == true) setControlsVisible(false)
     }
@@ -1100,16 +1101,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setControlsVisible(visible: Boolean) {
-        isControlsVisible = visible
-        val state = if (visible) View.VISIBLE else View.GONE
+        val shouldShow = visible && !isLibraryVisible
+        isControlsVisible = shouldShow
+        val state = if (shouldShow) View.VISIBLE else View.GONE
         topBar.visibility = state
         bottomBar.visibility = state
         // VLC mantiene el control principal en la fila inferior, no como botón flotante duplicado.
         centerControls.visibility = View.GONE
-        btnScreenshotFloat.visibility = if (visible && currentUri != null &&
+        btnScreenshotFloat.visibility = if (shouldShow && currentUri != null &&
             getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) View.VISIBLE else View.GONE
         handler.removeCallbacks(controlsHideRunnable)
-        if (visible && mediaPlayer?.isPlaying == true) handler.postDelayed(controlsHideRunnable, 3500L)
+        if (shouldShow && mediaPlayer?.isPlaying == true) handler.postDelayed(controlsHideRunnable, 3500L)
     }
 
     private fun applyResponsiveControls() {
@@ -1345,6 +1347,8 @@ class MainActivity : AppCompatActivity() {
         libraryVideos.clear(); libraryVideos.addAll(found); renderLibrary(libraryMode)
     }
     private fun renderLibrary(mode: String) {
+        isLibraryVisible = true
+        handler.removeCallbacks(controlsHideRunnable)
         libraryMode = mode; libraryItems.removeAllViews()
         topBar.visibility = View.GONE
         bottomBar.visibility = View.GONE
@@ -1558,6 +1562,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("MPM_PLAYER", "VLC event: $eventName")
             when (ev.type) {
                 MediaPlayer.Event.Playing -> {
+                    isLibraryVisible = false
                     welcomeScreen.visibility = View.GONE
                     txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Reproduciendo"
                     btnPlay.setImageResource(R.drawable.vlc_ic_pause_player)
@@ -1566,13 +1571,18 @@ class MainActivity : AppCompatActivity() {
                     setControlsVisible(true)
                 }
                 MediaPlayer.Event.Paused -> {
+                    if (isLibraryVisible) {
+                        setControlsVisible(false)
+                    } else {
                     txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Pausa"
                     btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     btnPlay.contentDescription = "Reproducir"
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     setControlsVisible(true)
+                    }
                 }
                 MediaPlayer.Event.Stopped -> {
+                    isLibraryVisible = true
                     welcomeScreen.visibility = View.VISIBLE
                     setControlsVisible(false)
                     txtStatus.text = "Detenido"
@@ -1651,6 +1661,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun play(uri: Uri, startPos: Long = -1L) {
+        isLibraryVisible = false
         if (startPos < 0L) {
             val saved = getPlaybackProgress(uri)
             if (saved > 10_000L) {
