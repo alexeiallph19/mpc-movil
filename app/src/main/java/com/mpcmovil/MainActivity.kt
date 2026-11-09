@@ -1328,13 +1328,13 @@ class MainActivity : AppCompatActivity() {
             when (ev.type) {
                 MediaPlayer.Event.Playing -> {
                     welcomeScreen.visibility = View.GONE
-                    txtStatus.text = "Reproduciendo"
+                    txtStatus.text = currentUri?.let { getDisplayName(it) } ?: "Reproduciendo"
                     btnPlay.setImageResource(R.drawable.vlc_ic_pause_player)
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     setControlsVisible(true)
                 }
                 MediaPlayer.Event.Paused -> {
-                    txtStatus.text = "Pausa"
+                    txtStatus.text = currentUri?.let { "Pausa · " + getDisplayName(it) } ?: "Pausa"
                     btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                     setControlsVisible(true)
