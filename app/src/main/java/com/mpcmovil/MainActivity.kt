@@ -1062,14 +1062,14 @@ class MainActivity : AppCompatActivity() {
         val bottom = bottomBar as? LinearLayout ?: return
 
         // Compact VLC-style HUD: time, seekbar and transport controls stay close together.
-        bottom.setPadding(dp(if (landscape) 16 else 12), dp(if (landscape) 0 else 2),
-            dp(if (landscape) 16 else 12), dp(if (landscape) 0 else 2))
+        bottom.setPadding(dp(if (landscape) 12 else 10), dp(if (landscape) 0 else 1),
+            dp(if (landscape) 12 else 10), dp(if (landscape) 0 else 1))
         bottom.getChildAt(0)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 16 else 20) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 14 else 18) }
         }
-        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 18 else 24) }
+        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 14 else 20) }
         bottom.findViewById<View>(R.id.playerControlsRow)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 36 else 46) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 32 else 42) }
         }
 
         val compactGroups = if (landscape) listOf(
@@ -1093,7 +1093,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 44 else 56) }
+        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 40 else 48) }
     }
 
     private fun togglePlayback() {
@@ -1115,6 +1115,13 @@ class MainActivity : AppCompatActivity() {
         libraryHeading = findViewById(R.id.libraryHeading)
         librarySubtitle = findViewById(R.id.librarySubtitle)
         topBar = findViewById(R.id.topBar)
+        findViewById<ImageButton>(R.id.btnPlayerBack).setOnClickListener {
+            savePlaybackProgress()
+            mediaPlayer?.pause()
+            welcomeScreen.visibility = View.VISIBLE
+            setControlsVisible(false)
+            renderLibrary(libraryMode)
+        }
         bottomBar = findViewById(R.id.bottomBar)
         centerControls = findViewById(R.id.centerControls)
         btnCenterPlay = findViewById(R.id.btnCenterPlay)
