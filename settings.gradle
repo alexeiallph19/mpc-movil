@@ -18,12 +18,11 @@ android {
     buildToolsVersion = '36.0.0'
 }
 
-include ':libvlcjni:libvlc', ':medialibrary'
+include ':medialibrary'
 include ':application:tools', ':application:resources', ':application:mediadb', ':application:live-plot-graph'
 include ':application:vlc-android'
 
 // Keep the upstream VLC checkout nested under third_party.
-project(':libvlcjni:libvlc').projectDir = file('third_party/vlc-android/libvlcjni/libvlc')
 project(':medialibrary').projectDir = file('third_party/vlc-android/medialibrary')
 project(':application:tools').projectDir = file('third_party/vlc-android/application/tools')
 project(':application:resources').projectDir = file('third_party/vlc-android/application/resources')
