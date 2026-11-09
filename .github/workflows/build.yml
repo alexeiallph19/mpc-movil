@@ -119,8 +119,8 @@ jobs:
                   applicationId "com.mpmplayer.android"
                   minSdk 21
                   targetSdk 34
-                  versionCode 7
-                  versionName "4.2.0-MPM"
+                  versionCode 8
+                  versionName "4.3.0-MPM"
               }
 
               signingConfigs {
@@ -201,6 +201,10 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
+          <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+          <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+          <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+          <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
               <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
               <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
               <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -331,6 +335,17 @@ jobs:
           import android.media.MediaMetadataRetriever
           import android.graphics.Bitmap
           import android.graphics.BitmapFactory
+          import android.Manifest
+          import android.content.ContentValues
+          import android.content.pm.PackageManager
+          import android.media.MediaScannerConnection
+          import android.net.wifi.WifiManager
+          import android.os.Environment
+          import android.provider.MediaStore
+          import android.view.TextureView
+          import android.view.ViewGroup
+          import androidx.core.app.ActivityCompat
+          import androidx.core.content.ContextCompat
           import android.os.Build
           import android.database.Cursor
           import android.provider.OpenableColumns
@@ -354,6 +369,8 @@ jobs:
           import org.videolan.libvlc.*
           import org.videolan.libvlc.util.VLCVideoLayout
           import java.util.Locale
+          import java.text.SimpleDateFormat
+          import java.util.Date
           import java.io.File
           import java.io.FileOutputStream
           import java.util.concurrent.Executors
@@ -409,6 +426,12 @@ jobs:
               private var repeatA: Long? = null
               private var repeatB: Long? = null
               private var sleepTimerRunnable: Runnable? = null
+              private val rendererDiscoverers = mutableListOf<RendererDiscoverer>()
+              private val rendererItems = mutableListOf<RendererItem>()
+              private var multicastLock: WifiManager.MulticastLock? = null
+              private var castDialog: AlertDialog? = null
+              private var activeRendererName: String? = null
+              private val screenshotRequestCode = 9041
           
               private val fileLauncher = registerForActivityResult(
                   ActivityResultContracts.StartActivityForResult()
@@ -646,9 +669,279 @@ jobs:
                   }.setNegativeButton("Cerrar", null).show()
               }
 
+
+              private fun showCastDialog() {
+                  if (currentUri == null) {
+                      Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  val root = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(dp(18), dp(8), dp(18), dp(8))
+                  }
+                  val status = TextView(this).apply {
+                      text = "Buscando dispositivos compatibles en tu red…"
+                      setTextColor(0xFFB9C4D0.toInt())
+                      textSize = 13f
+                      setPadding(0, dp(4), 0, dp(10))
+                  }
+                  val listView = ListView(this)
+                  val names = mutableListOf<String>()
+                  val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, names)
+                  listView.adapter = adapter
+                  root.addView(status)
+                  root.addView(listView, LinearLayout.LayoutParams(-1, dp(260)))
+                  val dialog = AlertDialog.Builder(this)
+                      .setTitle("Emitir a dispositivo")
+                      .setView(root)
+                      .setNeutralButton("Desconectar") { _, _ -> disconnectRenderer() }
+                      .setNegativeButton("Cerrar", null)
+                      .create()
+                  castDialog = dialog
+                  dialog.setOnDismissListener {
+                      stopRendererDiscovery()
+                      if (castDialog === dialog) castDialog = null
+                  }
+                  listView.setOnItemClickListener { _, _, position, _ ->
+                      val item = rendererItems.getOrNull(position)
+                      if (item != null) {
+                          val player = mediaPlayer
+                          if (player == null) {
+                              Toast.makeText(this, "El reproductor no está disponible", Toast.LENGTH_SHORT).show()
+                          } else {
+                              try {
+                                  if (player.isPlaying) player.pause()
+                                  val result = player.setRenderer(item)
+                                  if (result == 0) {
+                                      activeRendererName = item.displayName
+                                      player.play()
+                                      showOsd("Emitiendo en " + item.displayName)
+                                      dialog.dismiss()
+                                  } else {
+                                      player.play()
+                                      Toast.makeText(this, "No se pudo conectar con ese dispositivo", Toast.LENGTH_LONG).show()
+                                  }
+                              } catch (e: Exception) {
+                                  Log.e("MPM_PLAYER", "Error al conectar con el dispositivo de emisión", e)
+                                  Toast.makeText(this, "No se pudo iniciar la emisión", Toast.LENGTH_LONG).show()
+                              }
+                          }
+                      }
+                  }
+                  dialog.show()
+                  startRendererDiscovery(status, adapter, names)
+              }
+
+              private fun startRendererDiscovery(status: TextView, adapter: ArrayAdapter<String>, names: MutableList<String>) {
+                  stopRendererDiscovery()
+                  val wifi = applicationContext.getSystemService(WIFI_SERVICE) as? WifiManager
+                  try {
+                      multicastLock = wifi?.createMulticastLock("MPMPlayerRendererDiscovery")?.apply {
+                          setReferenceCounted(false)
+                          acquire()
+                      }
+                  } catch (e: Exception) {
+                      Log.w("MPM_PLAYER", "No se pudo adquirir el bloqueo multicast", e)
+                  }
+                  val vlc = libVLC
+                  if (vlc == null) {
+                      status.text = "El motor VLC no está disponible"
+                      return
+                  }
+                  try {
+                      val descriptions = RendererDiscoverer.list(vlc)
+                      if (descriptions.isEmpty()) {
+                          status.text = "Este motor VLC no ofrece servicios de descubrimiento en este dispositivo"
+                          return
+                      }
+                      var started = 0
+                      descriptions.forEach { description ->
+                          val discoverer = RendererDiscoverer(vlc, description.name)
+                          discoverer.setEventListener { event ->
+                              val item = event.item
+                              runOnUiThread {
+                                  when (event.type) {
+                                      RendererDiscoverer.Event.ItemAdded -> {
+                                          if (rendererItems.none { it.name == item.name }) {
+                                              rendererItems.add(item)
+                                              names.add(item.displayName)
+                                              adapter.notifyDataSetChanged()
+                                          }
+                                          status.text = if (names.isEmpty()) "Buscando dispositivos…" else "Dispositivos encontrados: " + names.size
+                                      }
+                                      RendererDiscoverer.Event.ItemDeleted -> {
+                                          val index = rendererItems.indexOfFirst { it.name == item.name }
+                                          if (index >= 0) {
+                                              rendererItems.removeAt(index)
+                                              if (index < names.size) names.removeAt(index)
+                                              adapter.notifyDataSetChanged()
+                                          }
+                                          status.text = if (names.isEmpty()) "Buscando dispositivos compatibles…" else "Dispositivos encontrados: " + names.size
+                                      }
+                                  }
+                              }
+                          }
+                          try {
+                              if (discoverer.start()) {
+                                  rendererDiscoverers.add(discoverer)
+                                  started++
+                              } else {
+                                  discoverer.setEventListener(null)
+                                  discoverer.release()
+                              }
+                          } catch (e: Exception) {
+                              discoverer.setEventListener(null)
+                              discoverer.release()
+                              Log.w("MPM_PLAYER", "No se pudo iniciar el descubrimiento " + description.name, e)
+                          }
+                      }
+                      if (started == 0) status.text = "No se pudo iniciar la búsqueda de dispositivos"
+                      else {
+                          status.text = "Buscando televisores y dispositivos compatibles en la misma red…"
+                          handler.postDelayed({
+                              if (dialogIsShowing(status) && names.isEmpty()) {
+                                  status.text = "No se encontraron dispositivos, comprueba que ambos estén en la misma red Wi‑Fi"
+                              }
+                          }, 8000)
+                      }
+                  } catch (e: Exception) {
+                      Log.e("MPM_PLAYER", "Error al buscar dispositivos de emisión", e)
+                      status.text = "No se pudo buscar dispositivos en esta red"
+                  }
+              }
+
+              private fun dialogIsShowing(status: TextView): Boolean =
+                  castDialog?.isShowing == true && status.isShown
+
+              private fun stopRendererDiscovery() {
+                  rendererDiscoverers.forEach { discoverer ->
+                      try {
+                          discoverer.stop()
+                          discoverer.setEventListener(null)
+                          discoverer.release()
+                      } catch (e: Exception) {
+                          Log.w("MPM_PLAYER", "Error al detener el descubrimiento de dispositivos", e)
+                      }
+                  }
+                  rendererDiscoverers.clear()
+                  rendererItems.clear()
+                  try {
+                      multicastLock?.let { if (it.isHeld) it.release() }
+                  } catch (e: Exception) {
+                      Log.w("MPM_PLAYER", "No se pudo liberar el bloqueo multicast", e)
+                  } finally {
+                      multicastLock = null
+                  }
+              }
+
+              private fun disconnectRenderer() {
+                  try {
+                      mediaPlayer?.let { player ->
+                          if (player.isPlaying) player.pause()
+                          player.setRenderer(null)
+                          player.play()
+                      }
+                      activeRendererName = null
+                      showOsd("Emisión desconectada")
+                  } catch (e: Exception) {
+                      Log.e("MPM_PLAYER", "No se pudo desconectar el dispositivo de emisión", e)
+                      Toast.makeText(this, "No se pudo desconectar el dispositivo", Toast.LENGTH_LONG).show()
+                  }
+              }
+
+              private fun takeScreenshot() {
+                  if (currentUri == null || mediaPlayer == null) {
+                      Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+                      ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                      ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), screenshotRequestCode)
+                      return
+                  }
+                  val texture = findTextureView(videoLayout)
+                  if (texture == null || !texture.isAvailable) {
+                      Toast.makeText(this, "La captura no está disponible en este momento", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  val bitmap = texture.getBitmap()
+                  if (bitmap == null) {
+                      Toast.makeText(this, "No se pudo capturar el fotograma", Toast.LENGTH_SHORT).show()
+                      return
+                  }
+                  val fileName = "MPM_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date()) + ".jpg"
+                  try {
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                          val values = ContentValues().apply {
+                              put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                              put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                              put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/MPM Player")
+                              put(MediaStore.Images.Media.IS_PENDING, 1)
+                          }
+                          val imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                              ?: throw IllegalStateException("No se pudo crear el archivo de imagen")
+                          try {
+                              val output = contentResolver.openOutputStream(imageUri)
+                                  ?: throw IllegalStateException("No se pudo guardar la imagen")
+                              output.use { stream ->
+                                  if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream)) {
+                                      throw IllegalStateException("No se pudo codificar la captura")
+                                  }
+                              }
+                              val completed = ContentValues().apply { put(MediaStore.Images.Media.IS_PENDING, 0) }
+                              contentResolver.update(imageUri, completed, null, null)
+                          } catch (e: Exception) {
+                              contentResolver.delete(imageUri, null, null)
+                              throw e
+                          }
+                      } else {
+                          val folder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MPM Player")
+                          if (!folder.exists() && !folder.mkdirs()) throw IllegalStateException("No se pudo crear la carpeta de capturas")
+                          val file = File(folder, fileName)
+                          FileOutputStream(file).use { stream ->
+                              if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream)) {
+                                  throw IllegalStateException("No se pudo codificar la captura")
+                              }
+                          }
+                          MediaScannerConnection.scanFile(this, arrayOf(file.absolutePath), arrayOf("image/jpeg"), null)
+                      }
+                      showOsd("Captura guardada en Imágenes/MPM Player")
+                      Toast.makeText(this, "Captura guardada en la galería", Toast.LENGTH_SHORT).show()
+                  } catch (e: Exception) {
+                      Log.e("MPM_PLAYER", "Error al guardar la captura", e)
+                      Toast.makeText(this, "No se pudo guardar la captura: " + (e.message ?: "error"), Toast.LENGTH_LONG).show()
+                  } finally {
+                      bitmap.recycle()
+                  }
+              }
+
+              private fun findTextureView(view: View): TextureView? {
+                  if (view is TextureView) return view
+                  if (view is ViewGroup) {
+                      for (index in 0 until view.childCount) {
+                          val found = findTextureView(view.getChildAt(index))
+                          if (found != null) return found
+                      }
+                  }
+                  return null
+              }
+
+              override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+                  super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+                  if (requestCode == screenshotRequestCode) {
+                      if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                          takeScreenshot()
+                      } else {
+                          Toast.makeText(this, "Se necesita permiso para guardar capturas en la galería", Toast.LENGTH_LONG).show()
+                      }
+                  }
+              }
+
               private fun showMainMenu(anchor: View) {
                   val popup = PopupMenu(this, anchor)
                   popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
+                  popup.menu.add("Emitir a dispositivo…").setOnMenuItemClickListener { showCastDialog(); true }
+                  popup.menu.add("Tomar captura de pantalla").setOnMenuItemClickListener { takeScreenshot(); true }
                   popup.menu.add("Lista de reproducción").setOnMenuItemClickListener { showPlaylist(); true }
                   popup.menu.add("Archivos recientes").setOnMenuItemClickListener { showRecentFiles(); true }
                   popup.menu.add("Favoritos").setOnMenuItemClickListener { showFavorites(); true }
@@ -696,6 +989,8 @@ jobs:
                               }
                           }
                           popup.menu.add("Pantalla completa").setOnMenuItemClickListener { enterImmersiveMode(); true }
+                          popup.menu.add("Emitir a dispositivo…").setOnMenuItemClickListener { showCastDialog(); true }
+                          popup.menu.add("Tomar captura de pantalla").setOnMenuItemClickListener { takeScreenshot(); true }
                       }
                       "Reproducir" -> {
                           popup.menu.add("Reproducir / Pausar").setOnMenuItemClickListener {
@@ -927,6 +1222,9 @@ jobs:
               }
           
               private fun rebuildPlayer() {
+                  stopRendererDiscovery()
+                  activeRendererName = null
+                  mediaPlayer?.setRenderer(null)
                   mediaPlayer?.stop()
                   releaseCurrentAssetDescriptor()
                   if (viewsAttached) {
@@ -962,7 +1260,7 @@ jobs:
                       videoLayout.post {
                           if (isFinishing || isDestroyed) return@post
                           if (!viewsAttached) {
-                              mediaPlayer?.attachViews(videoLayout, null, false, false)
+                              mediaPlayer?.attachViews(videoLayout, null, false, true)
                               viewsAttached = true
                           }
                           play(uri, startPos)
@@ -1243,7 +1541,7 @@ jobs:
                       // No desmontar la superficie al volver del selector: hacerlo provoca
                       // un parpadeo negro y puede reiniciar la salida de video.
                       if (!viewsAttached) {
-                          player.attachViews(videoLayout, null, false, false)
+                          player.attachViews(videoLayout, null, false, true)
                           viewsAttached = true
                       }
                       videoLayout.requestLayout()
@@ -1586,6 +1884,8 @@ jobs:
           
               override fun onDestroy() {
                   super.onDestroy()
+                  stopRendererDiscovery()
+                  mediaPlayer?.setRenderer(null)
                   mediaPlayer?.stop()
                   mediaPlayer?.release()
                   releaseCurrentAssetDescriptor()
@@ -1599,7 +1899,7 @@ jobs:
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: MPM Player-Android-v4.2.0
+          name: MPM Player-Android-v4.3.0
           path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
@@ -1609,12 +1909,12 @@ jobs:
           tag_name: mpc-android-build-${{ github.run_number }}
           name: MPM Player Android - compilación #${{ github.run_number }}
           body: |
-            MPM Player 4.2.0
+            MPM Player 4.3.0
 
             Novedades:
-            - Favoritos guardados en el dispositivo.
-            - Apertura de subtítulos externos compatibles con VLC.
-            - Conservación de permisos de archivos para volver a abrirlos.
+            - Emisión a dispositivos compatibles detectados en la red local mediante LibVLC.
+            - Capturas de fotogramas guardadas en la galería en Imágenes/MPM Player.
+            - Mejoras acumuladas de reproducción, audio, subtítulos y favoritos.
             - Se mantiene el motor LibVLC y la firma permanente.
 
             Rama: ${{ github.ref_name }}
