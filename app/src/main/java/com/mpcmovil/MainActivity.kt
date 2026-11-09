@@ -1769,8 +1769,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val requestId = playbackRequestId.incrementAndGet()
-        mediaPlayer?.stop()
-        releaseCurrentAssetDescriptor()
         currentUri = uri
         if (playlistIndex < 0 || playlist.getOrNull(playlistIndex) != uri) {
             playlist.clear()
@@ -1788,6 +1786,11 @@ class MainActivity : AppCompatActivity() {
             var afd: AssetFileDescriptor? = null
             var media: Media? = null
             try {
+                // Stopping a previous native VLC session can block; never do it on Android's UI thread.
+                try { mediaPlayer?.stop() } catch (stopError: Exception) {
+                    Log.w("MPM_PLAYER", "No se pudo detener la sesión anterior de VLC", stopError)
+                }
+                releaseCurrentAssetDescriptor()
                 var displayName = "desconocido"
                 var fileSize = "desconocido"
                 val mimeType = contentResolver.getType(uri) ?: "desconocido"
