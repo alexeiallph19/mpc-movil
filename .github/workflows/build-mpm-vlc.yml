@@ -1,0 +1,85 @@
+name: Build MPM Player from VLC
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - migracion-vlc-base
+    paths:
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'settings.gradle'
+      - 'application/**'
+      - 'buildsystem/**'
+      - '.github/workflows/build-mpm-vlc.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mpm-vlc-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Checkout MPM VLC base
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake autopoint build-essential cmake gettext git libtool libtool-bin make pkg-config python3 unzip wget yasm nasm ant flex bison
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK and NDK
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;21.4.7075529"
+          echo "ANDROID_SDK=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK=$ANDROID_HOME/ndk/21.4.7075529" >> "$GITHUB_ENV"
+
+      - name: Prepare VLC native sources and Gradle wrapper
+        run: ./buildsystem/compile.sh --init
+
+      - name: Restore MPM signing key
+        env:
+          MPM_KEYSTORE_BASE64: ${{ secrets.MPM_KEYSTORE_BASE64 }}
+        run: |
+          set +x
+          test -n "$MPM_KEYSTORE_BASE64" || { echo "Missing MPM_KEYSTORE_BASE64 secret"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/mpm-signing"
+          printf '%s' "$MPM_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mpm-signing/mpm-player-release.jks"
+          test -s "$RUNNER_TEMP/mpm-signing/mpm-player-release.jks"
+          echo "MPM_KEYSTORE_FILE=$RUNNER_TEMP/mpm-signing/mpm-player-release.jks" >> "$GITHUB_ENV"
+
+      - name: Build signed MPM Player APK
+        env:
+          MPM_KEYSTORE_PASSWORD: ${{ secrets.MPM_KEYSTORE_PASSWORD }}
+          MPM_KEY_ALIAS: ${{ secrets.MPM_KEY_ALIAS }}
+          MPM_KEY_PASSWORD: ${{ secrets.MPM_KEY_PASSWORD }}
+        run: |
+          set +x
+          test -n "$MPM_KEYSTORE_PASSWORD" || { echo "Missing MPM_KEYSTORE_PASSWORD secret"; exit 1; }
+          test -n "$MPM_KEY_ALIAS" || { echo "Missing MPM_KEY_ALIAS secret"; exit 1; }
+          test -n "$MPM_KEY_PASSWORD" || { echo "Missing MPM_KEY_PASSWORD secret"; exit 1; }
+          ./buildsystem/compile.sh --signrelease -a arm64 -t
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MPM-Player-VLC-base-arm64
+          path: application/app/build/outputs/apk/signedRelease/*.apk
+          if-no-files-found: error
+          retention-days: 14
