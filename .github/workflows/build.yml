@@ -1037,30 +1037,27 @@ jobs:
               }
 
               private fun applyPreferredRefreshRate() {
+                  // No fijar la pantalla a su Hz máximo: LibVLC conserva la cadencia
+                  // original del video y Android puede gestionar el refresco disponible.
+                  // Un refresco de 90/120 Hz no convierte un video de 24 FPS en 90/120 FPS.
                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                       try {
-                          val supported = windowManager.defaultDisplay.supportedModes
-                          val maxRate = supported.maxOfOrNull { it.refreshRate } ?: 60f
                           window.attributes = window.attributes.apply {
-                              preferredRefreshRate = maxRate
+                              preferredRefreshRate = 0f
+                              preferredDisplayModeId = 0
                           }
                       } catch (e: Exception) {
-                          Log.w("MPM_PLAYER", "No se pudo solicitar la frecuencia máxima de pantalla", e)
+                          Log.w("MPM_PLAYER", "No se pudo dejar la frecuencia de pantalla en modo automático", e)
                       }
                   }
               }
 
               private fun displayRefreshRateLabel(): String {
                   return try {
-                      val rate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                          windowManager.defaultDisplay.supportedModes.maxOfOrNull { it.refreshRate }
-                              ?: windowManager.defaultDisplay.refreshRate
-                      } else {
-                          windowManager.defaultDisplay.refreshRate
-                      }
-                      rate.toInt().toString() + " Hz"
+                      // Mostrar el refresco actual, no el máximo que admite el dispositivo.
+                      windowManager.defaultDisplay.refreshRate.toInt().toString() + " Hz"
                   } catch (_: Exception) {
-                      "Hz adaptable"
+                      "Hz automático"
                   }
               }
 
