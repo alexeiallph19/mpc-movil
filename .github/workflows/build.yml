@@ -303,17 +303,30 @@ jobs:
               android:layout_width="match_parent" android:layout_height="match_parent" android:background="#000000">
               <org.videolan.libvlc.util.VLCVideoLayout
                   android:id="@+id/videoLayout" android:layout_width="match_parent" android:layout_height="match_parent" />
-              <LinearLayout android:id="@+id/welcomeScreen" android:layout_width="match_parent" android:layout_height="match_parent"
-                  android:gravity="center" android:orientation="vertical" android:background="#F20B0E12" android:padding="28dp">
-                  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MPM"
-                      android:textColor="#F2F5F8" android:textSize="34sp" android:textStyle="bold" android:letterSpacing="0.12" />
-                  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp"
-                      android:text="MEDIA PLAYER" android:textColor="#8995A3" android:textSize="10sp" android:letterSpacing="0.22" />
-                  <View android:layout_width="34dp" android:layout_height="2dp" android:layout_marginTop="22dp" android:background="#4DA3FF" />
-                  <Button android:id="@+id/btnWelcomeOpen" style="@style/Widget.AppCompat.Button.Borderless"
-                      android:layout_width="wrap_content" android:layout_height="44dp" android:layout_marginTop="22dp"
-                      android:paddingStart="22dp" android:paddingEnd="22dp" android:text="Abrir archivo"
-                      android:textAllCaps="false" android:textColor="#DCEBFA" android:textSize="14sp" android:backgroundTint="#263C5A" />
+              <LinearLayout android:id="@+id/welcomeScreen" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="#101216" android:paddingTop="20dp">
+                  <LinearLayout android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="18dp" android:paddingEnd="8dp">
+                      <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="MPM" android:textColor="#FFFFFF" android:textSize="25sp" android:textStyle="bold" />
+                      <Button android:id="@+id/btnLibraryRefresh" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="44dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp" android:text="⟳" android:textColor="#E6E6E6" android:textSize="22sp" />
+                      <Button android:id="@+id/btnLibrarySettings" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="44dp" android:layout_height="44dp" android:minWidth="0dp" android:minHeight="0dp" android:text="⚙" android:textColor="#E6E6E6" android:textSize="19sp" />
+                  </LinearLayout>
+                  <TextView android:id="@+id/libraryHeading" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="20dp" android:paddingTop="4dp" android:text="Vídeos" android:textColor="#FFFFFF" android:textSize="23sp" android:textStyle="bold" />
+                  <TextView android:id="@+id/librarySubtitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="20dp" android:paddingBottom="9dp" android:text="Archivos de vídeo del dispositivo" android:textColor="#9AA2AD" android:textSize="12sp" />
+                  <HorizontalScrollView android:layout_width="match_parent" android:layout_height="46dp" android:scrollbars="none">
+                      <LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal">
+                          <Button android:id="@+id/btnLibraryVideos" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Vídeos" android:textAllCaps="false" android:textColor="#FFFF6A00" />
+                          <Button android:id="@+id/btnLibraryFolders" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Carpetas" android:textAllCaps="false" android:textColor="#B7BEC8" />
+                          <Button android:id="@+id/btnLibraryRecent" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Recientes" android:textAllCaps="false" android:textColor="#B7BEC8" />
+                          <Button android:id="@+id/btnLibraryFavorites" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Favoritos" android:textAllCaps="false" android:textColor="#B7BEC8" />
+                      </LinearLayout>
+                  </HorizontalScrollView>
+                  <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#252A31" />
+                  <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+                      <LinearLayout android:id="@+id/libraryItems" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="10dp" />
+                  </ScrollView>
+                  <LinearLayout android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center" android:orientation="horizontal" android:background="#171B21">
+                      <Button android:id="@+id/btnLibraryOpen" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:text="＋  Abrir archivo" android:textAllCaps="false" android:textColor="#FFFFFF" />
+                      <Button android:id="@+id/btnLibraryPlaylist" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:text="☷  Lista" android:textAllCaps="false" android:textColor="#D0D5DC" />
+                  </LinearLayout>
               </LinearLayout>
               <LinearLayout android:id="@+id/topBar" android:layout_width="match_parent" android:layout_height="44dp"
               android:layout_gravity="top" android:background="#B30B0B0B" android:gravity="center_vertical"
@@ -327,21 +340,8 @@ jobs:
                   android:layout_width="44dp" android:layout_height="42dp" android:minWidth="0dp" android:minHeight="0dp"
                   android:text="⋮" android:textColor="#FFFFFF" android:textSize="23sp" />
           </LinearLayout>
-          <LinearLayout android:id="@+id/centerControls" android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:layout_gravity="center" android:gravity="center" android:orientation="horizontal"
-              android:padding="6dp" android:background="#55000000">
-              <Button android:id="@+id/btnCenterBack" style="@style/Widget.AppCompat.Button.Borderless"
-                  android:layout_width="62dp" android:layout_height="58dp" android:minWidth="0dp" android:minHeight="0dp"
-                  android:background="@drawable/mpm_control_surface" android:text="−10" android:textColor="#FFFFFF"
-                  android:textSize="16sp" />
-              <Button android:id="@+id/btnCenterPlay" style="@style/Widget.AppCompat.Button.Borderless"
-                  android:layout_width="76dp" android:layout_height="68dp" android:layout_marginStart="12dp" android:layout_marginEnd="12dp"
-                  android:minWidth="0dp" android:minHeight="0dp" android:background="@drawable/mpm_control_primary"
-                  android:text="▶" android:textColor="#FFFFFF" android:textSize="27sp" />
-              <Button android:id="@+id/btnCenterForward" style="@style/Widget.AppCompat.Button.Borderless"
-                  android:layout_width="62dp" android:layout_height="58dp" android:minWidth="0dp" android:minHeight="0dp"
-                  android:background="@drawable/mpm_control_surface" android:text="+10" android:textColor="#FFFFFF"
-                  android:textSize="16sp" />
+          <LinearLayout android:id="@+id/centerControls" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:gravity="center" android:orientation="horizontal" android:padding="6dp" android:background="#33000000">
+              <Button android:id="@+id/btnCenterPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="68dp" android:layout_height="68dp" android:minWidth="0dp" android:minHeight="0dp" android:background="@drawable/mpm_control_primary" android:text="▶" android:textColor="#FFFFFF" android:textSize="26sp" />
           </LinearLayout>
           <TextView android:id="@+id/txtOsd" android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal|top" android:layout_marginTop="58dp"
@@ -444,6 +444,13 @@ jobs:
           
               private lateinit var videoLayout: VLCVideoLayout
               private lateinit var welcomeScreen: View
+              private lateinit var libraryItems: LinearLayout
+              private lateinit var libraryHeading: TextView
+              private lateinit var librarySubtitle: TextView
+              private var libraryMode = "Videos"
+              private var selectedFolder = ""
+              private val libraryVideos = mutableListOf<LibraryVideo>()
+              private data class LibraryVideo(val uri: Uri, val name: String, val duration: Long, val folder: String)
               private lateinit var topBar: View
               private lateinit var bottomBar: View
               private lateinit var centerControls: View
@@ -551,6 +558,8 @@ jobs:
                   initViews()
                   initGestures()
                   initPlayer()
+                  renderLibrary("Videos")
+                  ensureLibraryPermission()
                   intent?.data?.let { play(it) }
               }
           
@@ -752,7 +761,7 @@ jobs:
                               topBar.visibility = v
                               bottomBar.visibility = v
                           }
-                          5 -> showMainMenu(findViewById(R.id.btnMainMenu))
+                          5 -> { welcomeScreen.visibility = View.VISIBLE; renderLibrary("Videos") }
                       }
                   }.setNegativeButton("Cerrar", null).show()
               }
@@ -1135,17 +1144,18 @@ jobs:
               override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
                   super.onRequestPermissionsResult(requestCode, permissions, grantResults)
                   if (requestCode == screenshotRequestCode) {
-                      if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                          takeScreenshot()
-                      } else {
-                          Toast.makeText(this, "Se necesita permiso para guardar capturas en la galería", Toast.LENGTH_LONG).show()
-                      }
+                      if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) takeScreenshot()
+                      else Toast.makeText(this, "Se necesita permiso para guardar capturas en la galería", Toast.LENGTH_LONG).show()
+                  } else if (requestCode == 9042) {
+                      if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) refreshLibrary()
+                      else showLibraryEmpty("Permite el acceso a vídeos para mostrar tu biblioteca")
                   }
               }
 
               private fun showMainMenu(anchor: View) {
                   val popup = PopupMenu(this, anchor)
-                  popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
+                  popup.menu.add("Biblioteca").setOnMenuItemClickListener { welcomeScreen.visibility = View.VISIBLE; renderLibrary(libraryMode); true }
+                  popup.menu.add("Abrir archivo…").setOnMenuItemClickListener { pickFile(); true }
                   popup.menu.add("Emitir a dispositivo…").setOnMenuItemClickListener { showCastDialog(); true }
                   popup.menu.add("Tomar captura de pantalla").setOnMenuItemClickListener { takeScreenshot(); true }
                   popup.menu.add("Botón flotante de captura: " + if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) "Activado" else "Desactivado").setOnMenuItemClickListener { toggleFloatingScreenshot(); true }
@@ -1303,6 +1313,9 @@ jobs:
               private fun initViews() {
                   videoLayout = findViewById(R.id.videoLayout)
                   welcomeScreen = findViewById(R.id.welcomeScreen)
+                  libraryItems = findViewById(R.id.libraryItems)
+                  libraryHeading = findViewById(R.id.libraryHeading)
+                  librarySubtitle = findViewById(R.id.librarySubtitle)
                   topBar = findViewById(R.id.topBar)
                   bottomBar = findViewById(R.id.bottomBar)
                   centerControls = findViewById(R.id.centerControls)
@@ -1325,21 +1338,27 @@ jobs:
           
                   findViewById<Button>(R.id.btnMainMenu).setOnClickListener { showMainMenu(it) }
           
-                  findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
+                  findViewById<Button>(R.id.btnLibraryOpen).setOnClickListener { pickFile() }
+                  findViewById<Button>(R.id.btnLibraryRefresh).setOnClickListener { refreshLibrary() }
+                  findViewById<Button>(R.id.btnLibrarySettings).setOnClickListener { showPlayerSettings() }
+                  findViewById<Button>(R.id.btnLibraryVideos).setOnClickListener { renderLibrary("Videos") }
+                  findViewById<Button>(R.id.btnLibraryFolders).setOnClickListener { renderLibrary("Carpetas") }
+                  findViewById<Button>(R.id.btnLibraryRecent).setOnClickListener { renderLibrary("Recientes") }
+                  findViewById<Button>(R.id.btnLibraryFavorites).setOnClickListener { renderLibrary("Favoritos") }
+                  findViewById<Button>(R.id.btnLibraryPlaylist).setOnClickListener { showPlaylist() }
                   btnScreenshotFloat.setOnClickListener { takeScreenshot() }
                   btnScreenshotFloat.visibility = if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true) && isControlsVisible) View.VISIBLE else View.GONE
                   findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
           
                   btnPlay.setOnClickListener { togglePlayback() }
                   btnCenterPlay.setOnClickListener { togglePlayback() }
-                  findViewById<Button>(R.id.btnCenterBack).setOnClickListener { seekBy(-seekIntervalSeconds) }
-                  findViewById<Button>(R.id.btnCenterForward).setOnClickListener { seekBy(seekIntervalSeconds) }
                   findViewById<Button>(R.id.btnPause).setOnClickListener { mediaPlayer?.pause() }
           
                   findViewById<Button>(R.id.btnStop).setOnClickListener {
                       mediaPlayer?.stop()
                       releaseCurrentAssetDescriptor()
                       welcomeScreen.visibility = View.VISIBLE
+                      renderLibrary(libraryMode)
                       txtStatus.text = "Detenido"
                       txtTime.text = "00:00:00"
                       txtRemaining.text = "-00:00:00"
@@ -1391,6 +1410,90 @@ jobs:
                   })
               }
           
+              private fun ensureLibraryPermission() {
+                  val permission = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_VIDEO else Manifest.permission.READ_EXTERNAL_STORAGE
+                  if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) refreshLibrary()
+                  else ActivityCompat.requestPermissions(this, arrayOf(permission), 9042)
+              }
+              private fun showLibraryEmpty(message: String) {
+                  libraryItems.removeAllViews()
+                  libraryItems.addView(TextView(this).apply { text = "▣\\n\\n" + message + "\\n\\nUsa 'Abrir archivo' para abrir vídeos de otras ubicaciones."; gravity = android.view.Gravity.CENTER; textSize = 14f; setTextColor(0xFFD7DCE2.toInt()); setPadding(dp(24), dp(52), dp(24), dp(52)) }, LinearLayout.LayoutParams(-1, -2))
+              }
+              private fun refreshLibrary() {
+                  val permission = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_VIDEO else Manifest.permission.READ_EXTERNAL_STORAGE
+                  if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) { ensureLibraryPermission(); return }
+                  val found = mutableListOf<LibraryVideo>()
+                  val base = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                  val cols = mutableListOf(MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.DURATION)
+                  if (Build.VERSION.SDK_INT >= 29) cols.add(MediaStore.Video.Media.RELATIVE_PATH)
+                  try {
+                      contentResolver.query(base, cols.toTypedArray(), null, null, MediaStore.Video.Media.DATE_ADDED + " DESC")?.use { cur ->
+                          val id = cur.getColumnIndexOrThrow(MediaStore.Video.Media._ID); val name = cur.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME); val duration = cur.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+                          val folder = if (Build.VERSION.SDK_INT >= 29) cur.getColumnIndex(MediaStore.Video.Media.RELATIVE_PATH) else -1
+                          while (cur.moveToNext()) {
+                              val path = if (folder >= 0) cur.getString(folder).orEmpty().trimEnd('/') else "Almacenamiento interno"
+                              found.add(LibraryVideo(android.content.ContentUris.withAppendedId(base, cur.getLong(id)), cur.getString(name) ?: "Vídeo", cur.getLong(duration), path.ifBlank { "Almacenamiento interno" }))
+                          }
+                      }
+                  } catch (e: Exception) { Log.e("MPM_PLAYER", "Error al leer biblioteca", e) }
+                  libraryVideos.clear(); libraryVideos.addAll(found); renderLibrary(libraryMode)
+              }
+              private fun renderLibrary(mode: String) {
+                  libraryMode = mode; libraryItems.removeAllViews()
+                  val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
+                  val recent = prefs.getString("recent_files_ordered", "")?.split("\\n")?.filter { it.isNotBlank() }.orEmpty()
+                  val favorites = prefs.getStringSet("favorites", emptySet()).orEmpty()
+                  val chosen = when (mode) {
+                      "Recientes" -> { val map = libraryVideos.associateBy { it.uri.toString() }; recent.mapNotNull { map[it] } }
+                      "Favoritos" -> libraryVideos.filter { favorites.contains(it.uri.toString()) }
+                      else -> libraryVideos
+                  }
+                  libraryHeading.text = when (mode) { "Carpetas" -> if (selectedFolder.isBlank()) "Carpetas" else selectedFolder.substringAfterLast('/'); "Recientes" -> "Reproducidos recientemente"; "Favoritos" -> "Favoritos"; else -> "Vídeos" }
+                  librarySubtitle.text = when (mode) { "Carpetas" -> "Explora tus archivos por ubicación"; "Recientes" -> "${chosen.size} archivos recientes"; "Favoritos" -> "${chosen.size} archivos guardados"; else -> "${libraryVideos.size} vídeos encontrados" }
+                  val ids = listOf(R.id.btnLibraryVideos, R.id.btnLibraryFolders, R.id.btnLibraryRecent, R.id.btnLibraryFavorites)
+                  val active = when (mode) { "Carpetas" -> R.id.btnLibraryFolders; "Recientes" -> R.id.btnLibraryRecent; "Favoritos" -> R.id.btnLibraryFavorites; else -> R.id.btnLibraryVideos }
+                  ids.forEach { id -> findViewById<Button>(id).setTextColor(if (id == active) 0xFFFF6A00.toInt() else 0xFFB7BEC8.toInt()) }
+                  if (mode == "Carpetas") {
+                      if (selectedFolder.isNotBlank()) {
+                          libraryItems.addView(TextView(this).apply { text = "‹  Todas las carpetas"; setTextColor(0xFFFF8A35.toInt()); setPadding(dp(10), dp(14), 0, dp(14)); setOnClickListener { selectedFolder = ""; renderLibrary("Carpetas") } })
+                          libraryVideos.filter { it.folder == selectedFolder }.forEach { addLibraryVideoRow(it) }
+                      } else {
+                          val folders = libraryVideos.map { it.folder }.distinct().sorted()
+                          if (folders.isEmpty()) showLibraryEmpty("No se encontraron carpetas con vídeos")
+                          folders.forEach { folder ->
+                              val row = TextView(this).apply { text = "▰   ${folder.substringAfterLast('/')}     ·     ${libraryVideos.count { it.folder == folder }} vídeos"; textSize = 14f; setTextColor(0xFFF1F3F5.toInt()); setPadding(dp(14), dp(18), 0, dp(18)); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF1A1F26.toInt()); cornerRadius = dp(10).toFloat() }; setOnClickListener { selectedFolder = folder; renderLibrary("Carpetas") } }
+                              val lp = LinearLayout.LayoutParams(-1, -2); lp.setMargins(0, dp(4), 0, dp(4)); libraryItems.addView(row, lp)
+                          }
+                      }
+                      return
+                  }
+                  if (chosen.isEmpty()) { showLibraryEmpty(when (mode) { "Favoritos" -> "Todavía no tienes favoritos"; "Recientes" -> "Aún no has reproducido vídeos"; else -> "No se encontraron vídeos en el dispositivo" }); return }
+                  chosen.forEach { addLibraryVideoRow(it) }
+              }
+              private fun addLibraryVideoRow(video: LibraryVideo) {
+                  val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL; setPadding(dp(7), dp(8), dp(8), dp(8)); background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF191E25.toInt()); cornerRadius = dp(10).toFloat() } }
+                  val thumb = ImageView(this).apply { layoutParams = LinearLayout.LayoutParams(dp(112), dp(70)); scaleType = ImageView.ScaleType.CENTER_CROP; setBackgroundColor(0xFF252B33.toInt()); setImageResource(android.R.drawable.ic_media_play) }
+                  val info = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(12), 0, dp(4), 0) }
+                  info.addView(TextView(this).apply { text = video.name; textSize = 13.5f; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; setTextColor(0xFFF4F5F7.toInt()) })
+                  info.addView(TextView(this).apply { text = formatTime(video.duration) + "   ·   " + video.folder.substringAfterLast('/'); textSize = 10.5f; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; setTextColor(0xFF9AA4B0.toInt()); setPadding(0, dp(5), 0, 0) })
+                  row.addView(thumb); row.addView(info, LinearLayout.LayoutParams(0, -2, 1f))
+                  row.setOnClickListener { playlist.clear(); playlist.add(video.uri); playlistIndex = 0; play(video.uri) }
+                  row.setOnLongClickListener {
+                      AlertDialog.Builder(this).setTitle(video.name).setItems(arrayOf("Reproducir", "Añadir a favoritos", "Información")) { _, which ->
+                          when (which) {
+                              0 -> { playlist.clear(); playlist.add(video.uri); playlistIndex = 0; play(video.uri) }
+                              1 -> { val set = getSharedPreferences("mpm_player", MODE_PRIVATE).getStringSet("favorites", emptySet())?.toMutableSet() ?: mutableSetOf(); set.add(video.uri.toString()); getSharedPreferences("mpm_player", MODE_PRIVATE).edit().putStringSet("favorites", set).apply(); renderLibrary(libraryMode) }
+                              2 -> { currentUri = video.uri; showMediaInfo() }
+                          }
+                      }.show(); true
+                  }
+                  val lp = LinearLayout.LayoutParams(-1, -2); lp.setMargins(0, dp(4), 0, dp(4)); libraryItems.addView(row, lp)
+                  if (Build.VERSION.SDK_INT >= 29) thumbnailExecutor.execute {
+                      try { val bmp = contentResolver.loadThumbnail(video.uri, android.util.Size(dp(112), dp(70)), null); runOnUiThread { if (!isDestroyed && thumb.parent != null) thumb.setImageBitmap(bmp) } }
+                      catch (e: Exception) { Log.d("MPM_PLAYER", "Miniatura no disponible: ${video.name}") }
+                  }
+              }
+
               private fun initPlayer() {
                   val opts = ArrayList<String>()
                   opts.add("--file-caching=2000")
