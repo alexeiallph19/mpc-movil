@@ -406,6 +406,9 @@ jobs:
               private var gestureStartBrightness = 0.5f
               private var gestureStartTime = 0L
               private var gestureMode = ""
+              private var repeatA: Long? = null
+              private var repeatB: Long? = null
+              private var sleepTimerRunnable: Runnable? = null
           
               private val fileLauncher = registerForActivityResult(
                   ActivityResultContracts.StartActivityForResult()
@@ -455,6 +458,183 @@ jobs:
                   intent?.data?.let { play(it) }
               }
           
+
+              private fun showAudioSubsPanel(initial: String) {
+                  val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(8), dp(16), dp(8)) }
+                  val tabs = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+                  val body = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+                  root.addView(tabs)
+                  root.addView(body, LinearLayout.LayoutParams(-1, dp(300)))
+                  val dialog = AlertDialog.Builder(this).setTitle("Audio y subtítulos").setView(root)
+                      .setNegativeButton("Cerrar", null).create()
+                  fun add(label: String, action: () -> Unit) {
+                      body.addView(Button(this).apply {
+                          text = label
+                          isAllCaps = false
+                          setOnClickListener { action() }
+                      }, LinearLayout.LayoutParams(-1, dp(46)))
+                  }
+                  fun render(tab: String) {
+                      body.removeAllViews()
+                      if (tab == "Audio") {
+                          val tracks = mediaPlayer?.audioTracks.orEmpty()
+                          if (tracks.isEmpty()) add("No hay pistas de audio disponibles") {}
+                          tracks.forEach { track ->
+                              val prefix = if (track.id == (mediaPlayer?.audioTrack ?: -1)) "✓  " else ""
+                              add(prefix + (track.name ?: ("Pista " + track.id))) {
+                                  mediaPlayer?.audioTrack = track.id
+                                  showOsd("Pista de audio cambiada")
+                                  dialog.dismiss()
+                              }
+                          }
+                      } else {
+                          add("Desactivar subtítulos") {
+                              mediaPlayer?.spuTrack = -1
+                              showOsd("Subtítulos desactivados")
+                              dialog.dismiss()
+                          }
+                          val tracks = mediaPlayer?.spuTracks.orEmpty()
+                          tracks.forEach { track ->
+                              val prefix = if (track.id == (mediaPlayer?.spuTrack ?: -1)) "✓  " else ""
+                              add(prefix + (track.name ?: ("Subtítulo " + track.id))) {
+                                  mediaPlayer?.spuTrack = track.id
+                                  showOsd("Pista de subtítulos cambiada")
+                                  dialog.dismiss()
+                              }
+                          }
+                          add("Cargar subtítulo externo…") { dialog.dismiss(); pickExternalSubtitle() }
+                      }
+                  }
+                  listOf("Audio", "Subs").forEach { tab ->
+                      tabs.addView(Button(this).apply {
+                          text = tab
+                          isAllCaps = false
+                          setOnClickListener { render(tab) }
+                      }, LinearLayout.LayoutParams(0, dp(46), 1f))
+                  }
+                  render(if (initial == "Subs") "Subs" else "Audio")
+                  dialog.show()
+              }
+
+              private fun showImagePanel() {
+                  val items = arrayOf("Relación de aspecto", "Cambiar orientación", "Rellenar pantalla", "Alternar video bajo notch")
+                  AlertDialog.Builder(this).setTitle("Imagen y pantalla").setItems(items) { _, which ->
+                      when (which) {
+                          0 -> showAspectMenu()
+                          1 -> cycleRotation()
+                          2 -> applyAspect(aspects.lastIndex)
+                          3 -> {
+                              displayUnderNotch = !displayUnderNotch
+                              getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                                  .putBoolean("display_under_notch", displayUnderNotch).apply()
+                              applyDisplayUnderNotch()
+                          }
+                      }
+                  }.setNegativeButton("Cerrar", null).show()
+              }
+
+              private fun showPlaybackTools() {
+                  val items = arrayOf("Ir a un tiempo…", "Temporizador de apagado", "Marcar punto A", "Marcar punto B y repetir", "Desactivar repetición A-B", "Velocidad")
+                  AlertDialog.Builder(this).setTitle("Herramientas de reproducción").setItems(items) { _, which ->
+                      when (which) {
+                          0 -> showJumpToTime()
+                          1 -> showSleepTimer()
+                          2 -> {
+                              repeatA = mediaPlayer?.time
+                              repeatB = null
+                              showOsd(if (repeatA == null) "Abre un video primero" else "Punto A marcado")
+                          }
+                          3 -> {
+                              val now = mediaPlayer?.time
+                              if (repeatA == null || now == null || now <= (repeatA ?: 0L)) {
+                                  Toast.makeText(this, "Marca primero un punto A válido", Toast.LENGTH_SHORT).show()
+                              } else {
+                                  repeatB = now
+                                  showOsd("Repetición A-B activada")
+                              }
+                          }
+                          4 -> { repeatA = null; repeatB = null; showOsd("Repetición A-B desactivada") }
+                          5 -> showSpeedMenu()
+                      }
+                  }.setNegativeButton("Cerrar", null).show()
+              }
+
+              private fun showSpeedMenu() {
+                  val labels = speeds.map { it.toString() + "×" }.toTypedArray()
+                  AlertDialog.Builder(this).setTitle("Velocidad")
+                      .setSingleChoiceItems(labels, speedIndex) { d, which ->
+                          speedIndex = which
+                          val value = speeds[which]
+                          mediaPlayer?.rate = value
+                          btnSpeed.text = value.toString() + "X"
+                          showOsd("Velocidad: " + value + "×")
+                          d.dismiss()
+                      }.setNegativeButton("Cerrar", null).show()
+              }
+
+              private fun showJumpToTime() {
+                  val field = EditText(this).apply { hint = "HH:MM:SS o segundos;"; setSingleLine(true) }
+                  AlertDialog.Builder(this).setTitle("Ir a un tiempo")
+                      .setMessage("Ejemplo: 00:12:30")
+                      .setView(field)
+                      .setPositiveButton("Ir") { _, _ ->
+                          val parts = field.text.toString().trim().split(":")
+                          val seconds = try {
+                              when (parts.size) {
+                                  1 -> parts[0].toLong()
+                                  2 -> parts[0].toLong() * 60L + parts[1].toLong()
+                                  3 -> parts[0].toLong() * 3600L + parts[1].toLong() * 60L + parts[2].toLong()
+                                  else -> -1L
+                              }
+                          } catch (_: Exception) { -1L }
+                          if (seconds < 0L) Toast.makeText(this, "Tiempo no válido", Toast.LENGTH_SHORT).show()
+                          else mediaPlayer?.let { p ->
+                              val target = seconds * 1000L
+                              p.time = if (p.length > 0L) target.coerceAtMost(p.length) else target
+                              showOsd("Salto realizado")
+                          } ?: Toast.makeText(this, "Primero abre un archivo", Toast.LENGTH_SHORT).show()
+                      }.setNegativeButton("Cancelar", null).show()
+              }
+
+              private fun showSleepTimer() {
+                  val choices = arrayOf("15 minutos", "30 minutos", "45 minutos", "60 minutos", "Cancelar temporizador")
+                  AlertDialog.Builder(this).setTitle("Temporizador").setItems(choices) { _, which ->
+                      sleepTimerRunnable?.let { handler.removeCallbacks(it) }
+                      sleepTimerRunnable = null
+                      if (which == 4) showOsd("Temporizador cancelado")
+                      else {
+                          val minutes = intArrayOf(15, 30, 45, 60)[which]
+                          val task = Runnable {
+                              mediaPlayer?.pause()
+                              showOsd("Temporizador finalizado")
+                              sleepTimerRunnable = null
+                          }
+                          sleepTimerRunnable = task
+                          handler.postDelayed(task, minutes * 60_000L)
+                          showOsd("Pausa programada: " + minutes + " min")
+                      }
+                  }.setNegativeButton("Cerrar", null).show()
+              }
+
+              private fun showPlayerSettings() {
+                  val sections = arrayOf("Reproducción", "Audio", "Subtítulos", "Imagen y pantalla", "Interfaz", "Biblioteca")
+                  AlertDialog.Builder(this).setTitle("Ajustes").setItems(sections) { _, which ->
+                      when (which) {
+                          0 -> showPlaybackTools()
+                          1 -> showAudioSubsPanel("Audio")
+                          2 -> showAudioSubsPanel("Subs")
+                          3 -> showImagePanel()
+                          4 -> {
+                              isControlsVisible = !isControlsVisible
+                              val v = if (isControlsVisible) View.VISIBLE else View.GONE
+                              topBar.visibility = v
+                              bottomBar.visibility = v
+                          }
+                          5 -> showMainMenu(findViewById(R.id.btnMainMenu))
+                      }
+                  }.setNegativeButton("Cerrar", null).show()
+              }
+
               private fun showMainMenu(anchor: View) {
                   val popup = PopupMenu(this, anchor)
                   popup.menu.add("Abrir video").setOnMenuItemClickListener { pickFile(); true }
@@ -465,9 +645,10 @@ jobs:
                   popup.menu.add("Información del medio").setOnMenuItemClickListener { showMediaInfo(); true }
                   popup.menu.add("Relación de aspecto").setOnMenuItemClickListener { showAspectMenu(); true }
                   popup.menu.add("Cambiar orientación").setOnMenuItemClickListener { cycleRotation(); true }
-                  popup.menu.add("Pistas de audio").setOnMenuItemClickListener { pickAudio(); true }
-                  popup.menu.add("Pistas de subtítulos").setOnMenuItemClickListener { pickSubtitles(); true }
-                  popup.menu.add("Abrir subtítulo externo").setOnMenuItemClickListener { pickExternalSubtitle(); true }
+                  popup.menu.add("Audio y subtítulos").setOnMenuItemClickListener { showAudioSubsPanel("Audio"); true }
+                  popup.menu.add("Imagen y pantalla").setOnMenuItemClickListener { showImagePanel(); true }
+                  popup.menu.add("Herramientas de reproducción").setOnMenuItemClickListener { showPlaybackTools(); true }
+                  popup.menu.add("Ajustes").setOnMenuItemClickListener { showPlayerSettings(); true }
                   popup.menu.add("Acerca de MPM Player").setOnMenuItemClickListener {
                       AlertDialog.Builder(this).setTitle("MPM Player")
                           .setMessage("Reproductor multimedia para Android")
@@ -569,8 +750,8 @@ jobs:
                   btnHwSw = findViewById(R.id.btnHwSw)
                   btnSpeed = findViewById(R.id.btnSpeed)
           
-                  findViewById<Button>(R.id.btnAudioTrack).setOnClickListener { pickAudio() }
-                  findViewById<Button>(R.id.btnSubtitleTrack).setOnClickListener { pickSubtitles() }
+                  findViewById<Button>(R.id.btnAudioTrack).setOnClickListener { showAudioSubsPanel("Audio") }
+                  findViewById<Button>(R.id.btnSubtitleTrack).setOnClickListener { showAudioSubsPanel("Subs") }
           
                   findViewById<Button>(R.id.btnMainMenu).setOnClickListener { showMainMenu(it) }
                   findViewById<Button>(R.id.topMenuFile).setOnClickListener { showTopMenu(it, "Archivo") }
@@ -702,6 +883,9 @@ jobs:
                                       seekBar.progress = ((t.toFloat() / l) * 1000).toInt()
                                       txtTime.text = "${formatTime(t)} / ${formatTime(l)}"
                                   }
+                                  val a = repeatA
+                                  val b = repeatB
+                                  if (a != null && b != null && b > a && t >= b) mediaPlayer?.time = a
                                   if (t - lastProgressSaveAt >= 5000L) {
                                       lastProgressSaveAt = t
                                       savePlaybackProgress()
@@ -1301,14 +1485,19 @@ jobs:
           
                             private fun rememberRecent(uri: Uri) {
                             val prefs = getSharedPreferences("mpm_player", MODE_PRIVATE)
-                            val recent = prefs.getStringSet("recent_files", emptySet())?.toMutableList() ?: mutableListOf()
+                            val recent = prefs.getString("recent_files_ordered", "")?.split("\\n")?.filter { it.isNotBlank() }?.toMutableList()
+                                ?: prefs.getStringSet("recent_files", emptySet())?.toMutableList() ?: mutableListOf()
                             recent.remove(uri.toString()); recent.add(0, uri.toString())
-                            prefs.edit().putStringSet("recent_files", recent.take(30).toSet()).apply()
+                            val limited = recent.take(30)
+                            prefs.edit().putStringSet("recent_files", limited.toSet())
+                                .putString("recent_files_ordered", limited.joinToString("\\n")).apply()
                         }
                         private fun showRecentFiles() {
                             val recent = getSharedPreferences("mpm_player", MODE_PRIVATE).getStringSet("recent_files", emptySet())?.toList().orEmpty()
                             if (recent.isEmpty()) { AlertDialog.Builder(this).setTitle("Archivos recientes").setMessage("Todavía no hay archivos recientes.").setPositiveButton("Aceptar", null).show(); return }
-                            val ordered = recent.sortedByDescending { it }
+                            val orderedSaved = getSharedPreferences("mpm_player", MODE_PRIVATE)
+                                .getString("recent_files_ordered", "")?.split("\\n")?.filter { it.isNotBlank() }.orEmpty()
+                            val ordered = (orderedSaved + recent).distinct().filter { recent.contains(it) }
                             AlertDialog.Builder(this).setTitle("Archivos recientes").setItems(ordered.map { getDisplayName(Uri.parse(it)) }.toTypedArray()) { _, which ->
                                 val uri = Uri.parse(ordered[which]); playlist.clear(); playlist.add(uri); playlistIndex = 0; play(uri)
                             }.setNegativeButton("Cerrar", null).show()
