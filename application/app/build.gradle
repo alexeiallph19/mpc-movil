@@ -50,7 +50,16 @@ android {
             storealias=androiddebugkey
             storepwd=android
              */
-            if (project.hasProperty('keyStoreFile')) {
+            def mpmStoreFile = System.getenv('MPM_KEYSTORE_FILE')
+            def mpmStorePassword = System.getenv('MPM_KEYSTORE_PASSWORD')
+            def mpmKeyAlias = System.getenv('MPM_KEY_ALIAS')
+            def mpmKeyPassword = System.getenv('MPM_KEY_PASSWORD')
+            if (mpmStoreFile && mpmStorePassword && mpmKeyAlias && mpmKeyPassword) {
+                storeFile file(mpmStoreFile)
+                storePassword = mpmStorePassword
+                keyAlias = mpmKeyAlias
+                keyPassword = mpmKeyPassword
+            } else if (project.hasProperty('keyStoreFile')) {
                 storeFile file(project.findProperty('keyStoreFile'))
                 keyAlias project.findProperty('storealias')
                 if (System.getenv('PASSWORD_KEYSTORE') != null && !System.getenv('PASSWORD_KEYSTORE').isEmpty()) {
