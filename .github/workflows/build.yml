@@ -1290,12 +1290,8 @@ jobs:
                       }
                   }
                   topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 38 else 44) }
-                  findViewById<Button>(R.id.btnCenterBack).layoutParams =
-                      findViewById<Button>(R.id.btnCenterBack).layoutParams.apply { height = dp(if (landscape) 48 else 58) }
                   btnCenterPlay.layoutParams =
                       btnCenterPlay.layoutParams.apply { height = dp(if (landscape) 56 else 68) }
-                  findViewById<Button>(R.id.btnCenterForward).layoutParams =
-                      findViewById<Button>(R.id.btnCenterForward).layoutParams.apply { height = dp(if (landscape) 48 else 58) }
               }
 
               private fun togglePlayback() {
