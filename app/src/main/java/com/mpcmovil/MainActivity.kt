@@ -1060,31 +1060,40 @@ class MainActivity : AppCompatActivity() {
     private fun applyResponsiveControls() {
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val bottom = bottomBar as? LinearLayout ?: return
-        bottom.setPadding(dp(if (landscape) 16 else 12), dp(2), dp(if (landscape) 16 else 12), dp(2))
+
+        // Compact VLC-style HUD: time, seekbar and transport controls stay close together.
+        bottom.setPadding(dp(if (landscape) 16 else 12), dp(if (landscape) 0 else 2),
+            dp(if (landscape) 16 else 12), dp(if (landscape) 0 else 2))
         bottom.getChildAt(0)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 18 else 20) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 16 else 20) }
         }
-        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 24 else 28) }
+        seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 18 else 24) }
         bottom.findViewById<View>(R.id.playerControlsRow)?.let { row ->
-            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 46 else 50) }
-        if (!landscape) {
-            val compactGroups = listOf(
-                R.id.playerControlsLeft to intArrayOf(34, 34),
-                R.id.playerControlsCenter to intArrayOf(38, 46, 38),
-                R.id.playerControlsRight to intArrayOf(32, 32, 40, 32)
-            )
-            compactGroups.forEach { (groupId, widths) ->
-                bottom.findViewById<LinearLayout>(groupId)?.let { group ->
-                    widths.forEachIndexed { index, width ->
-                        group.getChildAt(index)?.let { child ->
-                            child.layoutParams = child.layoutParams.apply { this.width = dp(width) }
+            row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 36 else 46) }
+        }
+
+        val compactGroups = if (landscape) listOf(
+            R.id.playerControlsLeft to intArrayOf(38, 38),
+            R.id.playerControlsCenter to intArrayOf(38, 44, 38),
+            R.id.playerControlsRight to intArrayOf(36, 36, 42, 34)
+        ) else listOf(
+            R.id.playerControlsLeft to intArrayOf(34, 34),
+            R.id.playerControlsCenter to intArrayOf(38, 46, 38),
+            R.id.playerControlsRight to intArrayOf(32, 32, 40, 32)
+        )
+        compactGroups.forEach { (groupId, widths) ->
+            bottom.findViewById<LinearLayout>(groupId)?.let { group ->
+                widths.forEachIndexed { index, width ->
+                    group.getChildAt(index)?.let { child ->
+                        child.layoutParams = child.layoutParams.apply {
+                            this.width = dp(width)
+                            if (landscape) this.height = dp(36)
                         }
                     }
                 }
             }
         }
-        }
-        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 48 else 56) }
+        topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 44 else 56) }
     }
 
     private fun togglePlayback() {

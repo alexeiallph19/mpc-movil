@@ -1,6 +1,6 @@
 <!-- Adapted from VLC for Android. Copyright © VideoLAN and VLC authors. GPL-2.0-or-later. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="28dp" android:width="28dp" android:viewportHeight="14" android:viewportWidth="14">
+    android:height="20dp" android:width="20dp" android:viewportHeight="14" android:viewportWidth="14">
     <path android:fillAlpha="1" android:fillColor="#ff610a" android:fillType="nonZero"
         android:pathData="m11,7a4,4 0,1 1,-8 0,4 4,0 1,1 8,0z"
         android:strokeColor="#00000000" android:strokeWidth="1" />
