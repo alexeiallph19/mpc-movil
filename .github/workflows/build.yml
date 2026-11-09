@@ -469,6 +469,9 @@ jobs:
               private var playbackEvents = mutableListOf<String>()
               private var isHw = true
               private var isControlsVisible = true
+              private val controlsHideRunnable = Runnable {
+                  if (mediaPlayer?.isPlaying == true) setControlsVisible(false)
+              }
               private var immersiveMode = false
               private var subtitlePickerPending = false
               private var resumeAfterSubtitlePicker = false
@@ -1247,6 +1250,44 @@ jobs:
                   popup.show()
               }
           
+              private fun setControlsVisible(visible: Boolean) {
+                  isControlsVisible = visible
+                  val state = if (visible) View.VISIBLE else View.GONE
+                  topBar.visibility = state
+                  bottomBar.visibility = state
+                  centerControls.visibility = state
+                  btnScreenshotFloat.visibility = if (visible &&
+                      getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true)) View.VISIBLE else View.GONE
+                  handler.removeCallbacks(controlsHideRunnable)
+                  if (visible && mediaPlayer?.isPlaying == true) handler.postDelayed(controlsHideRunnable, 3500L)
+              }
+
+              private fun applyResponsiveControls() {
+                  val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                  val bottom = bottomBar as? LinearLayout ?: return
+                  bottom.setPadding(dp(10), dp(if (landscape) 2 else 5), dp(10), dp(if (landscape) 2 else 4))
+                  bottom.getChildAt(0)?.let { row ->
+                      row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 14 else 18) }
+                  }
+                  seekBar.layoutParams = seekBar.layoutParams.apply { height = dp(if (landscape) 22 else 28) }
+                  (bottom.getChildAt(2) as? LinearLayout)?.let { row ->
+                      row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 34 else 42) }
+                      for (index in 0 until row.childCount) {
+                          val child = row.getChildAt(index)
+                          if (child is Button) child.layoutParams = child.layoutParams.apply {
+                              height = dp(if (landscape) 32 else 40)
+                          }
+                      }
+                  }
+                  topBar.layoutParams = topBar.layoutParams.apply { height = dp(if (landscape) 38 else 44) }
+                  findViewById<Button>(R.id.btnCenterBack).layoutParams =
+                      findViewById<Button>(R.id.btnCenterBack).layoutParams.apply { height = dp(if (landscape) 48 else 58) }
+                  btnCenterPlay.layoutParams =
+                      btnCenterPlay.layoutParams.apply { height = dp(if (landscape) 56 else 68) }
+                  findViewById<Button>(R.id.btnCenterForward).layoutParams =
+                      findViewById<Button>(R.id.btnCenterForward).layoutParams.apply { height = dp(if (landscape) 48 else 58) }
+              }
+
               private fun togglePlayback() {
                   val player = mediaPlayer ?: return
                   if (player.isPlaying) player.pause() else player.play()
@@ -1283,12 +1324,6 @@ jobs:
                   findViewById<Button>(R.id.btnSubtitleTrack).setOnClickListener { showAudioSubsPanel("Subs") }
           
                   findViewById<Button>(R.id.btnMainMenu).setOnClickListener { showMainMenu(it) }
-                  findViewById<Button>(R.id.topMenuFile).setOnClickListener { showTopMenu(it, "Archivo") }
-                  findViewById<Button>(R.id.topMenuView).setOnClickListener { showTopMenu(it, "Ver") }
-                  findViewById<Button>(R.id.topMenuPlay).setOnClickListener { showTopMenu(it, "Reproducir") }
-                  findViewById<Button>(R.id.topMenuNavigate).setOnClickListener { showTopMenu(it, "Navegar") }
-                  findViewById<Button>(R.id.topMenuFavorites).setOnClickListener { showTopMenu(it, "Favoritos") }
-                  findViewById<Button>(R.id.topMenuHelp).setOnClickListener { showTopMenu(it, "Ayuda") }
           
                   findViewById<Button>(R.id.btnWelcomeOpen).setOnClickListener { pickFile() }
                   btnScreenshotFloat.setOnClickListener { takeScreenshot() }
@@ -1334,6 +1369,7 @@ jobs:
                       }
                   }
           
+                  applyResponsiveControls()
                   seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                       override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                           if (fromUser && mediaPlayer != null) {
@@ -1390,11 +1426,13 @@ jobs:
                               txtStatus.text = "Reproduciendo"
                               btnPlay.text = "❚❚"
                               btnCenterPlay.text = "❚❚"
+                              setControlsVisible(true)
                           }
                           MediaPlayer.Event.Paused -> {
                               txtStatus.text = "Pausa"
                               btnPlay.text = "▶"
                               btnCenterPlay.text = "▶"
+                              setControlsVisible(true)
                           }
                           MediaPlayer.Event.Stopped -> {
                               welcomeScreen.visibility = View.VISIBLE
@@ -1901,6 +1939,7 @@ jobs:
               override fun onConfigurationChanged(newConfig: Configuration) {
                   super.onConfigurationChanged(newConfig)
                   videoLayout.post {
+                      applyResponsiveControls()
                       videoLayout.requestLayout()
                       if (immersiveMode) enterImmersiveMode()
                   }
@@ -2146,6 +2185,7 @@ jobs:
           
               override fun onPause() {
                   super.onPause()
+                  handler.removeCallbacks(controlsHideRunnable)
                   savePlaybackProgress()
                   if (subtitlePickerPending) {
                       resumeAfterSubtitlePicker = mediaPlayer?.isPlaying == true || resumeAfterSubtitlePicker
