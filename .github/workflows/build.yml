@@ -235,45 +235,45 @@ jobs:
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/mpm_seekbar_track.xml
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@android:id/background">
-        <shape android:shape="rectangle">
+          <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+              <item android:id="@android:id/background">
+                  <shape android:shape="rectangle">
             <size android:height="2dp" />
             <corners android:radius="2dp" />
             <solid android:color="#80FFFFFF" />
-        </shape>
-    </item>
-    <item android:id="@android:id/secondaryProgress">
-        <scale android:scaleWidth="100%">
+                  </shape>
+              </item>
+              <item android:id="@android:id/secondaryProgress">
+                  <scale android:scaleWidth="100%">
             <shape android:shape="rectangle">
                 <size android:height="2dp" />
                 <corners android:radius="2dp" />
                 <solid android:color="#B3FFFFFF" />
             </shape>
-        </scale>
-    </item>
-    <item android:id="@android:id/progress">
-        <scale android:scaleWidth="100%">
+                  </scale>
+              </item>
+              <item android:id="@android:id/progress">
+                  <scale android:scaleWidth="100%">
             <shape android:shape="rectangle">
                 <size android:height="2dp" />
                 <corners android:radius="2dp" />
                 <solid android:color="#FFFF610A" />
             </shape>
-        </scale>
-    </item>
-</layer-list>
+                  </scale>
+              </item>
+          </layer-list>
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/mpm_seekbar_thumb.xml
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="28dp"
-    android:height="28dp"
-    android:viewportWidth="14"
-    android:viewportHeight="14">
-    <path
-        android:fillColor="#FFFF610A"
-        android:pathData="M7,4a3,3 0,1 0,0 6a3,3 0,1 0,0 -6" />
-</vector>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="28dp"
+              android:height="28dp"
+              android:viewportWidth="14"
+              android:viewportHeight="14">
+              <path
+                  android:fillColor="#FFFF610A"
+                  android:pathData="M7,4a3,3 0,1 0,0 6a3,3 0,1 0,0 -6" />
+          </vector>
           EOF
 
                     cat << 'EOF' > app/src/main/res/layout/activity_main.xml
