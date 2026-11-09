@@ -395,6 +395,8 @@ jobs:
           import android.content.Intent
           import android.content.res.AssetFileDescriptor
           import android.media.MediaMetadataRetriever
+          import android.graphics.Bitmap
+          import android.graphics.BitmapFactory
           import android.os.Build
           import android.database.Cursor
           import android.provider.OpenableColumns
@@ -418,6 +420,9 @@ jobs:
           import org.videolan.libvlc.*
           import org.videolan.libvlc.util.VLCVideoLayout
           import java.util.Locale
+          import java.io.File
+          import java.io.FileOutputStream
+          import java.util.concurrent.Executors
 
           class MainActivity : AppCompatActivity() {
 
@@ -457,6 +462,8 @@ jobs:
               private val aspectValues = arrayOf<String?>(null, "16:9", "4:3", "1:1", "2.35:1", "fill")
 
               private val handler = Handler(Looper.getMainLooper())
+              private val thumbnailExecutor = Executors.newSingleThreadExecutor()
+              private var lastProgressSaveAt = 0L
               private var isSeeking = false
               private lateinit var gestureDetector: GestureDetector
 
@@ -533,6 +540,7 @@ jobs:
                               true
                           }
                           popup.menu.add("Detener").setOnMenuItemClickListener {
+                              savePlaybackProgress()
                               mediaPlayer?.stop()
                               releaseCurrentAssetDescriptor()
                               welcomeScreen.visibility = View.VISIBLE
@@ -712,14 +720,21 @@ jobs:
                               btnPlay.text = "▶"
                           }
                           MediaPlayer.Event.TimeChanged -> {
-                              if (!isSeeking) {
-                                  val t = ev.timeChanged
-                                  val l = mediaPlayer?.length ?: 0L
-                                  if (l > 0) {
+                              val t = ev.timeChanged
+                              val l = mediaPlayer?.length ?: 0L
+                              if (l > 0) {
+                                  if (!isSeeking) {
                                       seekBar.progress = ((t.toFloat() / l) * 1000).toInt()
                                       txtTime.text = "${formatTime(t)} / ${formatTime(l)}"
                                   }
+                                  if (t - lastProgressSaveAt >= 5000L) {
+                                      lastProgressSaveAt = t
+                                      savePlaybackProgress()
+                                  }
                               }
+                          }
+                          MediaPlayer.Event.EndReached -> {
+                              currentUri?.let { clearPlaybackProgress(it) }
                           }
                           MediaPlayer.Event.EncounteredError -> {
                               txtStatus.text = "Error al abrir"
@@ -748,7 +763,26 @@ jobs:
                   initPlayer()
               }
 
-              private fun play(uri: Uri, startPos: Long = 0L) {
+              private fun play(uri: Uri, startPos: Long = -1L) {
+                  if (startPos < 0L) {
+                      val saved = getPlaybackProgress(uri)
+                      if (saved > 10_000L) {
+                          val name = getDisplayName(uri)
+                          AlertDialog.Builder(this)
+                              .setTitle("Continuar reproducción")
+                              .setMessage("¿Quieres continuar ${name} desde ${formatTime(saved)} o empezar desde el principio?")
+                              .setPositiveButton("Continuar") { _, _ -> play(uri, saved) }
+                              .setNegativeButton("Empezar de cero") { _, _ ->
+                                  clearPlaybackProgress(uri)
+                                  play(uri, 0L)
+                              }
+                              .setNeutralButton("Cancelar", null)
+                              .show()
+                          return
+                      }
+                      play(uri, 0L)
+                      return
+                  }
                   if (!viewsAttached) {
                       videoLayout.post {
                           if (isFinishing || isDestroyed) return@post
@@ -763,6 +797,7 @@ jobs:
                   mediaPlayer?.stop()
                   releaseCurrentAssetDescriptor()
                   currentUri = uri
+                  lastProgressSaveAt = 0L
                   playbackEvents.clear()
                   try {
                       var displayName = "desconocido"
@@ -805,6 +840,27 @@ jobs:
                       Log.e("MPM_PLAYER", playbackDiagnostics, e)
                       AlertDialog.Builder(this).setTitle("Error al abrir archivo").setMessage(playbackDiagnostics).setPositiveButton("Cerrar", null).show()
                   }
+              }
+
+              private fun progressKey(uri: Uri): String = "progress_" + uri.toString().hashCode().toString()
+
+              private fun getPlaybackProgress(uri: Uri): Long =
+                  getSharedPreferences("mpm_player", MODE_PRIVATE).getLong(progressKey(uri), 0L)
+
+              private fun savePlaybackProgress() {
+                  val uri = currentUri ?: return
+                  val player = mediaPlayer ?: return
+                  val position = player.time
+                  val duration = player.length
+                  if (position > 0L && duration > 0L && position < duration - 10_000L) {
+                      getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                          .putLong(progressKey(uri), position).apply()
+                  }
+              }
+
+              private fun clearPlaybackProgress(uri: Uri) {
+                  getSharedPreferences("mpm_player", MODE_PRIVATE).edit()
+                      .remove(progressKey(uri)).apply()
               }
 
               private fun releaseCurrentAssetDescriptor() {
@@ -912,13 +968,39 @@ jobs:
                           val uri = Uri.parse(favorites[position])
                           label.text = getDisplayName(uri)
                           image.setImageDrawable(null)
-                          try {
-                              val retriever = MediaMetadataRetriever()
-                              retriever.setDataSource(this@MainActivity, uri)
-                              image.setImageBitmap(retriever.getFrameAtTime(1_000_000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
-                              retriever.release()
-                          } catch (e: Exception) {
-                              Log.w("MPM_PLAYER", "No se pudo generar miniatura del favorito", e)
+                          image.setImageResource(android.R.drawable.ic_menu_report_image)
+                          val expectedTag = "favorite_thumbnail:" + uri.toString()
+                          image.tag = expectedTag
+                          val cacheFile = File(cacheDir, "favorite_" + uri.toString().hashCode() + ".jpg")
+                          if (cacheFile.exists() && cacheFile.length() > 0L) {
+                              BitmapFactory.decodeFile(cacheFile.absolutePath)?.let { image.setImageBitmap(it) }
+                          } else {
+                              val target = image
+                              thumbnailExecutor.execute {
+                                  var bitmap: Bitmap? = null
+                                  try {
+                                      val retriever = MediaMetadataRetriever()
+                                      try {
+                                          retriever.setDataSource(this@MainActivity, uri)
+                                          bitmap = retriever.getFrameAtTime(1_000_000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                              ?: retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                                      } finally {
+                                          retriever.release()
+                                      }
+                                      bitmap?.let { frame ->
+                                          FileOutputStream(cacheFile).use { out ->
+                                              frame.compress(Bitmap.CompressFormat.JPEG, 82, out)
+                                          }
+                                      }
+                                  } catch (e: Exception) {
+                                      Log.w("MPM_PLAYER", "No se pudo generar miniatura del favorito", e)
+                                  }
+                                  runOnUiThread {
+                                      if (target.tag == expectedTag && bitmap != null) {
+                                          target.setImageBitmap(bitmap)
+                                      }
+                                  }
+                              }
                           }
                           return row
                       }
@@ -1211,6 +1293,7 @@ jobs:
 
               override fun onPause() {
                   super.onPause()
+                  savePlaybackProgress()
                   if (subtitlePickerPending) {
                       resumeAfterSubtitlePicker = mediaPlayer?.isPlaying == true || resumeAfterSubtitlePicker
                   }
