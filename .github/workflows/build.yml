@@ -14,21 +14,6 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v7
-        with:
-          submodules: recursive
-
-      - name: Preparar fuentes VLC para compilación release
-        run: |
-          # VLC keeps local native development dependencies in the dev variant.
-          # This MPM workflow builds release and uses the published LibVLC/MediaLibrary artifacts.
-          sed -i "/^[[:space:]]*devApi project(':libvlcjni:libvlc')/d" third_party/vlc-android/application/resources/build.gradle
-          sed -i "/^[[:space:]]*devApi project(':medialibrary')/d" third_party/vlc-android/application/resources/build.gradle
-          sed -i "/^[[:space:]]*devApi project(':libvlcjni:libvlc')/d" third_party/vlc-android/application/vlc-android/build.gradle
-          sed -i "/^[[:space:]]*devApi project(':medialibrary')/d" third_party/vlc-android/application/vlc-android/build.gradle
-          # VLC's own R class needs the shared resource set as well as its local layouts.
-          # Upstream keeps these resources in application/resources; attach that complete
-          # directory to the VLC library source set instead of patching missing assets one by one.
-          sed -i "s|res.srcDirs = \['res'\]|res.srcDirs = ['res', '../resources/src/main/res']|" third_party/vlc-android/application/vlc-android/build.gradle
 
       - name: Configurar JDK 17
         uses: actions/setup-java@v6
@@ -40,10 +25,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.13'
-
-      - name: Configurar propiedades de VLC
-        run: |
-          printf 'android.ndkFullVersion=21.4.7075529\\n' > local.properties
 
       - name: Preparar firma permanente
         env:
@@ -71,7 +52,7 @@ jobs:
           fi
           keytool -list -keystore "$RUNNER_TEMP/mpm-player-release.jks" -storepass "$MPM_KEYSTORE_PASSWORD" -alias "$MPM_KEY_ALIAS"
 
-      - name: Compilar MPM Player
+      - name: Compilar MPM Player con LibVLC oficial
         env:
           MPM_KEYSTORE_PATH: ${{ runner.temp }}/mpm-player-release.jks
           MPM_KEYSTORE_PASSWORD: ${{ secrets.MPM_KEYSTORE_PASSWORD }}

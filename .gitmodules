@@ -1,3 +1,0 @@
-[submodule "third_party/vlc-android"]
-	path = third_party/vlc-android
-	url = https://github.com/videolan/vlc-android.git
