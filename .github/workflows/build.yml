@@ -270,6 +270,9 @@ jobs:
                           android:gravity="center_vertical" android:orientation="horizontal">
                           <Button android:id="@+id/topMenuFile" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp" android:text="Archivo" />
                           <Button android:id="@+id/topMenuView" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp" android:text="Ver" />
+                          <Button android:id="@+id/topMenuPlay" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp" android:text="Reproducir" />
+                          <Button android:id="@+id/topMenuNavigate" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp" android:text="Navegar" />
+                          <Button android:id="@+id/topMenuFavorites" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp" android:text="Favoritos" />
                           <Button android:id="@+id/topMenuHelp" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="wrap_content" android:layout_height="36dp" android:minWidth="0dp" android:minHeight="0dp" android:text="Ayuda" />
                       </LinearLayout>
                   </HorizontalScrollView>
@@ -876,7 +879,7 @@ jobs:
                               }
                           }
                       } else {
-                          val captured = bitmap
+                          val captured = bitmap ?: return@execute
                           runOnUiThread { saveScreenshotBitmap(captured, true) }
                       }
                   }
