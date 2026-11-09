@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.android_plugin_version = '9.4.1'
+    ext.android_plugin_version = '8.9.1'
     ext.kotlin_version = '2.2.10'
     ext.kotlinx_version = '1.7.1'
     repositories {
@@ -50,6 +50,13 @@ allprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
+                if (project.path.startsWith(':application:')) {
+                    compileSdkVersion 36
+                    defaultConfig {
+                        minSdkVersion 17
+                        targetSdkVersion 36
+                    }
+                }
                 compileOptions {
                     sourceCompatibility rootProject.ext.targetJVM
                     targetCompatibility rootProject.ext.targetJVM
