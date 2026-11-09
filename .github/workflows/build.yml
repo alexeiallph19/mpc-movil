@@ -84,6 +84,9 @@ jobs:
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/assets
+          cp COPYING app/src/main/assets/COPYING
+          cp THIRD_PARTY_NOTICES.md app/src/main/assets/THIRD_PARTY_NOTICES.md
 
           cat << 'EOF' > settings.gradle
           pluginManagement {
