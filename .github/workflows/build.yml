@@ -807,10 +807,50 @@ jobs:
                           .setPositiveButton("Aceptar", null).show()
                       return
                   }
-                  val labels = favorites.map { getDisplayName(Uri.parse(it)) }.toTypedArray()
                   var selected = 0
+                  val adapter = object : BaseAdapter() {
+                      override fun getCount(): Int = favorites.size
+                      override fun getItem(position: Int): Any = favorites[position]
+                      override fun getItemId(position: Int): Long = position.toLong()
+                      override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup?): View {
+                          val row = convertView as? LinearLayout ?: LinearLayout(this@MainActivity).apply {
+                              orientation = LinearLayout.HORIZONTAL
+                              gravity = android.view.Gravity.CENTER_VERTICAL
+                              setPadding(dp(8), dp(6), dp(8), dp(6))
+                              val image = ImageView(this@MainActivity).apply {
+                                  tag = "favorite_thumbnail"
+                                  layoutParams = LinearLayout.LayoutParams(dp(76), dp(58))
+                                  scaleType = ImageView.ScaleType.CENTER_CROP
+                                  setBackgroundColor(0xFF252525.toInt())
+                              }
+                              val label = TextView(this@MainActivity).apply {
+                                  tag = "favorite_label"
+                                  setTextColor(0xFFFFFFFF.toInt())
+                                  textSize = 14f
+                                  maxLines = 2
+                                  setPadding(dp(12), 0, 0, 0)
+                              }
+                              addView(image)
+                              addView(label, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                          }
+                          val image = row.findViewWithTag<ImageView>("favorite_thumbnail")
+                          val label = row.findViewWithTag<TextView>("favorite_label")
+                          val uri = Uri.parse(favorites[position])
+                          label.text = getDisplayName(uri)
+                          image.setImageDrawable(null)
+                          try {
+                              val retriever = MediaMetadataRetriever()
+                              retriever.setDataSource(this@MainActivity, uri)
+                              image.setImageBitmap(retriever.getFrameAtTime(1_000_000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+                              retriever.release()
+                          } catch (e: Exception) {
+                              Log.w("MPM_PLAYER", "No se pudo generar miniatura del favorito", e)
+                          }
+                          return row
+                      }
+                  }
                   AlertDialog.Builder(this).setTitle("Videos favoritos")
-                      .setSingleChoiceItems(labels, 0) { _, which -> selected = which }
+                      .setSingleChoiceItems(adapter, 0) { _, which -> selected = which }
                       .setPositiveButton("Abrir") { _, _ -> play(Uri.parse(favorites[selected])) }
                       .setNeutralButton("Quitar") { _, _ ->
                           val updated = favorites.toMutableSet()
@@ -827,12 +867,40 @@ jobs:
                       Toast.makeText(this, "Primero abre un video", Toast.LENGTH_SHORT).show()
                       return
                   }
+                  subtitlePickerPending = true
+                  resumeAfterSubtitlePicker = false
                   val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                       addCategory(Intent.CATEGORY_OPENABLE)
                       addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                       type = "*/*"
                   }
-                  subtitleLauncher.launch(intent)
+                  try {
+                      subtitleLauncher.launch(intent)
+                  } catch (e: Exception) {
+                      subtitlePickerPending = false
+                      Toast.makeText(this, "No se pudo abrir el selector de subtítulos", Toast.LENGTH_LONG).show()
+                  }
+              }
+
+              private fun finishSubtitlePicker() {
+                  subtitlePickerPending = false
+                  val shouldResume = resumeAfterSubtitlePicker
+                  resumeAfterSubtitlePicker = false
+                  videoLayout.postDelayed({ restoreVideoOutput(shouldResume) }, 250)
+              }
+
+              private fun restoreVideoOutput(shouldResume: Boolean) {
+                  val player = mediaPlayer ?: return
+                  if (currentUri == null) return
+                  try {
+                      if (viewsAttached) player.detachViews()
+                      viewsAttached = false
+                      player.attachViews(videoLayout, null, false, false)
+                      viewsAttached = true
+                      if (shouldResume) player.play()
+                  } catch (e: Exception) {
+                      Log.w("MPM_PLAYER", "No se pudo restaurar la salida de video", e)
+                  }
               }
 
               private fun attachExternalSubtitle(uri: Uri) {
