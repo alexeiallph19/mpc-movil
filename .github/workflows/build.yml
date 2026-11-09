@@ -371,6 +371,48 @@ jobs:
           </shape>
           EOF
 
+          cat << 'EOF' > app/src/main/res/drawable/vlc_ic_play_player.xml
+          <!-- Based on VLC for Android ic_play_player.xml. Copyright © VideoLAN and VLC authors. GPL-2.0-or-later. -->
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+              <path android:pathData="M20,33L32,24L20,15L20,33ZM24,4C12.96,4 4,12.96 4,24C4,35.04 12.96,44 24,44C35.04,44 44,35.04 44,24C44,12.96 35.04,4 24,4ZM24,41.5C14.3531,41.5 6.5,33.6469 6.5,24C6.5,14.3531 14.3531,6.5 24,6.5C33.6469,6.5 41.5,14.3531 41.5,24C41.5,35.6469 33.6469,41.5 24,41.5Z" android:fillColor="#FFFFFFFF" android:strokeColor="#00000000" android:strokeWidth="1" />
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/vlc_ic_pause_player.xml
+          <!-- Based on VLC for Android ic_pause_player.xml. Copyright © VideoLAN and VLC authors. GPL-2.0-or-later. -->
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+              <path android:pathData="M22.3333,17.3333L22.3333,30.6667L19,30.6667L19,17.3333L22.3333,17.3333ZM29,17.3333L29,30.6667L25.6667,30.6667L25.6667,17.3333L29,17.3333ZM24,4C12.96,4 4,12.96 4,24C4,35.04 12.96,44 24,44C35.04,44 44,35.04 44,24C44,12.96 35.04,4 24,4ZM24,41.5C14.3531,41.5 6.5,33.6469 6.5,24C6.5,14.3531 14.3531,6.5 24,6.5C33.6469,6.5 41.5,14.3531 41.5,24C41.5,35.04 33.6469,41.5 24,41.5Z" android:fillColor="#FFFFFFFF" android:strokeColor="#00000000" android:strokeWidth="1" />
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/vlc_ic_audiotrack.xml
+          <!-- Based on VLC for Android ic_player_audiotrack.xml. Copyright © VideoLAN and VLC authors. GPL-2.0-or-later. -->
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="32dp" android:height="32dp" android:viewportWidth="36" android:viewportHeight="36">
+              <path android:pathData="M8,8C6.892,8 6,8.892 6,10v16c0,1.108 0.892,2 2,2h20c1.108,0 2,-0.892 2,-2L30,10C30,8.892 29.108,8 28,8ZM9.75,18h1.5c0.6925,0 1.25,0.5575 1.25,1.25 0,0.6925 -0.5575,1.25 -1.25,1.25L9.75,20.5C9.0575,20.5 8.5,19.9425 8.5,19.25 8.5,18.5575 9.0575,18 9.75,18ZM16.25,18h10c0.6925,0 1.25,0.5575 1.25,1.25 0,0.6925 -0.5575,1.25 -1.25,1.25h-10C15.5575,20.5 15,19.9425 15,19.25 15,18.5575 15.5575,18 16.25,18ZM9.75,23h9c0.6925,0 1.25,0.5575 1.25,1.25 0,0.6925 -0.5575,1.25 -1.25,1.25h-9C9.0575,25.5 8.5,24.9425 8.5,24.25 8.5,23.5575 9.0575,23 9.75,23ZM23.75,23h2.5c0.6925,0 1.25,0.5575 1.25,1.25 0,0.6925 -0.5575,1.25 -1.25,1.25h-2.5c-0.6925,0 -1.25,-0.5575 -1.25,-1.25 0,-0.6925 0.5575,-1.25 1.25,-1.25z" android:fillColor="#FFFFFFFF" android:strokeColor="#00000000" android:strokeWidth="1" />
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/vlc_ic_rotate.xml
+          <!-- Based on VLC for Android ic_player_rotate.xml. Copyright © VideoLAN and VLC authors. GPL-2.0-or-later. -->
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="32dp" android:height="32dp" android:viewportWidth="36" android:viewportHeight="36">
+              <path android:pathData="M15.9844,7.5C15.4732,7.5 14.9621,7.6962 14.5703,8.0879L9.7852,12.8711L8.707,11.793C8.077,11.1634 7.0003,11.6094 7,12.5L7,16C7.0001,16.5523 7.4477,16.9999 8,17L11.5,17C12.3906,16.9996 12.8366,15.923 12.207,15.293L11.1992,14.2852L15.9844,9.502L22.9824,16.5L25.8105,16.5L17.3984,8.0879C17.0067,7.6962 16.4955,7.5 15.9844,7.5zM24.5,19C23.6094,19.0004 23.1634,20.077 23.793,20.707L24.8008,21.7148L20.0156,26.498L13.0176,19.5L10.1895,19.5L18.6016,27.9121C19.385,28.6956 20.6462,28.6956 21.4297,27.9121L26.2148,23.1289L27.293,24.207C27.923,24.8366 28.9996,24.3906 29,23.5L29,20C28.9999,19.4477 28.5523,19.0001 28,19L24.5,19z" android:fillColor="#FFFFFFFF" android:strokeColor="#00000000" android:strokeWidth="2" />
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/vlc_ic_subtitle.xml
+          <!-- MPM subtitle track glyph for the VLC track selector. -->
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="32dp" android:height="32dp" android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF" android:pathData="M4,5h16c1.1,0 2,0.9 2,2v10c0,1.1 -0.9,2 -2,2H4c-1.1,0 -2,-0.9 -2,-2V7c0,-1.1 0.9,-2 2,-2zM5,9v2h6V9H5zM13,9v2h6V9h-6zM5,13v2h4v-2H5zM11,13v2h8v-2h-8z" />
+          </vector>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/vlc_ic_cast.xml
+          <!-- MPM cast glyph. -->
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="32dp" android:height="32dp" android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF" android:pathData="M2,3h20v14h-7v-2h5V5H4v10H2V3zM2,19a3,3 0,0 1,3 3H2v-3zM2,15a7,7 0,0 1,7 7H7a5,5 0,0 0,-5 -5v-2zM2,11a11,11 0,0 1,11 11h-2A9,9 0,0 0,2 13v-2z" />
+          </vector>
+          EOF
+
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -423,9 +465,10 @@ jobs:
           <LinearLayout android:id="@+id/centerControls" android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:layout_gravity="center" android:gravity="center" android:orientation="horizontal"
               android:visibility="gone">
-              <Button android:id="@+id/btnCenterPlay" style="@style/Widget.AppCompat.Button.Borderless"
-                  android:layout_width="64dp" android:layout_height="64dp" android:minWidth="0dp" android:minHeight="0dp"
-                  android:background="@drawable/vlc_play_button" android:text="▶" android:textColor="#FFFFFF" android:textSize="25sp" />
+              <ImageButton android:id="@+id/btnCenterPlay" style="@style/Widget.AppCompat.Button.Borderless"
+                  android:layout_width="72dp" android:layout_height="72dp" android:minWidth="0dp" android:minHeight="0dp"
+                  android:background="@drawable/vlc_play_button" android:src="@drawable/vlc_ic_play_player"
+                  android:scaleType="fitCenter" android:padding="4dp" android:contentDescription="Reproducir" />
           </LinearLayout>
           <TextView android:id="@+id/txtOsd" android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal|top" android:layout_marginTop="62dp"
@@ -455,32 +498,32 @@ jobs:
                   android:gravity="center" android:orientation="horizontal">
                   <Button android:id="@+id/btnBack" android:visibility="gone" style="@style/Widget.AppCompat.Button.Borderless"
                       android:layout_width="1dp" android:layout_height="1dp" android:minWidth="0dp" android:minHeight="0dp" />
-                  <Button android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless"
-                      android:layout_width="54dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
-                      android:background="?attr/selectableItemBackgroundBorderless" android:text="Ⅱ"
-                      android:textColor="#FFFFFFFF" android:textSize="23sp" />
+                  <ImageButton android:id="@+id/btnPlay" style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="52dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
+                      android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/vlc_ic_pause_player"
+                      android:scaleType="fitCenter" android:padding="6dp" android:contentDescription="Pausar" />
                   <Button android:id="@+id/btnForward" android:visibility="gone" style="@style/Widget.AppCompat.Button.Borderless"
                       android:layout_width="1dp" android:layout_height="1dp" android:minWidth="0dp" android:minHeight="0dp" />
-                  <Button android:id="@+id/btnAudioTrack" style="@style/Widget.AppCompat.Button.Borderless"
-                      android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
-                      android:background="?attr/selectableItemBackgroundBorderless" android:text="♫"
-                      android:textColor="#F2FFFFFF" android:textSize="21sp" />
-                  <Button android:id="@+id/btnSubtitleTrack" style="@style/Widget.AppCompat.Button.Borderless"
-                      android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
-                      android:background="?attr/selectableItemBackgroundBorderless" android:text="CC"
-                      android:textColor="#F2FFFFFF" android:textSize="13sp" />
-                  <Button android:id="@+id/btnCastBottom" style="@style/Widget.AppCompat.Button.Borderless"
-                      android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
-                      android:background="?attr/selectableItemBackgroundBorderless" android:text="▣"
-                      android:textColor="#F2FFFFFF" android:textSize="20sp" />
+                  <ImageButton android:id="@+id/btnAudioTrack" style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="46dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
+                      android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/vlc_ic_audiotrack"
+                      android:scaleType="fitCenter" android:padding="9dp" android:contentDescription="Pistas de audio" />
+                  <ImageButton android:id="@+id/btnSubtitleTrack" style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="46dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
+                      android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/vlc_ic_subtitle"
+                      android:scaleType="fitCenter" android:padding="9dp" android:contentDescription="Subtítulos" />
+                  <ImageButton android:id="@+id/btnCastBottom" style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="46dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
+                      android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/vlc_ic_cast"
+                      android:scaleType="fitCenter" android:padding="9dp" android:contentDescription="Emitir" />
                   <Button android:id="@+id/btnSpeed" style="@style/Widget.AppCompat.Button.Borderless"
                       android:layout_width="52dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
                       android:background="?attr/selectableItemBackgroundBorderless" android:text="1.0x"
                       android:textColor="#F2FFFFFF" android:textSize="12sp" />
-                  <Button android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless"
-                      android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
-                      android:background="?attr/selectableItemBackgroundBorderless" android:text="⟳"
-                      android:textColor="#F2FFFFFF" android:textSize="22sp" />
+                  <ImageButton android:id="@+id/btnRotateBottom" style="@style/Widget.AppCompat.Button.Borderless"
+                      android:layout_width="46dp" android:layout_height="48dp" android:minWidth="0dp" android:minHeight="0dp"
+                      android:background="?attr/selectableItemBackgroundBorderless" android:src="@drawable/vlc_ic_rotate"
+                      android:scaleType="fitCenter" android:padding="9dp" android:contentDescription="Rotación" />
                   <Button android:id="@+id/btnHwSw" style="@style/Widget.AppCompat.Button.Borderless"
                       android:layout_width="1dp" android:layout_height="1dp" android:visibility="gone"
                       android:minWidth="0dp" android:minHeight="0dp" android:text="HW" />
@@ -565,14 +608,14 @@ jobs:
               private lateinit var topBar: View
               private lateinit var bottomBar: View
               private lateinit var centerControls: View
-              private lateinit var btnCenterPlay: Button
+              private lateinit var btnCenterPlay: ImageButton
               private lateinit var txtStatus: TextView
               private lateinit var txtDecoderInfo: TextView
               private lateinit var txtTime: TextView
               private lateinit var txtRemaining: TextView
               private lateinit var txtOsd: TextView
               private lateinit var seekBar: SeekBar
-              private lateinit var btnPlay: Button
+              private lateinit var btnPlay: ImageButton
               private lateinit var btnHwSw: Button
               private lateinit var btnSpeed: Button
           
@@ -1549,7 +1592,7 @@ jobs:
                       row.layoutParams = row.layoutParams.apply { height = dp(if (landscape) 34 else 42) }
                       for (index in 0 until row.childCount) {
                           val child = row.getChildAt(index)
-                          if (child is Button) child.layoutParams = child.layoutParams.apply {
+                          if (child is View) child.layoutParams = child.layoutParams.apply {
                               height = dp(if (landscape) 32 else 40)
                           }
                       }
@@ -1597,9 +1640,9 @@ jobs:
                   btnHwSw = findViewById(R.id.btnHwSw)
                   btnSpeed = findViewById(R.id.btnSpeed)
           
-                  findViewById<Button>(R.id.btnAudioTrack).setOnClickListener { showAudioSubsPanel("Audio") }
-                  findViewById<Button>(R.id.btnCastBottom).setOnClickListener { showCastDialog() }
-                  findViewById<Button>(R.id.btnSubtitleTrack).setOnClickListener { showAudioSubsPanel("Subs") }
+                  findViewById<ImageButton>(R.id.btnAudioTrack).setOnClickListener { showAudioSubsPanel("Audio") }
+                  findViewById<ImageButton>(R.id.btnCastBottom).setOnClickListener { showCastDialog() }
+                  findViewById<ImageButton>(R.id.btnSubtitleTrack).setOnClickListener { showAudioSubsPanel("Subs") }
           
                   findViewById<Button>(R.id.btnMainMenu).setOnClickListener { showMainMenu(it) }
           
@@ -1613,7 +1656,7 @@ jobs:
                   findViewById<Button>(R.id.btnLibraryPlaylist).setOnClickListener { showPlaylist() }
                   btnScreenshotFloat.setOnClickListener { takeScreenshot() }
                   btnScreenshotFloat.visibility = if (getSharedPreferences("mpm_player", MODE_PRIVATE).getBoolean("floating_screenshot", true) && isControlsVisible) View.VISIBLE else View.GONE
-                  findViewById<Button>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
+                  findViewById<ImageButton>(R.id.btnRotateBottom).setOnClickListener { cycleRotation() }
           
                   btnPlay.setOnClickListener { togglePlayback() }
                   btnCenterPlay.setOnClickListener { togglePlayback() }
@@ -1797,22 +1840,22 @@ jobs:
                           MediaPlayer.Event.Playing -> {
                               welcomeScreen.visibility = View.GONE
                               txtStatus.text = "Reproduciendo"
-                              btnPlay.text = "❚❚"
-                              btnCenterPlay.text = "▶"
+                              btnPlay.setImageResource(R.drawable.vlc_ic_pause_player)
+                              btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                               setControlsVisible(true)
                           }
                           MediaPlayer.Event.Paused -> {
                               txtStatus.text = "Pausa"
-                              btnPlay.text = "▶"
-                              btnCenterPlay.text = "▶"
+                              btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
+                              btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                               setControlsVisible(true)
                           }
                           MediaPlayer.Event.Stopped -> {
                               welcomeScreen.visibility = View.VISIBLE
                               setControlsVisible(false)
                               txtStatus.text = "Detenido"
-                              btnPlay.text = "▶"
-                              btnCenterPlay.text = "▶"
+                              btnPlay.setImageResource(R.drawable.vlc_ic_play_player)
+                              btnCenterPlay.setImageResource(R.drawable.vlc_ic_play_player)
                           }
                           MediaPlayer.Event.TimeChanged -> {
                               val t = ev.timeChanged
