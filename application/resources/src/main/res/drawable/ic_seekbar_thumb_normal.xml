@@ -22,10 +22,10 @@
   ~
   -->
 
-<vector android:height="28dp"
+<vector android:height="16dp"
         android:viewportHeight="14"
         android:viewportWidth="14"
-        android:width="28dp"
+        android:width="16dp"
         xmlns:android="http://schemas.android.com/apk/res/android">
     <path
             android:fillAlpha="1"
