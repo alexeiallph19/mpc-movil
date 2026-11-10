@@ -763,4 +763,5 @@
 <string name="permission">Acceso a archivos multimedia</string>
 <string name="onboarding_all_set">¡MPM Player está listo!</string>
 <string name="onboarding_permission_given">MPM ya puede encontrar tus archivos multimedia, utilizar subtítulos externos y reproducir contenido de red</string>
+    <string name="mpm_folders">Carpetas</string>
 </resources>
