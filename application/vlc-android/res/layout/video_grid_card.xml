@@ -350,6 +350,7 @@
                 android:text="@{media.title}"
                 android:textSize="14sp"
                 android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
                 tools:targetApi="jelly_bean"
                 tools:text="Star wars Episode 1"
                 android:enabled="@{isPresent}"
