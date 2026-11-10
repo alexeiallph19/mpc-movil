@@ -87,19 +87,15 @@ jobs:
             abi="${entry%%:*}"
             label="${entry#*:}"
             echo "::group::Building MPM Player for $label"
-
-            # Gradle places ABI-split APKs in nested variant/ABI directories.
-            # Clear previous outputs recursively so each iteration yields one APK.
-            find "$APK_DIR" -type f -name '*.apk' -delete
+            rm -f "$APK_DIR"/*.apk
             ./buildsystem/compile.sh --signrelease -a "$abi" -t
 
-            mapfile -t built_apks < <(find "$APK_DIR" -type f -name '*.apk' -print)
-            if [ "${#built_apks[@]}" -ne 1 ]; then
-              echo "::error::Expected exactly one signed APK for $label, found ${#built_apks[@]}"
-              find "$APK_DIR" -type f -maxdepth 5 -print
+            set -- "$APK_DIR"/*.apk
+            if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
+              echo "::error::Expected exactly one signed APK for $label"
               exit 1
             fi
-            cp "${built_apks[0]}" "$STAGING_DIR/MPM-Player-$label.apk"
+            cp "$1" "$STAGING_DIR/MPM-Player-$label.apk"
             echo "::endgroup::"
           done
 
