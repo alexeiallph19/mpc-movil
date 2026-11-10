@@ -17,7 +17,6 @@
             android:contentDescription="@string/theme_auto"
             android:padding="8dp"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintEnd_toStartOf="@+id/lightTheme"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/themeDescription"
