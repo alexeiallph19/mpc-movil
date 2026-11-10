@@ -549,17 +549,17 @@
     <string name="video_remote_enable">Cambiar a modo de control remoto</string>
     <string name="video_remote_disable">Duplicar pantalla</string>
     <string name="removed_from_playlist_anonymous">Elementos eliminados de la lista de reproduccción</string>
-    <string name="welcome_title">Bienvenido a VLC!</string>
-    <string name="welcome_subtitle">El reproductor multimedia libre y de código abierto.</string>
-    <string name="permission_media">VLC necesita su permiso para acceder a los medios en su dispositvo</string>
+    <string name="welcome_title">Bienvenido a MPM Player</string>
+    <string name="welcome_subtitle">Tu biblioteca multimedia y reproductor personal</string>
+    <string name="permission_media">MPM Player necesita acceso a tus archivos multimedia para encontrar y reproducir tus vídeos y audios</string>
     <string name="medialibrary_scan_explanation">VLC puede escanear automáticamente su dispositvo para organizar su colección de medios.</string>
-    <string name="onboarding_theme_title">Siéntase como en casa</string>
+    <string name="onboarding_theme_title">Elige la apariencia de MPM Player</string>
     <string name="done">Hecho</string>
-    <string name="onboarding_scan_title">Autodescubrir sus medios</string>
+    <string name="onboarding_scan_title">Buscar tus archivos multimedia</string>
     <string name="daynight_system_explanation">VLC cambiará automáticamente al modo oscuro de acuerdo con las preferencias del sistema</string>
-    <string name="daynight_legacy_explanation">VLC cambiará automáticamente al modo nocturno a la hora apropiada</string>
-    <string name="onboarding_scanning_enable">Dejar que VLC escanee mi dispositivo en busca de medios</string>
-    <string name="onboarding_scan_customize">Dejarme elegir que carpetas escanear</string>
+    <string name="daynight_legacy_explanation">MPM cambiará automáticamente al modo oscuro según la configuración del sistema</string>
+    <string name="onboarding_scanning_enable">Permitir que MPM busque archivos multimedia en mi dispositivo</string>
+    <string name="onboarding_scan_customize">Elegir las carpetas que MPM debe analizar</string>
     <string name="button_medialibrary_preferences">Ir a preferencias de librería de medios</string>
     <string name="light_theme">Tema claro</string>
     <string name="add">Añadir</string>
@@ -757,4 +757,10 @@
     <string name="discovery_failed">Error al detectar: %s</string>
     <string name="lock_use_sensor_title">Bloquear con sensor</string>
     <string name="lock_use_sensor_summary">Cuando la orientación está bloqueada, usa el sensor para permitir la orientación inversa</string>
-    </resources>
+    <string name="permission_onboarding_no_perm">Sin acceso, MPM no podrá analizar tu dispositivo. Aún podrás abrir archivos manualmente o reproducir contenido de red</string>
+<string name="permission_onboarding_perm_media">Permite el acceso a vídeos y audio para que MPM encuentre tus archivos multimedia</string>
+<string name="permission_onboarding_perm_all">Permite el acceso a todos los archivos para encontrar contenido en carpetas y admitir otros tipos de archivos</string>
+<string name="permission">Acceso a archivos multimedia</string>
+<string name="onboarding_all_set">¡MPM Player está listo!</string>
+<string name="onboarding_permission_given">MPM ya puede encontrar tus archivos multimedia, utilizar subtítulos externos y reproducir contenido de red</string>
+</resources>
