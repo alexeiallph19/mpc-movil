@@ -41,6 +41,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Configure Git identity for VLC patches
+        run: |
+          git config --global user.name "MPM Build Bot"
+          git config --global user.email "mpm-build-bot@users.noreply.github.com"
+
       - name: Install Android SDK and NDK
         run: |
           echo "ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
