@@ -425,14 +425,14 @@
     <!-- Widget -->
     <string name="widget_name_w">Tema blanco de VLC</string>
     <string name="widget_name_b">Tema negro de VLC</string>
-    <string name="allow_storage_access_title">Permitir a VLC acceder a archivos de vídeo y audio</string>
-    <string name="allow_storage_access_description">VLC necesita que concedas este permiso para acceder a los archivos de medios en este dispositivo.</string>
-    <string name="allow_settings_access_ringtone_title">Pemitir a VLC establecer el tono de llamada</string>
-    <string name="allow_settings_access_ringtone_description">VLC necesita que concedas este permiso para establecer esta canción como tono de llamada.</string>
-    <string name="allow_settings_access_brightness_title">Permitir a VLC cambiar el modo de brillo</string>
-    <string name="allow_settings_access_brightness_description">VLC necesita que concedas este permiso para cambiar el modo de brillo.</string>
-    <string name="allow_draw_overlays_title">Permitir al reproductor de VLC mostrarse sobre otras apps</string>
-    <string name="allow_sdraw_overlays_description">VLC necesita que concedas este permiso para mostrar el vídeo sobre otras aplicaciones.</string>
+    <string name="allow_storage_access_title">Permitir que MPM Player acceda a vídeos y audios</string>
+    <string name="allow_storage_access_description">MPM Player necesita este permiso para acceder a los archivos multimedia de este dispositivo.</string>
+    <string name="allow_settings_access_ringtone_title">Permitir que MPM Player establezca el tono de llamada</string>
+    <string name="allow_settings_access_ringtone_description">MPM Player necesita este permiso para establecer esta canción como tono de llamada.</string>
+    <string name="allow_settings_access_brightness_title">Permitir que MPM Player cambie el brillo</string>
+    <string name="allow_settings_access_brightness_description">MPM Player necesita este permiso para cambiar el modo de brillo.</string>
+    <string name="allow_draw_overlays_title">Permitir que MPM Player se muestre sobre otras aplicaciones</string>
+    <string name="allow_sdraw_overlays_description">MPM Player necesita este permiso para mostrar el vídeo sobre otras aplicaciones.</string>
     <string name="permission_ask_again">Conceder permiso</string>
     <string name="exit_app">Salir de VLC</string>
     <string name="exit_app_msg">¿Desea salir de VLC?</string>
@@ -471,7 +471,7 @@
     <string name="length">Longitud</string>
     <string name="tv_settings_hint">Presión largo del botón Aceptar para  marcar/desmarcar carpetas</string>
     <string name="ml_external_storage_title">Nuevo almacenamiento externo detectado</string>
-    <string name="ml_external_storage_msg">¿Desea que VLC añada el dispositivo %1$s a su biblioteca?</string>
+    <string name="ml_external_storage_msg">¿Deseas que MPM Player añada el dispositivo %1$s a tu biblioteca multimedia?</string>
     <string name="ml_external_storage_accept">Sí</string>
     <string name="ml_external_storage_decline">No</string>
     <string name="auto_last_added_media">Último añadido</string>
@@ -500,8 +500,8 @@
     <string name="browser_storages">Almacenes</string>
     <string name="msg_delete_failed">Fallo al eliminar medio %1$s</string>
     <string name="renderer_list_title">Pantallas</string>
-    <string name="sdcard_permission_dialog_title">Ha concedido a VLC acceso de escritura a su tarjeta SD</string>
-    <string name="sdcard_permission_dialog_message">VLC no puede borrar este archivo sin permiso de acceso de escritura.\nVaya a su tarjeta SD y haga clic en «Seleccionar».\nPuede que tenga que hacer clic primero en «Mostrar tarjeta SD» en el menú superior de la derecha</string>
+    <string name="sdcard_permission_dialog_title">MPM Player necesita acceso de escritura a tu tarjeta SD</string>
+    <string name="sdcard_permission_dialog_message">MPM Player no puede borrar este archivo sin permiso de escritura.\nVe a tu tarjeta SD y pulsa Seleccionar.\nPuede que primero tengas que elegir Mostrar tarjeta SD en el menú superior derecho.</string>
     <string name="dialog_sd_wizard">Mostrarme</string>
     <string name="renderers_disconnect">Desconectar</string>
     <string name="audio_digital_failed">Fallo al cambiar estado de salida de audio digital</string>
@@ -515,7 +515,7 @@
     <string name="playback_rewind">Rebobinar</string>
     <string name="playback_forward">Avance rápido</string>
     <string name="ml_wizard_scan_checkbox">Buscar medios en el dispositivo</string>
-    <string name="ml_wizard_description">Elija cuando VLC buscará medios en su dispositivo de almacenamiento para organizar su librería de medios o solo usarlo como simple reproductor con explorador integrado.</string>
+    <string name="ml_wizard_description">Elige si MPM Player analiza el almacenamiento de tu dispositivo para organizar tu biblioteca multimedia o si prefieres usarlo como reproductor con explorador integrado.</string>
     <string name="tv_my_new_videos">Mis nuevos vídeos</string>
     <string name="otg_device_title">Dispositivo OTG</string>
     <string name="browser">Explorador</string>
@@ -552,12 +552,12 @@
     <string name="welcome_title">Bienvenido a MPM Player</string>
     <string name="welcome_subtitle">Tu biblioteca multimedia y reproductor personal</string>
     <string name="permission_media">MPM Player necesita acceso a tus archivos multimedia para encontrar y reproducir tus vídeos y audios</string>
-    <string name="medialibrary_scan_explanation">VLC puede escanear automáticamente su dispositvo para organizar su colección de medios.</string>
+    <string name="medialibrary_scan_explanation">MPM Player puede analizar automáticamente tu dispositivo para organizar tu colección multimedia.</string>
     <string name="onboarding_theme_title">Elige la apariencia de MPM Player</string>
     <string name="done">Hecho</string>
     <string name="onboarding_scan_title">Buscar tus archivos multimedia</string>
-    <string name="daynight_system_explanation">VLC cambiará automáticamente al modo oscuro de acuerdo con las preferencias del sistema</string>
-    <string name="daynight_legacy_explanation">MPM cambiará automáticamente al modo oscuro según la configuración del sistema</string>
+    <string name="daynight_system_explanation">MPM Player cambiará automáticamente al modo oscuro según la configuración del sistema.</string>
+    <string name="daynight_legacy_explanation">MPM Player cambiará automáticamente al modo oscuro en el horario correspondiente.</string>
     <string name="onboarding_scanning_enable">Permitir que MPM busque archivos multimedia en mi dispositivo</string>
     <string name="onboarding_scan_customize">Elegir las carpetas que MPM debe analizar</string>
     <string name="button_medialibrary_preferences">Ir a preferencias de librería de medios</string>

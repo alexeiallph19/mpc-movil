@@ -33,7 +33,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake autopoint build-essential cmake gettext git libtool libtool-bin make pkg-config python3 unzip wget yasm nasm ant flex bison gperf
+          sudo apt-get install -y autoconf automake autopoint build-essential cmake gettext git libtool libtool-bin make pkg-config python3 unzip zip wget yasm nasm ant flex bison gperf
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -68,7 +68,7 @@ jobs:
           test -s "$RUNNER_TEMP/mpm-signing/mpm-player-release.jks"
           echo "MPM_KEYSTORE_FILE=$RUNNER_TEMP/mpm-signing/mpm-player-release.jks" >> "$GITHUB_ENV"
 
-      - name: Build signed MPM Player APK
+      - name: Build signed MPM Player APKs for all Android ABIs
         env:
           MPM_KEYSTORE_PASSWORD: ${{ secrets.MPM_KEYSTORE_PASSWORD }}
           MPM_KEY_ALIAS: ${{ secrets.MPM_KEY_ALIAS }}
@@ -78,12 +78,36 @@ jobs:
           test -n "$MPM_KEYSTORE_PASSWORD" || { echo "Missing MPM_KEYSTORE_PASSWORD secret"; exit 1; }
           test -n "$MPM_KEY_ALIAS" || { echo "Missing MPM_KEY_ALIAS secret"; exit 1; }
           test -n "$MPM_KEY_PASSWORD" || { echo "Missing MPM_KEY_PASSWORD secret"; exit 1; }
-          ./buildsystem/compile.sh --signrelease -a arm64 -t
 
-      - name: Upload signed APK
+          APK_DIR="application/app/build/outputs/apk/signedRelease"
+          STAGING_DIR="$RUNNER_TEMP/mpm-apks"
+          mkdir -p "$APK_DIR" "$STAGING_DIR"
+
+          for entry in "arm64:arm64-v8a" "arm:armeabi-v7a" "x86:x86" "x86_64:x86_64"; do
+            abi="${entry%%:*}"
+            label="${entry#*:}"
+            echo "::group::Building MPM Player for $label"
+            rm -f "$APK_DIR"/*.apk
+            ./buildsystem/compile.sh --signrelease -a "$abi" -t
+
+            set -- "$APK_DIR"/*.apk
+            if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
+              echo "::error::Expected exactly one signed APK for $label"
+              exit 1
+            fi
+            cp "$1" "$STAGING_DIR/MPM-Player-$label.apk"
+            echo "::endgroup::"
+          done
+
+          (
+            cd "$STAGING_DIR"
+            zip -9 -j MPM-Player-4-ABIs.zip MPM-Player-arm64-v8a.apk MPM-Player-armeabi-v7a.apk MPM-Player-x86.apk MPM-Player-x86_64.apk
+          )
+
+      - name: Upload four signed APK variants
         uses: actions/upload-artifact@v4
         with:
-          name: MPM-Player-VLC-base-arm64
-          path: application/app/build/outputs/apk/signedRelease/*.apk
+          name: MPM-Player-4-ABIs
+          path: ${{ runner.temp }}/mpm-apks/MPM-Player-4-ABIs.zip
           if-no-files-found: error
           retention-days: 14
