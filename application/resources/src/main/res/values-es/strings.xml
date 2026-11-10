@@ -215,7 +215,8 @@
     <string name="hold_to_stop">Mantener para parar</string>
 
     <!-- About -->
-    <string name="app_name_full">VLC para Android</string>
+    <string name="app_name_full">MPM Player</string>
+    <string name="about_vlc_text">MPM Player es un reproductor multimedia de código abierto para Android, impulsado por VLC media player y libVLC. Reproduce archivos locales y transmisiones de red.</string>
     <string name="revision">Revisión</string>
     <string name="about">Acerca de</string>
     <string name="vlc_authors">y autores VLC.</string>
