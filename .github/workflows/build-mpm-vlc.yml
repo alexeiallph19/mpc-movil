@@ -33,7 +33,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake autopoint build-essential cmake gettext git libtool libtool-bin make pkg-config python3 unzip wget yasm nasm ant flex bison
+          sudo apt-get install -y autoconf automake autopoint build-essential cmake gettext git libtool libtool-bin make pkg-config python3 unzip wget yasm nasm ant flex bison gperf
 
       - name: Set up Java
         uses: actions/setup-java@v4
