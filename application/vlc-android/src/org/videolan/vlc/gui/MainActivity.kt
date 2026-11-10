@@ -126,7 +126,8 @@ class MainActivity : ContentActivity(),
 
         if (!NotificationPermissionManager.launchIfNeeded(this)) {
             if (!WidgetMigration.launchIfNeeded(this)) {
-               if (!Settings.firstRun)  WhatsNewManager.launchIfNeeded(this) else WhatsNewManager.markAsShown(settings)
+               // MPM will provide its own update notes instead of VLC's dialog.
+               WhatsNewManager.markAsShown(settings)
             }
         }
 
@@ -312,7 +313,8 @@ class MainActivity : ContentActivity(),
 
     private fun updateIncognitoModeIcon() {
         val incognito = Settings.getInstance (this).getBoolean(KEY_INCOGNITO, false)
-        toolbarIcon.setImageDrawable(ContextCompat.getDrawable(this, if (incognito) R.drawable.ic_incognito else if (BuildConfig.DEBUG && BuildConfig.VLC_MAJOR_VERSION == 4) R.drawable.ic_icon_vlc4 else R.drawable.ic_icon))
+        toolbarIcon.visibility = if (incognito) View.VISIBLE else View.GONE
+        if (incognito) toolbarIcon.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_incognito))
 
     }
 
