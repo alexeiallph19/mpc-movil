@@ -59,6 +59,7 @@
             android:id="@+id/permNone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/mpm_onboarding_option"
             android:layout_marginStart="16dp"
             android:padding="16dp"
             android:scaleX="0.8"
@@ -75,13 +76,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/permission_onboarding_no_perm"
-                app:srcCompat="@drawable/ic_perm_none" />
+                app:srcCompat="@drawable/mpm_perm_none" />
     </FrameLayout>
 
     <FrameLayout
             android:id="@+id/permMedia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/mpm_onboarding_option"
             android:layout_marginTop="32dp"
             android:layout_marginBottom="24dp"
             android:padding="16dp"
@@ -98,7 +100,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/permission_onboarding_perm_media"
-                app:srcCompat="@drawable/ic_perm_media" />
+                app:srcCompat="@drawable/mpm_perm_media" />
     </FrameLayout>
 
     <FrameLayout
@@ -117,7 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/permission_onboarding_perm_all"
-                app:srcCompat="@drawable/ic_perm_all" />
+                app:srcCompat="@drawable/mpm_perm_all" />
     </FrameLayout>
 
     <TextView

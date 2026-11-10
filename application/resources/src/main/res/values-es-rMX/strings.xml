@@ -639,7 +639,7 @@
     <string name="removed_from_playlist_anonymous">Elemento(s) borrados de la lista</string>
     <string name="welcome_title">¡Bienvenido a VLC!</string>
     <string name="welcome_subtitle">El reproductor multimedia libre y de código abierto</string>
-    <string name="permission_media">VLC requiere permiso para acceder a medios del dispositivo</string>
+    <string name="permission_media">MPM Player necesita acceso a tus archivos multimedia para encontrar y reproducir tus vídeos y música</string>
     <string name="medialibrary_scan_explanation">VLC puede escanear medios automáticamente su dispositvo para organizar su colección</string>
     <string name="onboarding_theme_title">Personaliza tu experiencia</string>
     <string name="done">Listo</string>
@@ -815,4 +815,8 @@
     <string name="audio_delay_global">Retraso de audio de %s ms para todos los vídeos</string>
     <string name="go_to_folder">Explorar padre</string>
     <string name="no_sub_renderer">Los subtítulos aún no son compatibles durante la transmisión</string>
-    </resources>
+        <string name="permission">Acceso a tus archivos</string>
+    <string name="permission_onboarding_no_perm">Sin acceso, MPM no podrá buscar automáticamente tus archivos. Podrás abrirlos manualmente o reproducir contenido de red</string>
+    <string name="permission_onboarding_perm_media">Permite el acceso a vídeos y audio para que MPM encuentre tus archivos multimedia</string>
+    <string name="permission_onboarding_perm_all">Permite el acceso a todos los archivos para encontrar contenido en carpetas y admitir otros formatos</string>
+</resources>

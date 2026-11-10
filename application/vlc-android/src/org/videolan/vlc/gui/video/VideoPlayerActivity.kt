@@ -606,12 +606,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         isTv = Settings.showTvUi
         if (displayManager.isPrimary) {
             // Orientation
-            // Tips
-            if (!BuildConfig.DEBUG && !isTv && !settings.getBoolean(PREF_TIPS_SHOWN, false)
-                && !isBenchmark
-            ) {
-                tipsDelegate.init()
-            }
+            // MPM does not show the first-play tutorial.
+            settings.putSingle(PREF_TIPS_SHOWN, true)
         }
 
 
