@@ -29,9 +29,9 @@ class OnboardingThemeFragment : OnboardingFragment(), View.OnClickListener {
         super.onViewCreated(view, savedInstanceState)
         titleView = view.findViewById(R.id.theme_title)
         themeDescription = view.findViewById(R.id.themeDescription)
-        lightTheme = view.findViewById<TextView>(R.id.lightTheme)
-        darkTheme = view.findViewById<TextView>(R.id.darkTheme)
-        dayNightTheme = view.findViewById<TextView>(R.id.dayNightTheme)
+        lightTheme = view.findViewById<View>(R.id.lightTheme)
+        darkTheme = view.findViewById<View>(R.id.darkTheme)
+        dayNightTheme = view.findViewById<View>(R.id.dayNightTheme)
         themeDescription.setText(if (AndroidDevices.canUseSystemNightMode())R.string.daynight_system_explanation else R.string.daynight_legacy_explanation)
         lightTheme.setOnClickListener(this)
         darkTheme.setOnClickListener(this)
@@ -43,8 +43,8 @@ class OnboardingThemeFragment : OnboardingFragment(), View.OnClickListener {
         view.animate().scaleX(1F).scaleY(1F)
         when (view) {
             lightTheme -> {
-                darkTheme.background = null
-                dayNightTheme.background = null
+                darkTheme.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
+                dayNightTheme.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
                 darkTheme.animate().scaleX(0.8F).scaleY(0.8F)
                 dayNightTheme.animate().scaleX(0.8F).scaleY(0.8F)
                 viewModel.theme = AppCompatDelegate.MODE_NIGHT_NO
@@ -52,16 +52,16 @@ class OnboardingThemeFragment : OnboardingFragment(), View.OnClickListener {
             }
             darkTheme -> {
                 themeDescription.setText(R.string.enable_black_theme)
-                lightTheme.background = null
-                dayNightTheme.background = null
+                lightTheme.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
+                dayNightTheme.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
                 lightTheme.animate().scaleX(0.8F).scaleY(0.8F)
                 dayNightTheme.animate().scaleX(0.8F).scaleY(0.8F)
                 viewModel.theme = AppCompatDelegate.MODE_NIGHT_YES
             }
             dayNightTheme -> {
                 themeDescription.setText(if (AndroidDevices.canUseSystemNightMode())R.string.daynight_system_explanation else R.string.daynight_legacy_explanation)
-                lightTheme.background = null
-                darkTheme.background = null
+                lightTheme.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
+                darkTheme.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
                 lightTheme.animate().scaleX(0.8F).scaleY(0.8F)
                 darkTheme.animate().scaleX(0.8F).scaleY(0.8F)
                 viewModel.theme = if (AndroidDevices.canUseSystemNightMode()) AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM else AppCompatDelegate.MODE_NIGHT_AUTO
