@@ -81,7 +81,7 @@
                 android:shadowRadius="11"
                 android:textAlignment="center"
                 android:textColor="@color/white"
-                android:textSize="22sp"
+                android:textSize="18sp"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -186,7 +186,7 @@
                     android:clipToPadding="false"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    app:chipSpacing="16dp">
+                    app:chipSpacing="8dp">
 
                 <com.google.android.material.chip.Chip
                         android:id="@+id/orientation_quick_action"
