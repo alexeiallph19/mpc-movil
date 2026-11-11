@@ -958,6 +958,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
         if (show && player.isInPictureInPictureMode) return
         if (::hudBinding.isInitialized) {
             hudBinding.playerOverlayPlay.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            hudBinding.playerOverlayStop.visibility = if (show) View.VISIBLE else View.INVISIBLE
             if (seekButtons) {
                 hudBinding.playerOverlayRewind.visibility = if (show) View.VISIBLE else View.INVISIBLE
                 hudBinding.playerOverlayRewindText.text = "${Settings.videoJumpDelay}"
