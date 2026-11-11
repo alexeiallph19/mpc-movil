@@ -238,9 +238,9 @@
 <!--           ⚠️ margin are set in code!!!-->
         <org.videolan.vlc.gui.view.AccessibleSeekBar
                 android:id="@+id/player_overlay_seekbar"
-                android:layout_width="0dp" android:layout_height="24dp"
+                android:layout_width="0dp" android:layout_height="28dp"
                 android:focusable="true"
-                android:layoutDirection="ltr" android:maxHeight="2dp" android:minHeight="2dp"
+                android:layoutDirection="ltr" android:maxHeight="3dp" android:minHeight="3dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"
                 android:progress="@{player.service.getTime(progress.time)}"
@@ -313,7 +313,7 @@
             <ImageView
                     android:id="@+id/player_overlay_tracks" android:layout_width="34dp" android:layout_height="36dp"
                     android:layout_marginStart="@dimen/small_margins_sides"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:clickable="true"
                     android:contentDescription="@string/tracks"
                     android:focusable="true"
@@ -332,7 +332,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="@dimen/small_margins_sides"
                     android:contentDescription="@string/lock_orientation_description"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:focusable="true"
                     android:visibility="visible"
                     tools:visibility="visible"
@@ -354,7 +354,7 @@
             <ImageView
                     android:id="@+id/playlist_previous" android:layout_width="36dp" android:layout_height="40dp"
                     android:layout_marginEnd="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:padding="4dp"
                     android:clickable="true"
                     android:contentDescription="@string/previous"
@@ -373,7 +373,7 @@
             <ImageView
                     android:id="@+id/player_overlay_rewind" android:layout_width="36dp" android:layout_height="40dp"
                     android:layout_marginEnd="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:padding="4dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -404,8 +404,8 @@
                     tools:text="88" />
 
             <ImageView
-                    android:id="@+id/player_overlay_play" android:layout_width="36dp" android:layout_height="36dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:id="@+id/player_overlay_play" android:layout_width="44dp" android:layout_height="44dp"
+                    android:background="@drawable/mpm_player_modern_play_control"
                     android:clickable="true"
                     android:contentDescription="@string/play"
                     android:focusable="true"
@@ -420,7 +420,7 @@
             <ImageView
                     android:id="@+id/player_overlay_forward" android:layout_width="36dp" android:layout_height="40dp"
                     android:layout_marginStart="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:padding="4dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -455,7 +455,7 @@
             <ImageView
                     android:id="@+id/playlist_next" android:layout_width="36dp" android:layout_height="40dp"
                     android:layout_marginStart="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:padding="4dp"
                     android:clickable="true"
                     android:contentDescription="@string/next"
@@ -483,7 +483,7 @@
             <ImageView
                     android:id="@+id/player_resize" android:layout_width="34dp" android:layout_height="36dp"
                     android:layout_marginEnd="@dimen/small_margins_sides"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:clickable="true"
                     android:contentDescription="@string/aspect_ratio"
                     android:focusable="true"
@@ -500,7 +500,7 @@
             <ImageView
                     android:id="@+id/player_overlay_adv_function" android:layout_width="34dp" android:layout_height="36dp"
                     android:layout_marginEnd="@dimen/small_margins_sides"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/mpm_player_modern_control"
                     android:clickable="true"
                     android:contentDescription="@string/advanced"
                     android:focusable="true"
