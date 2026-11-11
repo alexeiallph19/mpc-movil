@@ -34,17 +34,6 @@
             tools:theme="@style/Theme.VLC.Player"
             tools:visibility="visible">
 
-        <!-- MPM classic MPC-HC inspired control strip. VLC actions and bindings remain unchanged. -->
-        <View
-                android:id="@+id/mpm_player_controls_panel"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="@drawable/mpm_player_controls_panel"
-                vlc:layout_constraintBottom_toBottomOf="parent"
-                vlc:layout_constraintEnd_toEndOf="parent"
-                vlc:layout_constraintStart_toStartOf="parent"
-                vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play" />
-
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/stats_container"
                 android:layout_width="0dp"
@@ -390,7 +379,7 @@
                     android:focusable="true"
                     android:longClickable="true"
                     android:scaleType="center"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     tools:visibility="visible"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintEnd_toStartOf="@+id/player_overlay_play"
@@ -437,7 +426,7 @@
                     android:focusable="true"
                     android:longClickable="true"
                     android:scaleType="center"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     tools:visibility="visible"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintEnd_toStartOf="@+id/playlist_next"
