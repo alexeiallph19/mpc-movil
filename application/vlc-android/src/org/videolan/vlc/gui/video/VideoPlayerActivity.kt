@@ -1838,6 +1838,11 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         }
     }
 
+    internal fun setAudioVolumeFromPercent(percent: Int) {
+        val bounded = percent.coerceIn(0, if (isAudioBoostEnabled) 200 else 100)
+        setAudioVolume((bounded * audioMax / 100f).roundToInt())
+    }
+
     internal fun setAudioVolume(volume: Int) {
         var vol = volume
         if (AndroidUtil.isNougatOrLater && (vol <= 0) xor isMute) {

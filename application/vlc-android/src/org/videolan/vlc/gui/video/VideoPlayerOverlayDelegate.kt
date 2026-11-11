@@ -41,6 +41,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.SeekBar
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.ViewStubCompat
@@ -391,6 +392,10 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
         volumeValueText.text = "$volume%"
         playerVolumeProgress.isDouble = player.isAudioBoostEnabled
         playerVolumeProgress.setValue(volume)
+        player.findViewById<SeekBar>(R.id.mpm_volume_slider)?.let {
+            it.max = if (player.isAudioBoostEnabled) 200 else 100
+            it.progress = volume.coerceIn(0, it.max)
+        }
         playerOverlayVolume.setVisible()
         player.handler.removeMessages(VideoPlayerActivity.FADE_OUT_VOLUME_INFO)
         player.handler.sendEmptyMessageDelayed(VideoPlayerActivity.FADE_OUT_VOLUME_INFO, 1000L)
@@ -693,6 +698,18 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             hudBinding.playerOverlaySeekbar.setOnClickListener {
                 if (player.service?.isPaused == true)
                     player.togglePlayPause()
+            }
+
+            player.findViewById<SeekBar>(R.id.mpm_volume_slider)?.let { slider ->
+                slider.max = if (player.isAudioBoostEnabled) 200 else 100
+                slider.progress = (player.service?.volume ?: 100).coerceIn(0, slider.max)
+                slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        if (fromUser) player.setAudioVolumeFromPercent(progress)
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+                })
             }
         }
         if (::hudRightBinding.isInitialized){
