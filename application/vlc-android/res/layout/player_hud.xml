@@ -424,7 +424,7 @@
                     tools:text="88" />
 
             <ImageView
-                    android:id="@+id/player_overlay_play" android:layout_width="42dp" android:layout_height="42dp"
+                    android:id="@+id/player_overlay_play" android:layout_width="34dp" android:layout_height="34dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:contentDescription="@string/play"
