@@ -1448,7 +1448,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     override fun previous() {
         service?.let { service ->
-            service.previous(false)
+            // MPM: Previous means previous playlist item, not restart current item.
+            service.previous(true)
             overlayDelegate.showInfo(getString(R.string.previous), 1000)
             overlayDelegate.showOverlay()
         }

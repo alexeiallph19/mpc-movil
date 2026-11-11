@@ -43,7 +43,7 @@
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
                 vlc:layout_constraintStart_toStartOf="parent"
-                vlc:layout_constraintTop_toTopOf="@+id/player_overlay_seekbar" />
+                vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/stats_container"
