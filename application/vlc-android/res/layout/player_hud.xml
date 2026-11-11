@@ -136,7 +136,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="2dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     vlc:layout_constraintEnd_toEndOf="parent"
                     vlc:layout_constraintTop_toTopOf="parent"
@@ -332,7 +332,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
-                    android:id="@+id/player_overlay_tracks" android:layout_width="34dp" android:layout_height="36dp"
+                    android:id="@+id/player_overlay_tracks" android:layout_width="30dp" android:layout_height="30dp"
                     android:layout_marginStart="@dimen/small_margins_sides"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
@@ -348,7 +348,7 @@
                     vlc:srcCompat="@drawable/ic_player_audiotrack" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/orientation_toggle" android:layout_width="34dp" android:layout_height="36dp"
+                    android:id="@+id/orientation_toggle" android:layout_width="30dp" android:layout_height="30dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="@dimen/small_margins_sides"
                     android:contentDescription="@string/lock_orientation_description"
@@ -357,13 +357,13 @@
                     android:visibility="visible"
                     tools:visibility="visible"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
-                    vlc:layout_constraintEnd_toStartOf="@+id/player_space_left"
-                    vlc:layout_constraintStart_toEndOf="@+id/player_overlay_tracks"
+                    vlc:layout_constraintStart_toStartOf="parent"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play"
                     vlc:srcCompat="@drawable/ic_player_rotate" android:tint="?attr/player_icon_color" />
 
             <Space
                     android:id="@+id/player_space_left"
+                     android:visibility="gone"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     vlc:layout_constraintBottom_toBottomOf="@+id/playlist_previous"
@@ -372,7 +372,7 @@
                     vlc:layout_constraintTop_toTopOf="@+id/playlist_previous" />
 
             <ImageView
-                    android:id="@+id/playlist_previous" android:layout_width="36dp" android:layout_height="40dp"
+                    android:id="@+id/playlist_previous" android:layout_width="30dp" android:layout_height="32dp"
                     android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="4dp"
@@ -391,7 +391,7 @@
                     vlc:srcCompat="@drawable/ic_player_previous" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_rewind" android:layout_width="36dp" android:layout_height="40dp"
+                    android:id="@+id/player_overlay_rewind" android:layout_width="30dp" android:layout_height="32dp"
                     android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="4dp"
@@ -424,7 +424,7 @@
                     tools:text="88" />
 
             <ImageView
-                    android:id="@+id/player_overlay_play" android:layout_width="34dp" android:layout_height="34dp"
+                    android:id="@+id/player_overlay_play" android:layout_width="30dp" android:layout_height="30dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:contentDescription="@string/play"
@@ -439,8 +439,8 @@
                     vlc:srcCompat="@drawable/ic_pause_player" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_forward" android:layout_width="36dp" android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
+                    android:id="@+id/player_overlay_forward" android:layout_width="30dp" android:layout_height="32dp"
+                    android:layout_marginStart="2dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="4dp"
                     android:clickable="true"
@@ -474,7 +474,7 @@
 
 
             <ImageView
-                    android:id="@+id/playlist_next" android:layout_width="36dp" android:layout_height="40dp"
+                    android:id="@+id/playlist_next" android:layout_width="30dp" android:layout_height="32dp"
                     android:layout_marginStart="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="4dp"
@@ -494,6 +494,7 @@
 
             <Space
                     android:id="@+id/player_space_right"
+                     android:visibility="gone"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     vlc:layout_constraintBottom_toBottomOf="@+id/playlist_next"
@@ -502,7 +503,7 @@
                     vlc:layout_constraintTop_toTopOf="@+id/playlist_next" />
 
             <ImageView
-                    android:id="@+id/player_resize" android:layout_width="34dp" android:layout_height="36dp"
+                    android:id="@+id/player_resize" android:layout_width="30dp" android:layout_height="30dp"
                     android:layout_marginEnd="@dimen/small_margins_sides"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
@@ -519,7 +520,7 @@
                     vlc:srcCompat="@drawable/ic_player_ratio" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_adv_function" android:layout_width="34dp" android:layout_height="36dp"
+                    android:id="@+id/player_overlay_adv_function" android:layout_width="30dp" android:layout_height="30dp"
                     android:layout_marginEnd="@dimen/small_margins_sides"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
