@@ -564,7 +564,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
 
             val vsc = player.findViewById<ViewStubCompat>(R.id.player_hud_stub)
             if (vsc != null) {
-                seekButtons = player.settings.getBoolean(ENABLE_SEEK_BUTTONS, false)
+                seekButtons = true // MPM: keep MPC-HC style seek controls visible by default
                 vsc.setVisible()
                 hudBinding = DataBindingUtil.bind(player.findViewById(R.id.progress_overlay)) ?: return
                 hudBinding.player = player
@@ -952,10 +952,9 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             hudBinding.playerOverlayTracks.visibility = if (show) View.VISIBLE else View.INVISIBLE
             hudBinding.playerOverlayAdvFunction.visibility = if (show) View.VISIBLE else View.INVISIBLE
             hudBinding.playerResize.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            if (hasPlaylist) {
-                hudBinding.playlistPrevious.visibility = if (show) View.VISIBLE else View.INVISIBLE
-                hudBinding.playlistNext.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            }
+            // Keep transport navigation visible like MPC-HC. VLC safely handles unavailable items.
+            hudBinding.playlistPrevious.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            hudBinding.playlistNext.visibility = if (show) View.VISIBLE else View.INVISIBLE
             hudBinding.orientationToggle.visibility = if (player.isTv || AndroidDevices.isChromeBook) View.INVISIBLE else if (show) View.VISIBLE else View.INVISIBLE
             if (!show) hudBinding.playerOverlaySeekbar.disableAccessibilityEvents() else hudBinding.playerOverlaySeekbar.enableAccessibilityEvents()
         }
