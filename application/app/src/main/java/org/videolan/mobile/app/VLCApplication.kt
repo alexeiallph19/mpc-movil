@@ -29,6 +29,7 @@ import org.videolan.libvlc.Dialog
 import org.videolan.tools.BitmapCache
 import org.videolan.vlc.ArtworkProvider
 import org.videolan.vlc.util.DialogDelegate
+import org.videolan.vlc.util.FontCache
 
 private const val TAG = "VLC/VLCApplication"
 
@@ -42,6 +43,8 @@ class VLCApplication : MultiDexApplication(), Dialog.Callbacks by DialogDelegate
     override fun onCreate() {
         setupApplication()
         super.onCreate()
+        // Build VLC's system-font cache in the background before the first video playback.
+        FontCache.prepare(this)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

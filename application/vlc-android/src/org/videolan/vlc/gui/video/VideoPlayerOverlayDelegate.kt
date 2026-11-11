@@ -46,6 +46,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.ViewStubCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.Guideline
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -854,7 +855,19 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 applyMargin(hudBinding.playerOverlayLength, overscanHorizontal, true)
             }
 
-            if (player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val portrait = player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.65f else 0.46f)
+            val compactSize = if (portrait) 24.dp else 28.dp
+            listOf(hudBinding.playlistPrevious, hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
+                    hudBinding.playerOverlayStop, hudBinding.playerOverlayForward, hudBinding.playlistNext,
+                    hudBinding.playerResize, hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks).forEach {
+                it.layoutParams = it.layoutParams.apply { width = compactSize; height = compactSize }
+            }
+            hudBinding.mpmVolumeSlider.layoutParams = hudBinding.mpmVolumeSlider.layoutParams.apply {
+                width = if (portrait) 52.dp else 92.dp
+                height = if (portrait) 26.dp else 32.dp
+            }
+            if (portrait) {
                 hudBinding.playerSpaceLeft.setGone()
                 hudBinding.playerSpaceRight.setGone()
                 applyMargin(hudBinding.playerOverlaySeekbar, 0, true)

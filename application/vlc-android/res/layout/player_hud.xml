@@ -273,6 +273,13 @@
                 vlc:layout_constraintStart_toStartOf="parent"
                 vlc:mediamax="@{(int)progress.length}" />
 
+        <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/mpm_controls_divider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                vlc:layout_constraintGuide_percent="0.46" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/bookmark_marker_container"
                 android:layout_width="0dp"
@@ -358,6 +365,8 @@
                     tools:visibility="visible"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintStart_toStartOf="parent"
+                    vlc:layout_constraintHorizontal_chainStyle="packed"
+                    vlc:layout_constraintHorizontal_bias="0"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play"
                     vlc:srcCompat="@drawable/ic_player_rotate" android:tint="?attr/player_icon_color" />
 
@@ -516,7 +525,7 @@
                     android:visibility="visible"
                     tools:visibility="visible"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
-                    vlc:layout_constraintEnd_toStartOf="@+id/player_space_right"
+                    vlc:layout_constraintEnd_toStartOf="@+id/mpm_controls_divider"
                     vlc:layout_constraintStart_toEndOf="@+id/player_overlay_forward"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play"
                     vlc:srcCompat="@drawable/ic_player_next" android:tint="?attr/player_icon_color" />
@@ -545,7 +554,9 @@
                     tools:visibility="visible"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintEnd_toStartOf="@+id/player_overlay_adv_function"
-                    vlc:layout_constraintStart_toEndOf="@+id/player_space_right"
+                    vlc:layout_constraintStart_toEndOf="@+id/mpm_controls_divider"
+                    vlc:layout_constraintHorizontal_chainStyle="packed"
+                    vlc:layout_constraintHorizontal_bias="1"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play"
                     vlc:srcCompat="@drawable/ic_player_ratio" android:tint="?attr/player_icon_color" />
 
