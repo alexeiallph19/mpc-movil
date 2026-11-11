@@ -7,11 +7,6 @@
                 android:height="48dp"
                 android:viewportWidth="48"
                 android:viewportHeight="48">
-            <path
-                    android:name="path_2"
-                    android:fillColor="?attr/player_icon_color"
-                    android:pathData="M 24 4 C 12.96 4 4 12.96 4 24 C 4 35.04 12.96 44 24 44 C 35.04 44 44 35.04 44 24 C 44 12.96 35.04 4 24 4 Z M 24 41.5 C 14.353 41.5 6.5 33.647 6.5 24 C 6.5 14.353 14.353 6.5 24 6.5 C 33.647 6.5 41.5 14.353 41.5 24 C 41.5 33.647 33.647 41.5 24 41.5 Z"
-                    android:strokeWidth="1" />
             <group
                     android:name="group"
                     android:pivotX="24"

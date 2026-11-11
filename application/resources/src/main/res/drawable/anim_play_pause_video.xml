@@ -7,9 +7,6 @@
                 android:height="48dp"
                 android:viewportWidth="48"
                 android:viewportHeight="48">
-            <path
-                    android:pathData="m24,4c-11.04,0 -20,8.96 -20,20 0,11.04 8.96,20 20,20 11.04,0 20,-8.96 20,-20 0,-11.04 -8.96,-20 -20,-20zM24,41.5c-9.647,0 -17.5,-7.853 -17.5,-17.5 0,-9.647 7.853,-17.5 17.5,-17.5 9.647,0 17.5,7.853 17.5,17.5 0,9.647 -7.853,17.5 -17.5,17.5z"
-                    android:fillColor="?attr/player_icon_color"/>
 
             <group
                     android:name="group"
