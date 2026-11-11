@@ -37,7 +37,7 @@
         <View
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
+                android:layout_height="54dp"
                 android:background="#E6101216"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
@@ -372,10 +372,10 @@
                     vlc:layout_constraintTop_toTopOf="@+id/playlist_previous" />
 
             <ImageView
-                    android:id="@+id/playlist_previous" android:layout_width="30dp" android:layout_height="32dp"
-                    android:layout_marginEnd="8dp"
+                    android:id="@+id/playlist_previous" android:layout_width="28dp" android:layout_height="28dp"
+                    android:layout_marginEnd="3dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
+                    android:padding="5dp"
                     android:clickable="true"
                     android:contentDescription="@string/previous"
                     android:focusable="true"
@@ -391,10 +391,10 @@
                     vlc:srcCompat="@drawable/ic_player_previous" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_rewind" android:layout_width="30dp" android:layout_height="32dp"
-                    android:layout_marginEnd="8dp"
+                    android:id="@+id/player_overlay_rewind" android:layout_width="28dp" android:layout_height="28dp"
+                    android:layout_marginEnd="3dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
+                    android:padding="5dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:longClickable="true"
@@ -424,7 +424,7 @@
                     tools:text="88" />
 
             <ImageView
-                    android:id="@+id/player_overlay_play" android:layout_width="30dp" android:layout_height="30dp"
+                    android:id="@+id/player_overlay_play" android:layout_width="28dp" android:layout_height="28dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:contentDescription="@string/play"
@@ -434,15 +434,33 @@
                     tools:visibility="visible"
                     android:layout_marginBottom="4dp"
                     vlc:layout_constraintBottom_toTopOf="@+id/mpm_status_strip"
-                    vlc:layout_constraintEnd_toStartOf="@+id/player_overlay_forward"
+                    vlc:layout_constraintEnd_toStartOf="@+id/player_overlay_stop"
                     vlc:layout_constraintStart_toEndOf="@+id/player_overlay_rewind"
                     vlc:srcCompat="@drawable/ic_pause_player" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_forward" android:layout_width="30dp" android:layout_height="32dp"
+                    android:id="@+id/player_overlay_stop"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/stop"
+                    android:focusable="true"
+                    android:onClick="@{(v) -> player.stop()}"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
+                    vlc:layout_constraintEnd_toStartOf="@+id/player_overlay_forward"
+                    vlc:layout_constraintStart_toEndOf="@+id/player_overlay_stop"
+                    vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play"
+                    vlc:srcCompat="@drawable/ic_mpm_classic_stop"
+                    android:tint="?attr/player_icon_color" />
+
+            <ImageView
+                    android:id="@+id/player_overlay_forward" android:layout_width="28dp" android:layout_height="28dp"
                     android:layout_marginStart="2dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
+                    android:padding="5dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:longClickable="true"
@@ -474,10 +492,10 @@
 
 
             <ImageView
-                    android:id="@+id/playlist_next" android:layout_width="30dp" android:layout_height="32dp"
-                    android:layout_marginStart="8dp"
+                    android:id="@+id/playlist_next" android:layout_width="28dp" android:layout_height="28dp"
+                    android:layout_marginStart="3dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="4dp"
+                    android:padding="5dp"
                     android:clickable="true"
                     android:contentDescription="@string/next"
                     android:focusable="true"
