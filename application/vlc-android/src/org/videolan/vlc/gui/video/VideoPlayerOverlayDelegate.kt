@@ -867,17 +867,19 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 applyMargin(hudBinding.orientationToggle, 0, false)
                 applyMargin(hudBinding.playerResize, 0, true)
             } else {
-                hudBinding.playerSpaceLeft.setVisible()
-                hudBinding.playerSpaceRight.setVisible()
-                applyMargin(hudBinding.playerOverlaySeekbar, 20.dp, true)
-                applyMargin(hudBinding.playerOverlaySeekbar, 20.dp, false)
+                // Keep the transport controls grouped in landscape instead of letting
+                // the weighted spacer views push the entire control chain to the right.
+                hudBinding.playerSpaceLeft.setGone()
+                hudBinding.playerSpaceRight.setGone()
+                applyMargin(hudBinding.playerOverlaySeekbar, 12.dp, true)
+                applyMargin(hudBinding.playerOverlaySeekbar, 12.dp, false)
 
-                applyMargin(hudBinding.playlistPrevious, largeMargin.toInt(), true)
-                applyMargin(hudBinding.playerOverlayRewind, largeMargin.toInt(), true)
-                applyMargin(hudBinding.playlistNext, largeMargin.toInt(), false)
-                applyMargin(hudBinding.playerOverlayForward, largeMargin.toInt(), false)
-                applyMargin(hudBinding.orientationToggle, smallMargin.toInt(), false)
-                applyMargin(hudBinding.playerResize, smallMargin.toInt(), true)
+                applyMargin(hudBinding.playlistPrevious, 0, true)
+                applyMargin(hudBinding.playerOverlayRewind, 4.dp, true)
+                applyMargin(hudBinding.playlistNext, 0, false)
+                applyMargin(hudBinding.playerOverlayForward, 4.dp, false)
+                applyMargin(hudBinding.orientationToggle, 4.dp, false)
+                applyMargin(hudBinding.playerResize, 4.dp, true)
             }
         }
         if (::hudRightBinding.isInitialized) {

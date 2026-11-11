@@ -37,7 +37,7 @@
         <View
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
-                android:layout_height="76dp"
+                android:layout_height="64dp"
                 android:background="#E6101216"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
@@ -256,10 +256,10 @@
 <!--           ⚠️ margin are set in code!!!-->
         <org.videolan.vlc.gui.view.AccessibleSeekBar
                 android:id="@+id/player_overlay_seekbar"
-                android:layout_width="0dp" android:layout_height="24dp"
+                android:layout_width="0dp" android:layout_height="18dp"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:layout_marginBottom="2dp"
+                android:layout_marginBottom="0dp"
                 android:focusable="true"
                 android:layoutDirection="ltr" android:maxHeight="3dp" android:minHeight="3dp"
                 android:paddingStart="0dp"
@@ -268,7 +268,7 @@
                 android:progressDrawable="@drawable/po_seekbar_video"
                 android:splitTrack="false"
                 android:thumb="@drawable/ic_seekbar_thumb"
-                vlc:layout_constraintBottom_toTopOf="@+id/player_overlay_play"
+                vlc:layout_constraintBottom_toTopOf="@+id/mpm_control_surface"
                 vlc:layout_constraintEnd_toEndOf="parent"
                 vlc:layout_constraintStart_toStartOf="parent"
                 vlc:mediamax="@{(int)progress.length}" />
@@ -424,7 +424,7 @@
                     tools:text="88" />
 
             <ImageView
-                    android:id="@+id/player_overlay_play" android:layout_width="40dp" android:layout_height="40dp"
+                    android:id="@+id/player_overlay_play" android:layout_width="42dp" android:layout_height="42dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:contentDescription="@string/play"
