@@ -897,7 +897,15 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             R.id.player_overlay_separator_transport, R.id.player_space_left, R.id.player_space_right).forEach { id ->
             player.findViewById<View>(id)?.setBackgroundColor(if (dark) 0xFF777777.toInt() else 0xFF888888.toInt())
         }
-        hudBinding.mpmVolumeSlider.setTrackColors(iconColor, if (dark) 0xFF777777.toInt() else 0xFFAAAAAA.toInt(), surfaceColor)
+        val seekTrackColor = if (dark) 0xFF777777.toInt() else 0xFF999999.toInt()
+        val seekBar = hudBinding.playerOverlaySeekbar
+        (seekBar.progressDrawable as? android.graphics.drawable.LayerDrawable)?.let { layers ->
+            layers.findDrawableByLayerId(android.R.id.background)?.mutate()?.setTint(seekTrackColor)
+            layers.findDrawableByLayerId(android.R.id.secondaryProgress)?.mutate()?.setTint(if (dark) 0xFFAAAAAA.toInt() else 0xFF777777.toInt())
+            layers.findDrawableByLayerId(android.R.id.progress)?.mutate()?.setTint(iconColor)
+        }
+        seekBar.thumb?.mutate()?.setTint(iconColor)
+        hudBinding.mpmVolumeSlider.setTrackColors(iconColor, seekTrackColor, surfaceColor)
     }
 
     fun updateHudMargins() {
