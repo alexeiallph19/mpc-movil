@@ -522,14 +522,18 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
 
                 if (skipAnim) {
                     hudBinding.playerOverlayPlay.setImageResource(if (service.isPlaying)
-                        R.drawable.ic_pause_player
+                        R.drawable.ic_mpm_classic_pause
                     else
-                        R.drawable.ic_play_player)
+                        R.drawable.ic_mpm_classic_play)
                 } else {
-                    val drawable = if (service.isPlaying) playToPause else pauseToPlay
-                    hudBinding.playerOverlayPlay.setImageDrawable(drawable)
-                    if (service.isPlaying != wasPlaying) drawable.start()
+                    // Use the same crisp desktop-style glyphs in both update paths.
+                    // Playback state and the original click listener remain unchanged.
+                    hudBinding.playerOverlayPlay.setImageResource(if (service.isPlaying)
+                        R.drawable.ic_mpm_classic_pause
+                    else
+                        R.drawable.ic_mpm_classic_play)
                 }
+                hudBinding.playerOverlayPlay.imageAlpha = 255
                 hudBinding.playerOverlayPlay.contentDescription = player.getString(if (service.isPlaying) R.string.pause else R.string.play)
 
                 wasPlaying = service.isPlaying
@@ -751,8 +755,12 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
     fun updatePausable(pausable: Boolean) {
         if (!::hudBinding.isInitialized) return
         hudBinding.playerOverlayPlay.isEnabled = pausable
-        if (!pausable)
-            hudBinding.playerOverlayPlay.setImageResource(R.drawable.ic_play_player_disabled)
+        if (!pausable) {
+            hudBinding.playerOverlayPlay.setImageResource(R.drawable.ic_mpm_classic_play)
+            hudBinding.playerOverlayPlay.imageAlpha = 90
+        } else {
+            hudBinding.playerOverlayPlay.imageAlpha = 255
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
