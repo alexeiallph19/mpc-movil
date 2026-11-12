@@ -363,7 +363,7 @@
                     vlc:layout_constraintEnd_toStartOf="@+id/mpm_volume_separator"
                     vlc:layout_constraintStart_toEndOf="@+id/player_overlay_adv_function"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play"
-                    vlc:srcCompat="@drawable/ic_mpm_classic_tracks" android:tint="?attr/player_icon_color" />
+                    vlc:srcCompat="@drawable/ic_player_audiotrack" android:tint="?attr/player_icon_color" />
 
             <ImageView
                     android:id="@+id/orientation_toggle" android:layout_width="30dp" android:layout_height="30dp"
