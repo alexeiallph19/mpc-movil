@@ -600,7 +600,7 @@
                     android:alpha="0.35"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintEnd_toStartOf="@+id/mpm_volume_slider"
-                    vlc:layout_constraintStart_toEndOf="@+id/player_overlay_tracks"
+                    vlc:layout_constraintStart_toEndOf="@+id/mpm_volume_separator"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play" />
 
             <SeekBar

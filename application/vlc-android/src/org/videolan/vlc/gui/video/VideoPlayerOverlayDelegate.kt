@@ -30,6 +30,10 @@ import android.annotation.TargetApi
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.view.Gravity
 import android.view.View
@@ -70,6 +74,7 @@ import org.videolan.resources.AndroidDevices
 import org.videolan.tools.ALLOW_FOLD_AUTO_LAYOUT
 import org.videolan.tools.ENABLE_SEEK_BUTTONS
 import org.videolan.tools.HINGE_ON_RIGHT
+import org.videolan.tools.KEY_APP_THEME
 import org.videolan.tools.KEY_ALWAYS_FAST_SEEK
 import org.videolan.tools.KEY_ENABLE_CASTING
 import org.videolan.tools.KEY_ENABLE_CLONE_MODE
@@ -834,7 +839,51 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
     }
 
 
+    private fun applyMpmHudTheme() {
+        if (!::hudBinding.isInitialized) return
+        val mode = Settings.getInstance(player).getString(KEY_APP_THEME, "-1")
+        val dark = when (mode) {
+            "1" -> false
+            "2" -> true
+            else -> (player.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        }
+        val surfaceColor = if (dark) Color.BLACK else Color.WHITE
+        val iconColor = if (dark) Color.WHITE else Color.BLACK
+        val pressedColor = if (dark) 0xFF303030.toInt() else 0xFFE6E6E6.toInt()
+        player.findViewById<View>(R.id.mpm_control_surface)?.setBackgroundColor(surfaceColor)
+        player.findViewById<View>(R.id.mpm_status_strip)?.setBackgroundColor(surfaceColor)
+
+        val controls = listOf(
+            hudBinding.orientationToggle, hudBinding.playlistPrevious,
+            hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
+            hudBinding.playerOverlayStop, hudBinding.playerOverlayForward,
+            hudBinding.playlistNext, hudBinding.playerResize,
+            hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks
+        )
+        controls.forEach { view ->
+            val pressed = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                setColor(pressedColor)
+            }
+            view.background = StateListDrawable().apply {
+                addState(intArrayOf(android.R.attr.state_pressed), pressed)
+                addState(intArrayOf(android.R.attr.state_focused), pressed)
+                addState(intArrayOf(), ColorDrawable(Color.TRANSPARENT))
+            }
+            (view as? ImageView)?.setColorFilter(iconColor)
+        }
+        listOf(hudBinding.playerOverlayTime, hudBinding.playerOverlayLength).forEach {
+            it.setTextColor(iconColor)
+        }
+        listOf(R.id.mpm_volume_separator, R.id.mpm_controls_group_separator,
+            R.id.player_overlay_separator_transport, R.id.player_space_left, R.id.player_space_right).forEach { id ->
+            player.findViewById<View>(id)?.setBackgroundColor(if (dark) 0xFF777777.toInt() else 0xFF888888.toInt())
+        }
+        hudBinding.mpmVolumeSlider.setTrackColors(iconColor, if (dark) 0xFF777777.toInt() else 0xFFAAAAAA.toInt())
+    }
+
     fun updateHudMargins() {
+        applyMpmHudTheme()
         //here, we override the default Android overscan
         val overscanHorizontal = if (player.isTv) 32.dp else 8.dp
         val overscanVertical = if (player.isTv) player.resources.getDimension(R.dimen.tv_overscan_vertical).toInt() else 8.dp
