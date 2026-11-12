@@ -600,10 +600,10 @@
                     android:alpha="0.35"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintEnd_toStartOf="@+id/mpm_volume_slider"
-                    vlc:layout_constraintStart_toEndOf="@+id/mpm_volume_separator"
+                    vlc:layout_constraintStart_toEndOf="@+id/player_overlay_tracks"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play" />
 
-            <SeekBar
+            <org.videolan.vlc.gui.view.MpmVolumeSeekBar
                     android:id="@+id/mpm_volume_slider"
                     style="@style/Widget.AppCompat.SeekBar"
                     android:layout_width="92dp"
@@ -612,13 +612,13 @@
                     android:layout_marginEnd="14dp"
                     android:max="100"
                     android:progress="100"
-                    android:progressDrawable="@drawable/mpm_volume_triangle"
+                    android:progressDrawable="@drawable/mpm_volume_empty"
                     android:thumb="@drawable/mpm_volume_thumb"
                     android:contentDescription="@string/volume"
                     android:focusable="true"
                     vlc:layout_constraintBottom_toBottomOf="@+id/player_overlay_play"
                     vlc:layout_constraintEnd_toEndOf="parent"
-                    vlc:layout_constraintStart_toEndOf="@+id/player_overlay_tracks"
+                    vlc:layout_constraintStart_toEndOf="@+id/mpm_volume_separator"
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play" />
 
             <org.videolan.vlc.gui.view.SwipeToUnlockView
