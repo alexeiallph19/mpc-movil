@@ -38,7 +38,7 @@
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
                 android:layout_height="54dp"
-                android:background="#E6101216"
+                android:background="?attr/background_default_darker"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
                 vlc:layout_constraintStart_toStartOf="parent" />
@@ -47,7 +47,7 @@
                     android:id="@+id/mpm_status_strip"
                     android:layout_width="0dp"
                     android:layout_height="18dp"
-                    android:background="#F20D0F12"
+                    android:background="?attr/background_default"
                     vlc:layout_constraintBottom_toBottomOf="parent"
                     vlc:layout_constraintEnd_toEndOf="parent"
                     vlc:layout_constraintStart_toStartOf="parent" />
@@ -232,7 +232,7 @@
                 vlc:layout_constraintBottom_toBottomOf="@+id/mpm_status_strip"
                 vlc:layout_constraintRight_toLeftOf="@+id/player_overlay_length"
                 vlc:layout_constraintHorizontal_chainStyle="spread"
-                vlc:layout_constraintLeft_toLeftOf="parent" android:textSize="11sp" android:fontFamily="monospace" android:textColor="@color/grey200" />
+                vlc:layout_constraintLeft_toLeftOf="parent" android:textSize="11sp" android:fontFamily="monospace" android:textColor="?attr/font_default" />
 
 
         <org.videolan.vlc.gui.view.FocusableTextView
@@ -251,7 +251,7 @@
                 vlc:layout_constraintRight_toRightOf="parent"
                 vlc:layout_constraintLeft_toRightOf="@+id/player_overlay_time"
                 vlc:length="@{progress.length}"
-                vlc:time="@{progress.time}" android:textSize="11sp" android:fontFamily="monospace" android:textColor="@color/grey200" />
+                vlc:time="@{progress.time}" android:textSize="11sp" android:fontFamily="monospace" ?attr/font_default />
 
 <!--           ⚠️ margin are set in code!!!-->
         <org.videolan.vlc.gui.view.AccessibleSeekBar
