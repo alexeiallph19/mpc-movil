@@ -858,8 +858,17 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
         val surfaceColor = if (dark) Color.BLACK else Color.WHITE
         val iconColor = if (dark) Color.WHITE else Color.BLACK
         val pressedColor = if (dark) 0xFF303030.toInt() else 0xFFE6E6E6.toInt()
-        player.findViewById<View>(R.id.mpm_control_surface)?.setBackgroundColor(surfaceColor)
-        player.findViewById<View>(R.id.mpm_status_strip)?.setBackgroundColor(surfaceColor)
+        val frameColor = if (dark) 0xFF777777.toInt() else 0xFF888888.toInt()
+        player.findViewById<View>(R.id.mpm_control_surface)?.background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(surfaceColor)
+            setStroke(1.dp, frameColor)
+        }
+        player.findViewById<View>(R.id.mpm_status_strip)?.background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(surfaceColor)
+            setStroke(1.dp, frameColor)
+        }
 
         val controls = listOf(
             hudBinding.orientationToggle, hudBinding.playlistPrevious,
@@ -869,14 +878,15 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks
         )
         controls.forEach { view ->
-            val pressed = GradientDrawable().apply {
+            fun buttonFace(fill: Int) = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                setColor(pressedColor)
+                setColor(fill)
+                setStroke(1.dp, frameColor)
             }
             view.background = StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_pressed), pressed)
-                addState(intArrayOf(android.R.attr.state_focused), pressed)
-                addState(intArrayOf(), ColorDrawable(Color.TRANSPARENT))
+                addState(intArrayOf(android.R.attr.state_pressed), buttonFace(pressedColor))
+                addState(intArrayOf(android.R.attr.state_focused), buttonFace(pressedColor))
+                addState(intArrayOf(), buttonFace(Color.TRANSPARENT))
             }
             (view as? ImageView)?.setColorFilter(iconColor)
         }
