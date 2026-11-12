@@ -251,7 +251,7 @@
                 vlc:layout_constraintRight_toRightOf="parent"
                 vlc:layout_constraintLeft_toRightOf="@+id/player_overlay_time"
                 vlc:length="@{progress.length}"
-                vlc:time="@{progress.time}" android:textSize="11sp" android:fontFamily="monospace" ?attr/font_default />
+                vlc:time="@{progress.time}" android:textSize="11sp" android:fontFamily="monospace" android:textColor="?attr/font_default" />
 
 <!--           ⚠️ margin are set in code!!!-->
         <org.videolan.vlc.gui.view.AccessibleSeekBar
