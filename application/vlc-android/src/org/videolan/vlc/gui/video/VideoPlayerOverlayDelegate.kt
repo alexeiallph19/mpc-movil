@@ -856,8 +856,10 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             }
 
             val portrait = player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.65f else 0.46f)
-            val compactSize = if (portrait) 24.dp else 28.dp
+            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.55f else 0.46f)
+            // Portrait has limited width: reserve enough room for the right-side audio/volume group.
+            // A balanced 55/45 split prevents ConstraintLayout from squeezing the controls together.
+            val compactSize = if (portrait) 23.dp else 28.dp
             listOf(hudBinding.playlistPrevious, hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
                     hudBinding.playerOverlayStop, hudBinding.playerOverlayForward, hudBinding.playlistNext,
                     hudBinding.playerResize, hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks).forEach {
