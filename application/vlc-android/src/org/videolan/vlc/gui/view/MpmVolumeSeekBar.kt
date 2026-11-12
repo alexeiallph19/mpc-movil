@@ -18,8 +18,11 @@ class MpmVolumeSeekBar @JvmOverloads constructor(
 
     private val density = resources.displayMetrics.density
     private val groovePath = Path()
-    private val groovePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL_AND_STROKE
+    private val grooveFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+    }
+    private val grooveBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
         strokeWidth = 1f * density
     }
     private val handlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -61,9 +64,10 @@ class MpmVolumeSeekBar @JvmOverloads constructor(
         groovePath.lineTo(grooveRight, top)
         groovePath.close()
 
-        groovePaint.color = grooveFillColor
-        groovePaint.strokeColor = grooveBorderColor
-        canvas.drawPath(groovePath, groovePaint)
+        grooveFillPaint.color = grooveFillColor
+        grooveBorderPaint.color = grooveBorderColor
+        canvas.drawPath(groovePath, grooveFillPaint)
+        canvas.drawPath(groovePath, grooveBorderPaint)
 
         val fraction = if (max > 0) progress.toFloat() / max.toFloat() else 0f
         val centerX = grooveLeft + (grooveRight - grooveLeft) * fraction
