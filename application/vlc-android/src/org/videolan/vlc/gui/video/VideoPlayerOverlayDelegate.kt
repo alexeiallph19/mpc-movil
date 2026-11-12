@@ -878,15 +878,15 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks
         )
         controls.forEach { view ->
-            fun buttonFace(fill: Int) = GradientDrawable().apply {
+            fun pressedFace() = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                setColor(fill)
+                setColor(pressedColor)
                 setStroke(1.dp, frameColor)
             }
             view.background = StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_pressed), buttonFace(pressedColor))
-                addState(intArrayOf(android.R.attr.state_focused), buttonFace(pressedColor))
-                addState(intArrayOf(), buttonFace(Color.TRANSPARENT))
+                addState(intArrayOf(android.R.attr.state_pressed), pressedFace())
+                addState(intArrayOf(android.R.attr.state_focused), pressedFace())
+                addState(intArrayOf(), ColorDrawable(Color.TRANSPARENT))
             }
             (view as? ImageView)?.setColorFilter(iconColor)
         }

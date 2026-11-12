@@ -37,7 +37,7 @@
         <View
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
-                android:layout_height="54dp"
+                android:layout_height="42dp"
                 android:background="@drawable/mpm_windows_toolbar_surface"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
@@ -46,7 +46,7 @@
             <View
                     android:id="@+id/mpm_status_strip"
                     android:layout_width="0dp"
-                    android:layout_height="18dp"
+                    android:layout_height="16dp"
                     android:background="@drawable/mpm_windows_status_strip"
                     vlc:layout_constraintBottom_toBottomOf="parent"
                     vlc:layout_constraintEnd_toEndOf="parent"
@@ -350,9 +350,9 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
-                    android:id="@+id/player_overlay_tracks" android:layout_width="30dp" android:layout_height="30dp"
+                    android:id="@+id/player_overlay_tracks" android:layout_width="26dp" android:layout_height="26dp"
                     android:layout_marginStart="@dimen/small_margins_sides"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
                     android:contentDescription="@string/tracks"
                     android:focusable="true"
@@ -366,11 +366,11 @@
                     vlc:srcCompat="@drawable/ic_player_audiotrack" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/orientation_toggle" android:layout_width="30dp" android:layout_height="30dp"
+                    android:id="@+id/orientation_toggle" android:layout_width="26dp" android:layout_height="26dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="@dimen/small_margins_sides"
                     android:contentDescription="@string/lock_orientation_description"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:focusable="true"
                     android:visibility="visible"
                     tools:visibility="visible"
@@ -394,9 +394,9 @@
                     vlc:layout_constraintTop_toTopOf="@+id/playlist_previous" />
 
             <ImageView
-                    android:id="@+id/playlist_previous" android:layout_width="28dp" android:layout_height="28dp"
+                    android:id="@+id/playlist_previous" android:layout_width="24dp" android:layout_height="24dp"
                     android:layout_marginEnd="3dp"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:padding="5dp"
                     android:clickable="true"
                     android:contentDescription="@string/previous"
@@ -413,9 +413,9 @@
                     vlc:srcCompat="@drawable/ic_mpm_classic_previous" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_rewind" android:layout_width="28dp" android:layout_height="28dp"
+                    android:id="@+id/player_overlay_rewind" android:layout_width="24dp" android:layout_height="24dp"
                     android:layout_marginEnd="3dp"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:padding="5dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -446,8 +446,8 @@
                     tools:text="88" />
 
             <ImageView
-                    android:id="@+id/player_overlay_play" android:layout_width="28dp" android:layout_height="28dp"
-                    android:background="@drawable/mpm_classic_button"
+                    android:id="@+id/player_overlay_play" android:layout_width="24dp" android:layout_height="24dp"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
                     android:contentDescription="@string/play"
                     android:focusable="true"
@@ -462,9 +462,9 @@
 
             <ImageView
                     android:id="@+id/player_overlay_stop"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:background="@drawable/mpm_classic_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
                     android:contentDescription="@string/stop"
                     android:focusable="true"
@@ -490,9 +490,9 @@
                     vlc:layout_constraintTop_toTopOf="@+id/player_overlay_play" />
 
             <ImageView
-                    android:id="@+id/player_overlay_forward" android:layout_width="28dp" android:layout_height="28dp"
+                    android:id="@+id/player_overlay_forward" android:layout_width="24dp" android:layout_height="24dp"
                     android:layout_marginStart="2dp"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:padding="5dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -525,9 +525,9 @@
 
 
             <ImageView
-                    android:id="@+id/playlist_next" android:layout_width="28dp" android:layout_height="28dp"
+                    android:id="@+id/playlist_next" android:layout_width="24dp" android:layout_height="24dp"
                     android:layout_marginStart="3dp"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:padding="5dp"
                     android:clickable="true"
                     android:contentDescription="@string/next"
@@ -556,9 +556,9 @@
                     vlc:layout_constraintTop_toTopOf="@+id/playlist_next" />
 
             <ImageView
-                    android:id="@+id/player_resize" android:layout_width="30dp" android:layout_height="30dp"
+                    android:id="@+id/player_resize" android:layout_width="26dp" android:layout_height="26dp"
                     android:layout_marginEnd="@dimen/small_margins_sides"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
                     android:contentDescription="@string/aspect_ratio"
                     android:focusable="true"
@@ -575,9 +575,9 @@
                     vlc:srcCompat="@drawable/ic_mpm_classic_ratio" android:tint="?attr/player_icon_color" />
 
             <ImageView
-                    android:id="@+id/player_overlay_adv_function" android:layout_width="30dp" android:layout_height="30dp"
+                    android:id="@+id/player_overlay_adv_function" android:layout_width="26dp" android:layout_height="26dp"
                     android:layout_marginEnd="@dimen/small_margins_sides"
-                    android:background="@drawable/mpm_classic_button"
+                    android:background="@android:color/transparent"
                     android:clickable="true"
                     android:contentDescription="@string/advanced"
                     android:focusable="true"

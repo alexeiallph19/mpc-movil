@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withTimeoutOrNull
 import org.videolan.libvlc.LibVLC
 import org.videolan.resources.VLCInstance
 import org.videolan.tools.AppScope
@@ -49,6 +50,8 @@ private const val MAX_FAILURES = 3
 /** Don't warn about the running build more often than this, which is how long a
  * [android.widget.Toast.LENGTH_LONG] toast stays on screen. */
 private const val WAIT_NOTIFICATION_INTERVAL = 3500L
+/** Maximum time playback may wait for the first-install font cache. */
+private const val MAX_PLAYBACK_WAIT_MS = 1500L
 
 /**
  * Builds the fontconfig font cache ahead of playback.
@@ -102,7 +105,8 @@ object FontCache {
         val pending = start(context) ?: return
         if (onWait != null && !pending.isCompleted && shouldNotifyWait()) onWait()
         try {
-            pending.await()
+            val completed = withTimeoutOrNull(MAX_PLAYBACK_WAIT_MS) { pending.await(); true } ?: false
+            if (!completed) Log.i(TAG, "Font cache is still building; playback continues and the cache remains in the background")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to build the font cache", e)
         }
