@@ -868,17 +868,27 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 height = if (portrait) 26.dp else 32.dp
             }
             if (portrait) {
-                hudBinding.playerSpaceLeft.setGone()
-                hudBinding.playerSpaceRight.setGone()
+                // Keep the two control groups visually separated on narrow screens.
+                // The previous zero margins made every transport icon touch its neighbour.
+                hudBinding.playerSpaceLeft.setVisible()
+                hudBinding.playerSpaceRight.setVisible()
                 applyMargin(hudBinding.playerOverlaySeekbar, 0, true)
                 applyMargin(hudBinding.playerOverlaySeekbar, 0, false)
 
-                applyMargin(hudBinding.playlistPrevious, 0, true)
-                applyMargin(hudBinding.playerOverlayRewind, 0, true)
-                applyMargin(hudBinding.playlistNext, 0, false)
-                applyMargin(hudBinding.playerOverlayForward, 0, false)
-                applyMargin(hudBinding.orientationToggle, 0, false)
-                applyMargin(hudBinding.playerResize, 0, true)
+                applyMargin(hudBinding.orientationToggle, 4.dp, true)
+                applyMargin(hudBinding.playlistPrevious, 3.dp, true)
+                applyMargin(hudBinding.playlistPrevious, 3.dp, false)
+                applyMargin(hudBinding.playerOverlayRewind, 3.dp, true)
+                applyMargin(hudBinding.playerOverlayRewind, 3.dp, false)
+                applyMargin(hudBinding.playerOverlayForward, 3.dp, true)
+                applyMargin(hudBinding.playerOverlayForward, 3.dp, false)
+                applyMargin(hudBinding.playlistNext, 3.dp, true)
+                applyMargin(hudBinding.playlistNext, 3.dp, false)
+                applyMargin(hudBinding.playerResize, 3.dp, true)
+                applyMargin(hudBinding.playerOverlayAdvFunction, 3.dp, true)
+                applyMargin(hudBinding.playerOverlayAdvFunction, 3.dp, false)
+                applyMargin(hudBinding.playerOverlayTracks, 3.dp, true)
+                applyMargin(hudBinding.playerOverlayTracks, 3.dp, false)
             } else {
                 // Keep the transport controls grouped in landscape instead of letting
                 // the weighted spacer views push the entire control chain to the right.
