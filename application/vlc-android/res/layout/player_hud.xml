@@ -38,7 +38,7 @@
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
                 android:layout_height="54dp"
-                android:background="?attr/background_default_darker"
+                android:background="@drawable/mpm_windows_toolbar_surface"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
                 vlc:layout_constraintStart_toStartOf="parent" />
@@ -47,7 +47,7 @@
                     android:id="@+id/mpm_status_strip"
                     android:layout_width="0dp"
                     android:layout_height="18dp"
-                    android:background="?attr/background_default"
+                    android:background="@drawable/mpm_windows_status_strip"
                     vlc:layout_constraintBottom_toBottomOf="parent"
                     vlc:layout_constraintEnd_toEndOf="parent"
                     vlc:layout_constraintStart_toStartOf="parent" />
