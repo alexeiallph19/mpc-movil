@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <vector
+            android:width="76dp"
+            android:height="24dp"
+            android:viewportWidth="76"
+            android:viewportHeight="24">
+            <path
+                android:fillColor="?attr/background_default"
+                android:pathData="M0,24 L76,0 L76,24 Z" />
+        </vector>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip android:clipOrientation="horizontal" android:gravity="left">
+            <vector
+                android:width="76dp"
+                android:height="24dp"
+                android:viewportWidth="76"
+                android:viewportHeight="24">
+                <path
+                    android:fillColor="?attr/player_icon_color"
+                    android:pathData="M0,24 L76,0 L76,24 Z" />
+            </vector>
+        </clip>
+    </item>
+</layer-list>

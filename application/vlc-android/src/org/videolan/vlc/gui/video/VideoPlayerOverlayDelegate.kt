@@ -856,9 +856,9 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             }
 
             val portrait = player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.55f else 0.46f)
-            // Portrait has limited width: reserve enough room for the right-side audio/volume group.
-            // A balanced 55/45 split prevents ConstraintLayout from squeezing the controls together.
+            // Keep both control groups balanced on narrow screens without squeezing
+            // the audio and volume controls against the right edge.
+            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.57f else 0.46f)
             val compactSize = if (portrait) 23.dp else 28.dp
             listOf(hudBinding.playlistPrevious, hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
                     hudBinding.playerOverlayStop, hudBinding.playerOverlayForward, hudBinding.playlistNext,
@@ -866,8 +866,8 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 it.layoutParams = it.layoutParams.apply { width = compactSize; height = compactSize }
             }
             hudBinding.mpmVolumeSlider.layoutParams = hudBinding.mpmVolumeSlider.layoutParams.apply {
-                width = if (portrait) 52.dp else 92.dp
-                height = if (portrait) 26.dp else 32.dp
+                width = if (portrait) 52.dp else 76.dp
+                height = 24.dp
             }
             if (portrait) {
                 // Keep the two control groups visually separated on narrow screens.
