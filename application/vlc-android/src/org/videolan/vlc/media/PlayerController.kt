@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
+import android.os.SystemClock
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
@@ -78,20 +80,27 @@ class PlayerController(val context: Context) : IVLCVout.Callback, MediaPlayer.Ev
 
     private var mediaplayerEventListener: MediaPlayerEventListener? = null
     internal suspend fun startPlayback(media: IMedia, listener: MediaPlayerEventListener, time: Long) {
+        val startedAt = SystemClock.elapsedRealtime()
         mediaplayerEventListener = listener
         resetPlaybackState(time, media.duration)
         mediaplayer.setEventListener(null)
+        val mediaSetAt = SystemClock.elapsedRealtime()
         withContext(Dispatchers.IO) { if (!mediaplayer.isReleased) mediaplayer.media = media.apply { if (hasRenderer) parse() } }
+        Log.i("MPMPlayback", "media assignment took ${SystemClock.elapsedRealtime() - mediaSetAt}ms")
         mediaplayer.setEventListener(this@PlayerController)
         if (!mediaplayer.isReleased) {
+            val equalizerAt = SystemClock.elapsedRealtime()
             if (Settings.getInstance(context).getBoolean(KEY_EQUALIZER_ENABLED, false)) withContext(Dispatchers.IO) {
                 val repository = EqualizerRepository.getInstance(context)
                 mediaplayer.setEqualizer(repository.getCurrentEqualizer(context).getEqualizer())
             } else {
                 mediaplayer.setEqualizer(null)
             }
+            Log.i("MPMPlayback", "equalizer setup took ${SystemClock.elapsedRealtime() - equalizerAt}ms")
             mediaplayer.setVideoTitleDisplay(MediaPlayer.Position.Disable, 0)
+            val playAt = SystemClock.elapsedRealtime()
             mediaplayer.play()
+            Log.i("MPMPlayback", "play() returned in ${SystemClock.elapsedRealtime() - playAt}ms, total setup ${SystemClock.elapsedRealtime() - startedAt}ms")
         }
     }
 

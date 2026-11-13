@@ -216,10 +216,10 @@
 
     <!-- About -->
     <string name="app_name_full">MPM Player</string>
-    <string name="about_vlc_text">MPM Player es un reproductor multimedia de código abierto para Android, impulsado por VLC media player y libVLC. Reproduce archivos locales y transmisiones de red.</string>
+    <string name="about_vlc_text">MPM Player es un reproductor multimedia para Android. Reproduce archivos locales y transmisiones de red.</string>
     <string name="revision">Revisión</string>
     <string name="about">Acerca de</string>
-    <string name="vlc_authors">y autores VLC.</string>
+    <string name="vlc_authors">y colaboradores del proyecto.</string>
     <string name="feedback_forum">Foro de comentarios</string>
 
     <!-- Preferences -->
@@ -306,8 +306,8 @@
     <string name="enable_play_on_headset_insertion">Continuar al insertar auriculares</string>
     <string name="enable_play_on_headset_insertion_summary">Pausar de otra manera</string>
     <string name="aout">Salida de audio</string>
-    <string name="aout_summary">Cambiar el método que usa VLC para la salida de audio</string>
-    <string name="audio_ducking_title">Bajar volumen de VLC en notificaciones</string>
+    <string name="aout_summary">Cambiar el método de salida de audio</string>
+    <string name="audio_ducking_title">Bajar el volumen del reproductor durante las notificaciones</string>
     <string name="audio_ducking_summary">Ayuda a oír las notificaciones de audio, instrucciones de navegación o asistente de voz</string>
     <string name="casting_category">Transformar</string>
     <string name="casting_switch_title">Emisión Wireless</string>
@@ -352,7 +352,7 @@
     <string name="clear_media_db">Limpiar base de datos de medios</string>
     <string name="clear_media_database_summary">Limpiar la base de datos para comenzar de nuevo</string>
     <string name="clear_app_data">Borrar datos de la aplicación</string>
-    <string name="clear_app_data_summary">Borra los datos de VLC para Android</string>
+    <string name="clear_app_data_summary">Borra los datos de MPM Player</string>
     <string name="clear_history">Limpiar historial</string>
     <string name="set_locale">Establecer idioma</string>
     <string name="network_caching">Valor de cache de red</string>
@@ -371,18 +371,18 @@
     <string name="start_logging">Iniciar registro</string>
     <string name="stop_logging">Detener registro</string>
     <string name="clear_log">Limpiar registro</string>
-    <string name="log_service_title">Grabación de trazas de VLC</string>
+    <string name="log_service_title">Grabación de registros de diagnóstico</string>
     <string name="log_service_text">Abrir la consola de trazas</string>
     <string name="copy_to_clipboard">Copiar al portapapeles</string>
     <string name="copied_to_clipboard">Registro copiado al portapapeles.</string>
     <string name="dump_logcat">Volcar trazas logcat</string>
     <string name="dump_logcat_success">Logcat volcado correctamente a %1$s</string>
     <string name="dump_logcat_failure">Fallo al volcar logcat.</string>
-    <string name="custom_libvlc_options">Opciones personalizas libVLC</string>
-    <string name="custom_libvlc_options_invalid">Opciones libVLC inválidas!</string>
-    <string name="serious_crash">Desafortunadamente, ha ocurrido un error serio y VLC ha tenido que cerrarse.</string>
-    <string name="help_us_send_log">Ayúdanos a mejorar VLC enviándonos las siguientes trazas de fallo:</string>
-    <string name="restart_vlc">Reiniciar VLC</string>
+    <string name="custom_libvlc_options">Opciones avanzadas del motor multimedia</string>
+    <string name="custom_libvlc_options_invalid">Las opciones avanzadas del motor multimedia no son válidas</string>
+    <string name="serious_crash">Se ha producido un error grave y la aplicación debe cerrarse.</string>
+    <string name="help_us_send_log">Ayúdanos a mejorar MPM Player enviando el siguiente registro de error:</string>
+    <string name="restart_vlc">Reiniciar MPM Player</string>
     <string name="send_log">Enviar las trazas</string>
     <string name="sending_log">Enviando las trazas…</string>
 
@@ -423,8 +423,8 @@
     <string name="music_now_playing">Reproduciendo ahora</string>
 
     <!-- Widget -->
-    <string name="widget_name_w">Tema blanco de VLC</string>
-    <string name="widget_name_b">Tema negro de VLC</string>
+    <string name="widget_name_w">Widget claro de MPM Player</string>
+    <string name="widget_name_b">Widget oscuro de MPM Player</string>
     <string name="allow_storage_access_title">Permitir que MPM Player acceda a vídeos y audios</string>
     <string name="allow_storage_access_description">MPM Player necesita este permiso para acceder a los archivos multimedia de este dispositivo.</string>
     <string name="allow_settings_access_ringtone_title">Permitir que MPM Player establezca el tono de llamada</string>
@@ -434,8 +434,8 @@
     <string name="allow_draw_overlays_title">Permitir que MPM Player se muestre sobre otras aplicaciones</string>
     <string name="allow_sdraw_overlays_description">MPM Player necesita este permiso para mostrar el vídeo sobre otras aplicaciones.</string>
     <string name="permission_ask_again">Conceder permiso</string>
-    <string name="exit_app">Salir de VLC</string>
-    <string name="exit_app_msg">¿Desea salir de VLC?</string>
+    <string name="exit_app">Salir de MPM Player</string>
+    <string name="exit_app_msg">¿Desea salir de MPM Player?</string>
     <!-- fast scroller -->
     <string name="fastscroller_track">Seguimiento FastScroller</string>
     <string name="fastscroller_handle">Manejador FastScroller</string>
@@ -542,7 +542,7 @@
     <string name="ctx_player_subs_track">Pista de subtítulos</string>
     <string name="ctx_pip_title">Reproductor emergente</string>
     <string name="device_dialog_title">Dispositivo externo insertado</string>
-    <string name="device_dialog_message">Acaba de conectar un nuevo dispositvo de almacenamiento a su TV, ¿desea abrirlo con VLC?</string>
+    <string name="device_dialog_message">Acaba de conectar un nuevo dispositivo de almacenamiento, ¿desea abrirlo con MPM Player?</string>
     <string name="videos_folders_title">Vídeos por carpetas</string>
     <string name="videos_groups_title">Grupos de vídeo</string>
     <string name="video_save_clone_mode">¿Activar automáticamente el modo clonar?</string>
@@ -594,13 +594,13 @@
     <string name="display_in_grid">Mostrar en rejilla</string>
     <string name="dump_db_succes">Base de datos volcada en la raíz del almacenamiento interno</string>
     <string name="dump_db_failure">Fall al volcar base de datos</string>
-    <string name="send_crash_title">Informador de fallos de VLC</string>
-    <string name="send_crash_description">Enviando su fallo, nos ayudará a mejorar la estabilidad de VLC.</string>
+    <string name="send_crash_title">Informador de errores de MPM Player</string>
+    <string name="send_crash_description">Al enviar el informe, ayudarás a mejorar la estabilidad de MPM Player.</string>
     <string name="send_crash_warning">Asegúrese de eliminar cualquier dato sensible que no quiera enviar.</string>
     <string name="include_medialib">Incluir su base de datos</string>
-    <string name="vlc_reporter">Informador de VLC</string>
-    <string name="welcome_beta_title">VLC Beta</string>
-    <string name="welcome_beta_description">Bienvenido al programa beta de VLC.\nNote que esta versión puede incluir algunos errores.</string>
+    <string name="vlc_reporter">Informador de errores de MPM Player</string>
+    <string name="welcome_beta_title">MPM Player Beta</string>
+    <string name="welcome_beta_description">Bienvenido al programa beta de MPM Player.\nEsta versión puede incluir algunos errores.</string>
     <string name="welcome_beta_description_bugs">Si se da cuenta de un error, informe de él en nuestro foro o seguimiento de errores.</string>
     <string name="send">Enviar</string>
     <string name="send_crash_action_title">¿Qué desea hacer?</string>
@@ -640,8 +640,8 @@
     <string name="recently_played">Reproducido recientemente</string>
     <string name="recently_added">Añadido recientemente</string>
     <string name="playback_multiple_errors">No se pueden reproducir múltiples medios</string>
-    <string name="clear_media_db_message">Perderás los progresos, marcadores y listas de reproducción que hayas creado, pero se mantendrán los ajustes de VLC para Android</string>
-    <string name="clear_app_data_message">Perderás los progresos, marcadores y listas de reproducción que hayas creado, así como todos los ajustes de VLC</string>
+    <string name="clear_media_db_message">Perderás los progresos, marcadores y listas de reproducción que hayas creado, pero se mantendrán los ajustes de MPM Player</string>
+    <string name="clear_app_data_message">Perderás los progresos, marcadores y listas de reproducción que hayas creado, así como todos los ajustes de MPM Player</string>
     <string name="clear">Borrar</string>
     <string name="abrepeat_add_first_marker">Establecer punto de inicio</string>
     <string name="abrepeat_add_second_marker">Establecer punto de fin</string>
@@ -694,18 +694,18 @@
     <string name="sub_result_by_name_season">Temporada %s</string>
     <string name="sub_result_by_name_episode">Episodio %s</string>
     <string name="sub_result_by_file">Resultados para su archivo</string>
-    <string name="donate">Ayudar a VLC</string>
-    <string name="donate_desc">Apoyar a los voluntarios contruyendo VLC</string>
+    <string name="donate">Apoyar el proyecto base</string>
+    <string name="donate_desc">Apoyar a los colaboradores que mantienen el motor multimedia</string>
     <string name="donate_subscribtion">Me gustaría que este fuera un patrocinio mensual</string>
     <string name="donate_send">Iniciar su patrocinio</string>
-    <string name="donation_description">Su patrocinio nos ayudará a:\nMejorar la app de VLC para Android\nApoyar la VideoLAN Association</string>
+    <string name="donation_description">Tu patrocinio ayuda a mantener el motor multimedia y sus colaboradores.</string>
     <string name="subscription_purchased">Está suscrito al patrocinio mensual</string>
     <string name="subscription_cancel">Puede desuscribirse en la Play Store</string>
     <string name="subscription_cancel_tv">Como desuscribirse</string>
     <string name="donate_unsubscribe_tv">Para desuscribirse, abra %s en un teléfono, en un ordenador o escanee este código:</string>
-    <string name="tip_jar">Ayudar a VLC</string>
+    <string name="tip_jar">Apoyar el proyecto base</string>
     <string name="thank_you">Gracias</string>
-    <string name="thank_you_desc">Gracias por su patrocinio\nNos ayudará mucho a mejorar VLC!</string>
+    <string name="thank_you_desc">Gracias por tu patrocinio, ayudará a mantener el motor multimedia.</string>
     <string name="donate_again">Patrocinar la app de nuevo</string>
 
     <string name="mark_as_played">Marcar como reproducido</string>
@@ -722,7 +722,7 @@
     <string name="air_action_next">Siguiente elemento en reproducción</string>
     <string name="air_action_previous">Anterior elemento en reproducción</string>
     <string name="allow_otg">Permitir acceso OTG</string>
-    <string name="allow_otg_description">Seleccione su unidad OTG para permitir acceso a VLC.</string>
+    <string name="allow_otg_description">Seleccione su unidad OTG para permitir el acceso a MPM Player.</string>
     <string name="timeout_infinite">Infinito</string>
     <string name="video_hud_timeout">Retraso de ocultación de los controles del reproductor de vídeo</string>
     <string name="remove_from_history">Eliminar del historial</string>

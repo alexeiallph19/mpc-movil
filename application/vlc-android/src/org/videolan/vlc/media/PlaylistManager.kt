@@ -545,7 +545,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
             }
             //todo restore position as well when we move to VLC 4.0
+            val mediaCreateAt = android.os.SystemClock.elapsedRealtime()
             val media = mediaFactory.getFromUri(VLCInstance.getInstance(service), uri)
+            Log.i(TAG, "media object and engine acquisition took ${android.os.SystemClock.elapsedRealtime() - mediaCreateAt}ms")
             //fixme workaround to prevent the issue described in https://code.videolan.org/videolan/vlc-android/-/issues/2106
             if (shouldDisableCookieForwarding) {
                 shouldDisableCookieForwarding = false
@@ -561,7 +563,9 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             //todo in VLC 4.0, this should be done by using libvlc_media_player_set_time instead of start-time
             media.addOption(":start-time=${start/1000L}")
             media.addOption(":no-sout-chromecast-video")
+            val optionsAt = android.os.SystemClock.elapsedRealtime()
             VLCOptions.setMediaOptions(media, ctx, flags or mw.flags, PlaybackService.hasRenderer())
+            Log.i(TAG, "media options preparation took ${android.os.SystemClock.elapsedRealtime() - optionsAt}ms")
             /* keeping only video during benchmark */
             if (isBenchmark) {
                 media.addOption(":no-audio")
