@@ -37,7 +37,7 @@
         <View
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
-                android:layout_height="44dp"
+                android:layout_height="50dp"
                 android:background="@drawable/mpm_windows_toolbar_surface"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
