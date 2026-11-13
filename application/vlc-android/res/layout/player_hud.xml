@@ -37,7 +37,7 @@
         <View
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
-                android:layout_height="58dp"
+                android:layout_height="44dp"
                 android:background="@drawable/mpm_windows_toolbar_surface"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
@@ -268,7 +268,7 @@
                 android:progress="@{player.service.getTime(progress.time)}"
                 android:progressDrawable="@drawable/po_seekbar_video"
                 android:splitTrack="false"
-                android:thumb="@drawable/mpm_windows_seekbar_thumb"
+                android:thumb="@drawable/ic_seekbar_thumb"
                 vlc:layout_constraintBottom_toTopOf="@+id/mpm_control_surface"
                 vlc:layout_constraintEnd_toEndOf="parent"
                 vlc:layout_constraintStart_toStartOf="parent"
