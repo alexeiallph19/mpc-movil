@@ -864,11 +864,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             setColor(surfaceColor)
             setStroke(1.dp, frameColor)
         }
-        player.findViewById<View>(R.id.mpm_status_strip)?.background = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            setColor(surfaceColor)
-            setStroke(1.dp, frameColor)
-        }
+        player.findViewById<View>(R.id.mpm_status_strip)?.setBackgroundColor(Color.TRANSPARENT)
 
         val controls = listOf(
             hudBinding.orientationToggle, hudBinding.playlistPrevious,
@@ -933,15 +929,15 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
             val portrait = player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
             // Keep both control groups balanced on narrow screens without squeezing
             // the audio and volume controls against the right edge.
-            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.57f else 0.46f)
-            val compactSize = if (portrait) 23.dp else 28.dp
+            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.59f else 0.46f)
+            val compactSize = if (portrait) 21.dp else 28.dp
             listOf(hudBinding.playlistPrevious, hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
                     hudBinding.playerOverlayStop, hudBinding.playerOverlayForward, hudBinding.playlistNext,
                     hudBinding.playerResize, hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks).forEach {
                 it.layoutParams = it.layoutParams.apply { width = compactSize; height = compactSize }
             }
             hudBinding.mpmVolumeSlider.layoutParams = hudBinding.mpmVolumeSlider.layoutParams.apply {
-                width = if (portrait) 52.dp else 76.dp
+                width = if (portrait) 48.dp else 76.dp
                 height = 24.dp
             }
             if (portrait) {
@@ -953,19 +949,19 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 applyMargin(hudBinding.playerOverlaySeekbar, 0, false)
 
                 applyMargin(hudBinding.orientationToggle, 4.dp, true)
-                applyMargin(hudBinding.playlistPrevious, 3.dp, true)
-                applyMargin(hudBinding.playlistPrevious, 3.dp, false)
-                applyMargin(hudBinding.playerOverlayRewind, 3.dp, true)
-                applyMargin(hudBinding.playerOverlayRewind, 3.dp, false)
-                applyMargin(hudBinding.playerOverlayForward, 3.dp, true)
-                applyMargin(hudBinding.playerOverlayForward, 3.dp, false)
-                applyMargin(hudBinding.playlistNext, 3.dp, true)
-                applyMargin(hudBinding.playlistNext, 3.dp, false)
-                applyMargin(hudBinding.playerResize, 3.dp, true)
-                applyMargin(hudBinding.playerOverlayAdvFunction, 3.dp, true)
-                applyMargin(hudBinding.playerOverlayAdvFunction, 3.dp, false)
-                applyMargin(hudBinding.playerOverlayTracks, 3.dp, true)
-                applyMargin(hudBinding.playerOverlayTracks, 3.dp, false)
+                applyMargin(hudBinding.playlistPrevious, 1.dp, true)
+                applyMargin(hudBinding.playlistPrevious, 1.dp, false)
+                applyMargin(hudBinding.playerOverlayRewind, 1.dp, true)
+                applyMargin(hudBinding.playerOverlayRewind, 1.dp, false)
+                applyMargin(hudBinding.playerOverlayForward, 1.dp, true)
+                applyMargin(hudBinding.playerOverlayForward, 1.dp, false)
+                applyMargin(hudBinding.playlistNext, 1.dp, true)
+                applyMargin(hudBinding.playlistNext, 1.dp, false)
+                applyMargin(hudBinding.playerResize, 1.dp, true)
+                applyMargin(hudBinding.playerOverlayAdvFunction, 1.dp, true)
+                applyMargin(hudBinding.playerOverlayAdvFunction, 1.dp, false)
+                applyMargin(hudBinding.playerOverlayTracks, 1.dp, true)
+                applyMargin(hudBinding.playerOverlayTracks, 1.dp, false)
             } else {
                 // Keep the transport controls grouped in landscape instead of letting
                 // the weighted spacer views push the entire control chain to the right.

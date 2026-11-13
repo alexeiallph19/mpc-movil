@@ -37,7 +37,7 @@
         <View
                 android:id="@+id/mpm_control_surface"
                 android:layout_width="0dp"
-                android:layout_height="42dp"
+                android:layout_height="58dp"
                 android:background="@drawable/mpm_windows_toolbar_surface"
                 vlc:layout_constraintBottom_toBottomOf="parent"
                 vlc:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +47,7 @@
                     android:id="@+id/mpm_status_strip"
                     android:layout_width="0dp"
                     android:layout_height="16dp"
-                    android:background="@drawable/mpm_windows_status_strip"
+                    android:background="@android:color/transparent"
                     vlc:layout_constraintBottom_toBottomOf="parent"
                     vlc:layout_constraintEnd_toEndOf="parent"
                     vlc:layout_constraintStart_toStartOf="parent" />
@@ -257,6 +257,7 @@
         <org.videolan.vlc.gui.view.AccessibleSeekBar
                 android:id="@+id/player_overlay_seekbar"
                 android:layout_width="0dp" android:layout_height="18dp"
+                android:translationY="9dp"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:layout_marginBottom="0dp"
