@@ -36,6 +36,7 @@ import org.videolan.tools.RESULT_RESTART
 import org.videolan.tools.Settings
 import org.videolan.vlc.BuildConfig
 import org.videolan.vlc.MediaParsingService
+import org.videolan.vlc.util.FontCache
 import org.videolan.vlc.R
 import org.videolan.vlc.gui.MainActivity
 import org.videolan.vlc.gui.helpers.hf.NotificationDelegate.Companion.getNotificationPermission
@@ -53,6 +54,8 @@ class OnboardingActivity : AppCompatActivity(), OnboardingFragmentListener {
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = false
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         super.onCreate(savedInstanceState)
+        // Build the system font cache while the user completes first-run setup.
+        FontCache.prepare(applicationContext)
 //        viewModel.permissionGranted = Permissions.canReadStorage(applicationContext)
         setContentView(R.layout.activity_onboarding)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container)) { v, windowInsets ->
