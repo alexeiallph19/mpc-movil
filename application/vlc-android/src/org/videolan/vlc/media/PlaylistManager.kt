@@ -485,9 +485,8 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
         // The fonts are scanned when the first text renderer is created, which would otherwise
         // delay the playback by several seconds on the first run. See [FontCache]
         // Wait before reading any state, as the queue can change in the meantime
-        FontCache.await(service) {
-            service.showToast(service.getString(R.string.font_cache_building), Toast.LENGTH_LONG)
-        }
+        // Prepare the font cache in the background without blocking the first video.
+        FontCache.prepare(service)
 
         videoBackground = videoBackground || (!player.isVideoPlaying() && player.canSwitchToVideo())
         if (mediaList.size() == 0) {
