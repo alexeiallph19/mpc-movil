@@ -326,9 +326,9 @@
     <string name="app_name_full">MPM Player for Android</string>
     <string name="revision">Revision</string>
     <string name="about">About</string>
-    <string name="about_vlc_text">MPM Player for Android™ is a port of MPM Player media player, the popular open source media player. The Android™ version can read all files and network streams.</string>
+    <string name="about_vlc_text">MPM Player is a multimedia player for Android that can play local files and network streams.</string>
     <string name="authors">Authors</string>
-    <string name="about_copyright" translatable="false">Copyleft &#169; 1996&#8211;2026 by equipo de desarrollo</string>
+    <string name="about_copyright" translatable="false">Copyleft &#169; 1996&#8211;2026 by VideoLAN</string>
     <string name="about_license" translatable="false">GNU General Public License v2.0</string>
     <string name="about_license_text" translatable="false"></string>
     <string name="vlc_authors">and MPM Player Authors.</string>
@@ -1067,7 +1067,7 @@
     <string name="donate_desc">Support the volunteers building MPM Player</string>
     <string name="donate_subscribtion">I would like this to be a monthly sponsorship</string>
     <string name="donate_send">Start your sponsorship</string>
-    <string name="donation_description">Your sponsorship will allow us to:\nImprove the MPM Player app for Android\nSupport the equipo de desarrollo Association</string>
+    <string name="donation_description">Your sponsorship will allow us to:\nImprove MPM Player\nSupport the VideoLAN Association</string>
     <string name="subscription_purchased">You are subscribed to a monthly sponsorship</string>
     <string name="subscription_cancel">You can unsubscribe in the Play Store</string>
     <string name="subscription_cancel_tv">How to unsubscribe</string>

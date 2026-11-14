@@ -697,7 +697,7 @@
     <string name="donate_desc">Apoyar a los voluntarios contruyendo MPM Player</string>
     <string name="donate_subscribtion">Me gustaría que este fuera un patrocinio mensual</string>
     <string name="donate_send">Iniciar su patrocinio</string>
-    <string name="donation_description">Su patrocinio nos ayudará a:\nMejorar la app de MPM Player para Android\nApoyar la equipo de desarrollo Association</string>
+    <string name="donation_description">Su patrocinio nos ayudará a:\nMejorar MPM Player\nApoyar a la VideoLAN Association</string>
     <string name="subscription_purchased">Está suscrito al patrocinio mensual</string>
     <string name="subscription_cancel">Puede desuscribirse en la Play Store</string>
     <string name="subscription_cancel_tv">Como desuscribirse</string>
