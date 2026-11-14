@@ -162,7 +162,6 @@ import org.videolan.vlc.viewmodels.mobile.VideosViewModel
 import org.videolan.vlc.viewmodels.mobile.getViewModel
 
 private const val TAG = "VLC/VideoListFragment"
-private const val KEY_FORCE_MPM_FOLDER_GROUPING = "mpm_force_folder_grouping"
 
 class VideoGridFragment : MediaBrowserFragment<VideosViewModel>(), SwipeRefreshLayout.OnRefreshListener, CtxActionReceiver {
 
@@ -201,8 +200,7 @@ class VideoGridFragment : MediaBrowserFragment<VideosViewModel>(), SwipeRefreshL
             else arguments?.parcelable(KEY_FOLDER)
             val parentGroup = if (savedInstanceState != null) savedInstanceState.parcelable<VideoGroup>(KEY_GROUP)
                     else arguments?.parcelable(KEY_GROUP)
-            val forceFolderGrouping = arguments?.getBoolean(KEY_FORCE_MPM_FOLDER_GROUPING) == true
-            val grouping = if (forceFolderGrouping) VideoGroupingType.FOLDER else if (parentGroup != null || folder != null) VideoGroupingType.NONE else when (Settings.getInstance(requireContext()).getString(KEY_GROUP_VIDEOS, null) ?: GROUP_VIDEOS_NAME) {
+            val grouping = if (parentGroup != null || folder != null) VideoGroupingType.NONE else when (Settings.getInstance(requireContext()).getString(KEY_GROUP_VIDEOS, null) ?: GROUP_VIDEOS_NAME) {
                 GROUP_VIDEOS_NONE -> VideoGroupingType.NONE
                 GROUP_VIDEOS_FOLDER -> VideoGroupingType.FOLDER
                 else -> VideoGroupingType.NAME
@@ -799,11 +797,7 @@ class VideoGridFragment : MediaBrowserFragment<VideosViewModel>(), SwipeRefreshL
     private fun castAsAudio(): Boolean = PlaybackService.renderer.value != null && settings.getBoolean(KEY_CASTING_AUDIO_ONLY, false)
 
     companion object {
-        fun newInstance(forceFolderGrouping: Boolean = false) = VideoGridFragment().apply {
-            if (forceFolderGrouping) arguments = Bundle().apply {
-                putBoolean(KEY_FORCE_MPM_FOLDER_GROUPING, true)
-            }
-        }
+        fun newInstance() = VideoGridFragment()
     }
 }
 

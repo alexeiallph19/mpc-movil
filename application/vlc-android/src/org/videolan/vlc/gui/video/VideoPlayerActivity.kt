@@ -606,8 +606,12 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         isTv = Settings.showTvUi
         if (displayManager.isPrimary) {
             // Orientation
-            // MPM does not show the first-play tutorial.
-            settings.putSingle(PREF_TIPS_SHOWN, true)
+            // Tips
+            if (!BuildConfig.DEBUG && !isTv && !settings.getBoolean(PREF_TIPS_SHOWN, false)
+                && !isBenchmark
+            ) {
+                tipsDelegate.init()
+            }
         }
 
 
@@ -1448,8 +1452,7 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     override fun previous() {
         service?.let { service ->
-            // MPM: Previous means previous playlist item, not restart current item.
-            service.previous(true)
+            service.previous(false)
             overlayDelegate.showInfo(getString(R.string.previous), 1000)
             overlayDelegate.showOverlay()
         }
@@ -1836,11 +1839,6 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
             setGravity(Gravity.LEFT or Gravity.BOTTOM, 16.dp, 0)
             show()
         }
-    }
-
-    internal fun setAudioVolumeFromPercent(percent: Int) {
-        val bounded = percent.coerceIn(0, if (isAudioBoostEnabled) 200 else 100)
-        setAudioVolume((bounded * audioMax / 100f).roundToInt())
     }
 
     internal fun setAudioVolume(volume: Int) {

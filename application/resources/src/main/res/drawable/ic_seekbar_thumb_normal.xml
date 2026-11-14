@@ -22,14 +22,14 @@
   ~
   -->
 
-<vector android:height="16dp"
+<vector android:height="28dp"
         android:viewportHeight="14"
         android:viewportWidth="14"
-        android:width="16dp"
+        android:width="28dp"
         xmlns:android="http://schemas.android.com/apk/res/android">
     <path
             android:fillAlpha="1"
-            android:fillColor="#ffffffff"
+            android:fillColor="#ff610a"
             android:fillType="nonZero"
             android:pathData="m10,7a3,3 90,1 1,-6 0,3 3,90 1,1 6,0z"
             android:strokeColor="#00000000"

@@ -89,6 +89,7 @@ import org.videolan.vlc.R
 import org.videolan.vlc.gui.browser.BaseBrowserFragment
 import org.videolan.vlc.gui.video.VideoPlayerActivity
 import org.videolan.vlc.util.FileUtils
+import org.videolan.vlc.util.FontCache
 import org.videolan.vlc.util.awaitMedialibraryStarted
 import org.videolan.vlc.util.isSchemeFD
 import org.videolan.vlc.util.isSchemeHttpOrHttps
@@ -481,6 +482,13 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
     }
 
     suspend fun playIndex(index: Int, flags: Int = 0, forceResume:Boolean = false, forceRestart:Boolean = false) {
+        // The fonts are scanned when the first text renderer is created, which would otherwise
+        // delay the playback by several seconds on the first run. See [FontCache]
+        // Wait before reading any state, as the queue can change in the meantime
+        FontCache.await(service) {
+            service.showToast(service.getString(R.string.font_cache_building), Toast.LENGTH_LONG)
+        }
+
         videoBackground = videoBackground || (!player.isVideoPlaying() && player.canSwitchToVideo())
         if (mediaList.size() == 0) {
             Log.w(TAG, "Warning: empty media list, nothing to play !")
@@ -545,9 +553,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
                 }
             }
             //todo restore position as well when we move to VLC 4.0
-            val mediaCreateAt = android.os.SystemClock.elapsedRealtime()
             val media = mediaFactory.getFromUri(VLCInstance.getInstance(service), uri)
-            Log.i(TAG, "media object and engine acquisition took ${android.os.SystemClock.elapsedRealtime() - mediaCreateAt}ms")
             //fixme workaround to prevent the issue described in https://code.videolan.org/videolan/vlc-android/-/issues/2106
             if (shouldDisableCookieForwarding) {
                 shouldDisableCookieForwarding = false
@@ -563,9 +569,7 @@ class PlaylistManager(val service: PlaybackService) : MediaWrapperList.EventList
             //todo in VLC 4.0, this should be done by using libvlc_media_player_set_time instead of start-time
             media.addOption(":start-time=${start/1000L}")
             media.addOption(":no-sout-chromecast-video")
-            val optionsAt = android.os.SystemClock.elapsedRealtime()
             VLCOptions.setMediaOptions(media, ctx, flags or mw.flags, PlaybackService.hasRenderer())
-            Log.i(TAG, "media options preparation took ${android.os.SystemClock.elapsedRealtime() - optionsAt}ms")
             /* keeping only video during benchmark */
             if (isBenchmark) {
                 media.addOption(":no-audio")

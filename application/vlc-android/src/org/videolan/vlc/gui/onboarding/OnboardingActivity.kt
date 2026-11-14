@@ -68,8 +68,6 @@ class OnboardingActivity : AppCompatActivity(), OnboardingFragmentListener {
             )
             WindowInsetsCompat.CONSUMED
         }
-        // Skip VLC-branded welcome while preserving permissions, scan and theme setup.
-        viewModel.currentFragment = if (Permissions.canReadStorage(this)) FragmentName.SCAN else FragmentName.ASK_PERMISSION
         showFragment(viewModel.currentFragment)
     }
 

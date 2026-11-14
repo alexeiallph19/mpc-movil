@@ -4,8 +4,8 @@
         android:id="@android:id/background"
         android:gravity="center_vertical|fill_horizontal">
         <shape android:shape="rectangle">
-            <size android:height="2dp" />
-            <solid android:color="#FF888888" />
+            <size android:height="4dp" />
+            <solid android:color="@color/grey200transparent" />
         </shape>
     </item>
     <item
@@ -13,8 +13,8 @@
         android:gravity="center_vertical|fill_horizontal">
         <clip>
             <shape android:shape="rectangle">
-                <size android:height="2dp" />
-                <solid android:color="#FFAAAAAA" />
+                <size android:height="4dp" />
+                <solid android:color="@color/grey200transparent" />
             </shape>
         </clip>
     </item>
@@ -23,8 +23,8 @@
         android:gravity="center_vertical|fill_horizontal">
         <clip>
             <shape android:shape="rectangle">
-                <size android:height="2dp" />
-                <solid android:color="#FFFFFFFF" />
+                <size android:height="4dp" />
+                <solid android:color="@color/orange800" />
             </shape>
         </clip>
     </item>

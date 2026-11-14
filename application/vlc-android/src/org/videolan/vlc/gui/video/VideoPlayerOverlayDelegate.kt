@@ -30,10 +30,6 @@ import android.annotation.TargetApi
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.view.Gravity
 import android.view.View
@@ -45,12 +41,10 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.SeekBar
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.ViewStubCompat
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.Guideline
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -74,7 +68,6 @@ import org.videolan.resources.AndroidDevices
 import org.videolan.tools.ALLOW_FOLD_AUTO_LAYOUT
 import org.videolan.tools.ENABLE_SEEK_BUTTONS
 import org.videolan.tools.HINGE_ON_RIGHT
-import org.videolan.tools.KEY_APP_THEME
 import org.videolan.tools.KEY_ALWAYS_FAST_SEEK
 import org.videolan.tools.KEY_ENABLE_CASTING
 import org.videolan.tools.KEY_ENABLE_CLONE_MODE
@@ -398,10 +391,6 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
         volumeValueText.text = "$volume%"
         playerVolumeProgress.isDouble = player.isAudioBoostEnabled
         playerVolumeProgress.setValue(volume)
-        player.findViewById<SeekBar>(R.id.mpm_volume_slider)?.let {
-            it.max = if (player.isAudioBoostEnabled) 200 else 100
-            it.progress = volume.coerceIn(0, it.max)
-        }
         playerOverlayVolume.setVisible()
         player.handler.removeMessages(VideoPlayerActivity.FADE_OUT_VOLUME_INFO)
         player.handler.sendEmptyMessageDelayed(VideoPlayerActivity.FADE_OUT_VOLUME_INFO, 1000L)
@@ -522,18 +511,14 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
 
                 if (skipAnim) {
                     hudBinding.playerOverlayPlay.setImageResource(if (service.isPlaying)
-                        R.drawable.ic_mpm_classic_pause
+                        R.drawable.ic_pause_player
                     else
-                        R.drawable.ic_mpm_classic_play)
+                        R.drawable.ic_play_player)
                 } else {
-                    // Use the same crisp desktop-style glyphs in both update paths.
-                    // Playback state and the original click listener remain unchanged.
-                    hudBinding.playerOverlayPlay.setImageResource(if (service.isPlaying)
-                        R.drawable.ic_mpm_classic_pause
-                    else
-                        R.drawable.ic_mpm_classic_play)
+                    val drawable = if (service.isPlaying) playToPause else pauseToPlay
+                    hudBinding.playerOverlayPlay.setImageDrawable(drawable)
+                    if (service.isPlaying != wasPlaying) drawable.start()
                 }
-                hudBinding.playerOverlayPlay.imageAlpha = 255
                 hudBinding.playerOverlayPlay.contentDescription = player.getString(if (service.isPlaying) R.string.pause else R.string.play)
 
                 wasPlaying = service.isPlaying
@@ -579,7 +564,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
 
             val vsc = player.findViewById<ViewStubCompat>(R.id.player_hud_stub)
             if (vsc != null) {
-                seekButtons = true // MPM: keep MPC-HC style seek controls visible by default
+                seekButtons = player.settings.getBoolean(ENABLE_SEEK_BUTTONS, false)
                 vsc.setVisible()
                 hudBinding = DataBindingUtil.bind(player.findViewById(R.id.progress_overlay)) ?: return
                 hudBinding.player = player
@@ -709,18 +694,6 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 if (player.service?.isPaused == true)
                     player.togglePlayPause()
             }
-
-            player.findViewById<SeekBar>(R.id.mpm_volume_slider)?.let { slider ->
-                slider.max = if (player.isAudioBoostEnabled) 200 else 100
-                slider.progress = (player.service?.volume ?: 100).coerceIn(0, slider.max)
-                slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                        if (fromUser) player.setAudioVolumeFromPercent(progress)
-                    }
-                    override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
-                    override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
-                })
-            }
         }
         if (::hudRightBinding.isInitialized){
             hudRightBinding.playerOverlayNavmenu.setOnClickListener(if (enabled) player else null)
@@ -755,12 +728,8 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
     fun updatePausable(pausable: Boolean) {
         if (!::hudBinding.isInitialized) return
         hudBinding.playerOverlayPlay.isEnabled = pausable
-        if (!pausable) {
-            hudBinding.playerOverlayPlay.setImageResource(R.drawable.ic_mpm_classic_play)
-            hudBinding.playerOverlayPlay.imageAlpha = 90
-        } else {
-            hudBinding.playerOverlayPlay.imageAlpha = 255
-        }
+        if (!pausable)
+            hudBinding.playerOverlayPlay.setImageResource(R.drawable.ic_play_player_disabled)
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -847,66 +816,7 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
     }
 
 
-    private fun applyMpmHudTheme() {
-        if (!::hudBinding.isInitialized) return
-        val mode = Settings.getInstance(player).getString(KEY_APP_THEME, "-1")
-        val dark = when (mode) {
-            "1" -> false
-            "2" -> true
-            else -> (player.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        }
-        val surfaceColor = if (dark) Color.BLACK else Color.WHITE
-        val iconColor = if (dark) Color.WHITE else Color.BLACK
-        val pressedColor = if (dark) 0xFF303030.toInt() else 0xFFE6E6E6.toInt()
-        val frameColor = if (dark) 0xFF777777.toInt() else 0xFF888888.toInt()
-        player.findViewById<View>(R.id.mpm_control_surface)?.background = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            setColor(surfaceColor)
-            setStroke(1.dp, frameColor)
-        }
-        player.findViewById<View>(R.id.mpm_status_strip)?.setBackgroundColor(Color.TRANSPARENT)
-
-        val controls = listOf(
-            hudBinding.orientationToggle, hudBinding.playlistPrevious,
-            hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
-            hudBinding.playerOverlayStop, hudBinding.playerOverlayForward,
-            hudBinding.playlistNext, hudBinding.playerResize,
-            hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks
-        )
-        controls.forEach { view ->
-            fun buttonFace(color: Int) = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                setColor(color)
-                setStroke(1.dp, frameColor)
-            }
-            // Classic desktop button faces: a permanent square frame, no Android ripple.
-            view.background = StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_pressed), buttonFace(pressedColor))
-                addState(intArrayOf(android.R.attr.state_focused), buttonFace(pressedColor))
-                addState(intArrayOf(), buttonFace(surfaceColor))
-            }
-            (view as? ImageView)?.setColorFilter(iconColor)
-        }
-        listOf(hudBinding.playerOverlayTime, hudBinding.playerOverlayLength).forEach {
-            it.setTextColor(iconColor)
-        }
-        listOf(R.id.mpm_volume_separator, R.id.mpm_controls_group_separator,
-            R.id.player_overlay_separator_transport, R.id.player_space_left, R.id.player_space_right).forEach { id ->
-            player.findViewById<View>(id)?.setBackgroundColor(if (dark) 0xFF777777.toInt() else 0xFF888888.toInt())
-        }
-        val seekTrackColor = if (dark) 0xFF777777.toInt() else 0xFF999999.toInt()
-        val seekBar = hudBinding.playerOverlaySeekbar
-        (seekBar.progressDrawable as? android.graphics.drawable.LayerDrawable)?.let { layers ->
-            layers.findDrawableByLayerId(android.R.id.background)?.mutate()?.setTint(seekTrackColor)
-            layers.findDrawableByLayerId(android.R.id.secondaryProgress)?.mutate()?.setTint(if (dark) 0xFFAAAAAA.toInt() else 0xFF777777.toInt())
-            layers.findDrawableByLayerId(android.R.id.progress)?.mutate()?.setTint(iconColor)
-        }
-        seekBar.thumb?.mutate()?.setTint(iconColor)
-        hudBinding.mpmVolumeSlider.setTrackColors(iconColor, seekTrackColor, surfaceColor)
-    }
-
     fun updateHudMargins() {
-        applyMpmHudTheme()
         //here, we override the default Android overscan
         val overscanHorizontal = if (player.isTv) 32.dp else 8.dp
         val overscanVertical = if (player.isTv) player.resources.getDimension(R.dimen.tv_overscan_vertical).toInt() else 8.dp
@@ -927,56 +837,30 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
                 applyMargin(hudBinding.playerOverlayLength, overscanHorizontal, true)
             }
 
-            val portrait = player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-            // Keep both control groups balanced on narrow screens without squeezing
-            // the audio and volume controls against the right edge.
-            player.findViewById<Guideline>(R.id.mpm_controls_divider)?.setGuidelinePercent(if (portrait) 0.59f else 0.46f)
-            val compactSize = if (portrait) 21.dp else 28.dp
-            listOf(hudBinding.playlistPrevious, hudBinding.playerOverlayRewind, hudBinding.playerOverlayPlay,
-                    hudBinding.playerOverlayStop, hudBinding.playerOverlayForward, hudBinding.playlistNext,
-                    hudBinding.playerResize, hudBinding.playerOverlayAdvFunction, hudBinding.playerOverlayTracks).forEach {
-                it.layoutParams = it.layoutParams.apply { width = compactSize; height = compactSize }
-            }
-            hudBinding.mpmVolumeSlider.layoutParams = hudBinding.mpmVolumeSlider.layoutParams.apply {
-                width = if (portrait) 48.dp else 76.dp
-                height = 24.dp
-            }
-            if (portrait) {
-                // Keep the two control groups visually separated on narrow screens.
-                // The previous zero margins made every transport icon touch its neighbour.
-                hudBinding.playerSpaceLeft.setVisible()
-                hudBinding.playerSpaceRight.setVisible()
+            if (player.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                hudBinding.playerSpaceLeft.setGone()
+                hudBinding.playerSpaceRight.setGone()
                 applyMargin(hudBinding.playerOverlaySeekbar, 0, true)
                 applyMargin(hudBinding.playerOverlaySeekbar, 0, false)
 
-                applyMargin(hudBinding.orientationToggle, 4.dp, true)
-                applyMargin(hudBinding.playlistPrevious, 1.dp, true)
-                applyMargin(hudBinding.playlistPrevious, 1.dp, false)
-                applyMargin(hudBinding.playerOverlayRewind, 1.dp, true)
-                applyMargin(hudBinding.playerOverlayRewind, 1.dp, false)
-                applyMargin(hudBinding.playerOverlayForward, 1.dp, true)
-                applyMargin(hudBinding.playerOverlayForward, 1.dp, false)
-                applyMargin(hudBinding.playlistNext, 1.dp, true)
-                applyMargin(hudBinding.playlistNext, 1.dp, false)
-                applyMargin(hudBinding.playerResize, 1.dp, true)
-                applyMargin(hudBinding.playerOverlayAdvFunction, 1.dp, true)
-                applyMargin(hudBinding.playerOverlayAdvFunction, 1.dp, false)
-                applyMargin(hudBinding.playerOverlayTracks, 1.dp, true)
-                applyMargin(hudBinding.playerOverlayTracks, 1.dp, false)
-            } else {
-                // Keep the transport controls grouped in landscape instead of letting
-                // the weighted spacer views push the entire control chain to the right.
-                hudBinding.playerSpaceLeft.setGone()
-                hudBinding.playerSpaceRight.setGone()
-                applyMargin(hudBinding.playerOverlaySeekbar, 12.dp, true)
-                applyMargin(hudBinding.playerOverlaySeekbar, 12.dp, false)
-
                 applyMargin(hudBinding.playlistPrevious, 0, true)
-                applyMargin(hudBinding.playerOverlayRewind, 4.dp, true)
+                applyMargin(hudBinding.playerOverlayRewind, 0, true)
                 applyMargin(hudBinding.playlistNext, 0, false)
-                applyMargin(hudBinding.playerOverlayForward, 4.dp, false)
-                applyMargin(hudBinding.orientationToggle, 4.dp, false)
-                applyMargin(hudBinding.playerResize, 4.dp, true)
+                applyMargin(hudBinding.playerOverlayForward, 0, false)
+                applyMargin(hudBinding.orientationToggle, 0, false)
+                applyMargin(hudBinding.playerResize, 0, true)
+            } else {
+                hudBinding.playerSpaceLeft.setVisible()
+                hudBinding.playerSpaceRight.setVisible()
+                applyMargin(hudBinding.playerOverlaySeekbar, 20.dp, true)
+                applyMargin(hudBinding.playerOverlaySeekbar, 20.dp, false)
+
+                applyMargin(hudBinding.playlistPrevious, largeMargin.toInt(), true)
+                applyMargin(hudBinding.playerOverlayRewind, largeMargin.toInt(), true)
+                applyMargin(hudBinding.playlistNext, largeMargin.toInt(), false)
+                applyMargin(hudBinding.playerOverlayForward, largeMargin.toInt(), false)
+                applyMargin(hudBinding.orientationToggle, smallMargin.toInt(), false)
+                applyMargin(hudBinding.playerResize, smallMargin.toInt(), true)
             }
         }
         if (::hudRightBinding.isInitialized) {
@@ -1055,23 +939,23 @@ class VideoPlayerOverlayDelegate (private val player: VideoPlayerActivity) {
         if (show && player.isInPictureInPictureMode) return
         if (::hudBinding.isInitialized) {
             hudBinding.playerOverlayPlay.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            hudBinding.playerOverlayStop.visibility = if (show) View.VISIBLE else View.INVISIBLE
             if (seekButtons) {
                 hudBinding.playerOverlayRewind.visibility = if (show) View.VISIBLE else View.INVISIBLE
                 hudBinding.playerOverlayRewindText.text = "${Settings.videoJumpDelay}"
                 hudBinding.playerOverlayRewind.contentDescription = player.getString(R.string.talkback_action_rewind, Settings.videoJumpDelay.toString())
-                hudBinding.playerOverlayRewindText.visibility = View.GONE
+                hudBinding.playerOverlayRewindText.visibility = if (show) View.VISIBLE else View.INVISIBLE
                 hudBinding.playerOverlayForward.visibility = if (show) View.VISIBLE else View.INVISIBLE
                 hudBinding.playerOverlayForwardText.text = "${Settings.videoJumpDelay}"
                 hudBinding.playerOverlayForward.contentDescription = player.getString(R.string.talkback_action_forward, Settings.videoJumpDelay.toString())
-                hudBinding.playerOverlayForwardText.visibility = View.GONE
+                hudBinding.playerOverlayForwardText.visibility = if (show) View.VISIBLE else View.INVISIBLE
             }
             hudBinding.playerOverlayTracks.visibility = if (show) View.VISIBLE else View.INVISIBLE
             hudBinding.playerOverlayAdvFunction.visibility = if (show) View.VISIBLE else View.INVISIBLE
             hudBinding.playerResize.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            // Keep transport navigation visible like MPC-HC. VLC safely handles unavailable items.
-            hudBinding.playlistPrevious.visibility = if (show) View.VISIBLE else View.INVISIBLE
-            hudBinding.playlistNext.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            if (hasPlaylist) {
+                hudBinding.playlistPrevious.visibility = if (show) View.VISIBLE else View.INVISIBLE
+                hudBinding.playlistNext.visibility = if (show) View.VISIBLE else View.INVISIBLE
+            }
             hudBinding.orientationToggle.visibility = if (player.isTv || AndroidDevices.isChromeBook) View.INVISIBLE else if (show) View.VISIBLE else View.INVISIBLE
             if (!show) hudBinding.playerOverlaySeekbar.disableAccessibilityEvents() else hudBinding.playerOverlaySeekbar.enableAccessibilityEvents()
         }

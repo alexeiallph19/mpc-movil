@@ -152,12 +152,11 @@ class VideoBrowserFragment : BaseFragment(), TabLayout.OnTabSelectedListener, Fi
 
     private fun getPageTitle(position: Int) = when (position) {
         0 -> getString(R.string.videos)
-        1 -> getString(R.string.mpm_folders)
         else -> getString(R.string.playlists)
     }
 
     override fun hasFAB(): Boolean {
-        return !::viewPager.isInitialized || viewPager.currentItem == 0 || viewPager.currentItem == 1
+        return !::viewPager.isInitialized || viewPager.currentItem == 0
     }
 
     private fun unSetTabLayout() {
@@ -173,15 +172,13 @@ class VideoBrowserFragment : BaseFragment(), TabLayout.OnTabSelectedListener, Fi
      */
     inner class VideoPagerAdapter(fa: VideoBrowserFragment) : FragmentStateAdapter(fa) {
 
-        override fun getItemCount() = 3
+        override fun getItemCount() = 2
 
-        // Keep the existing VLC video and playlist screens, with a dedicated
-        // folder view backed by the same medialibrary provider.
+        // Returns the fragment to display for that page
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> VideoGridFragment.newInstance()
-                1 -> VideoGridFragment.newInstance(forceFolderGrouping = true)
-                2 -> PlaylistFragment.newInstance(Playlist.Type.Video)
+                1 -> PlaylistFragment.newInstance(Playlist.Type.Video)
                 else -> throw IllegalStateException("Invalid fragment index")
             }
         }
@@ -223,8 +220,7 @@ class VideoBrowserFragment : BaseFragment(), TabLayout.OnTabSelectedListener, Fi
             title.text = getPageTitle(i)
             when (i) {
                 0 -> if (videoGridOnlyFavorites) title.addFavoritesIcon() else title.removeDrawables()
-                1 -> title.removeDrawables()
-                2 -> if (playlistOnlyFavorites) title.addFavoritesIcon() else title.removeDrawables()
+                1 -> if (playlistOnlyFavorites) title.addFavoritesIcon() else title.removeDrawables()
             }
             tab?.customView = view
         }

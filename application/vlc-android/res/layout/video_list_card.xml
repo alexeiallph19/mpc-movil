@@ -92,8 +92,8 @@
             android:onLongClick="@{holder::onLongClick}"
             android:orientation="horizontal"
             android:paddingStart="8dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:clipToPadding="false">
 
         <com.google.android.material.card.MaterialCardView
@@ -118,8 +118,8 @@
                 <!-- Image loading is handled by org.videolan.vlc.gui.helpers.ImageLoader.loadImage() -->
                 <ImageView
                         android:id="@+id/ml_item_thumbnail"
-                        android:layout_width="96dp"
-                        android:layout_height="60dp"
+                        android:layout_width="80dp"
+                        android:layout_height="50dp"
                         android:scaleType="centerCrop"
                         android:src="@{cover}"
                         tools:src="@tools:sample/backgrounds/scenic"
@@ -262,9 +262,7 @@
             android:gravity="center_vertical"
             android:lineSpacingMultiplier="1"
             android:text="@{media.title}"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif-medium"
-            android:includeFontPadding="false"
+            android:textSize="16sp"
             tools:text="Star wars Episode 1"
             vlc:layout_constraintBottom_toTopOf="@+id/ml_item_time"
             vlc:layout_constraintEnd_toStartOf="@+id/media_favorite"

@@ -22,14 +22,9 @@ package org.videolan.mobile.app
 import android.annotation.TargetApi
 import android.content.res.Configuration
 import android.os.Build
-import android.os.SystemClock
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.multidex.MultiDexApplication
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.videolan.resources.VLCInstance
-import org.videolan.tools.AppScope
 import org.videolan.libvlc.Dialog
 import org.videolan.tools.BitmapCache
 import org.videolan.vlc.ArtworkProvider
@@ -47,17 +42,6 @@ class VLCApplication : MultiDexApplication(), Dialog.Callbacks by DialogDelegate
     override fun onCreate() {
         setupApplication()
         super.onCreate()
-        // Warm up the native VLC engine while the user browses the library.
-        // Do not build the font cache here: that scan can contend with first playback.
-        AppScope.launch(Dispatchers.IO) {
-            val startedAt = SystemClock.elapsedRealtime()
-            try {
-                VLCInstance.getInstance(applicationContext)
-                Log.i(TAG, "LibVLC prewarmed in ${SystemClock.elapsedRealtime() - startedAt}ms")
-            } catch (exception: Exception) {
-                Log.e(TAG, "LibVLC prewarm failed", exception)
-            }
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

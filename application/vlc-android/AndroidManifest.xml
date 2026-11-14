@@ -937,7 +937,7 @@
                 <data android:pathPattern=".*\\..*\\..*\\.xspf" />
                 <data android:pathPattern=".*\\..*\\..*\\.XSPF" />
             </intent-filter>
-            <intent-filter android:label="Play with MPM Player">
+            <intent-filter android:label="Play with VLC">
                 <action android:name="android.intent.action.SEND"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>

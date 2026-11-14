@@ -62,6 +62,7 @@ import org.videolan.resources.util.launchForeground
 import org.videolan.resources.util.parcelable
 import org.videolan.resources.util.startMedialibrary
 import org.videolan.tools.AppScope
+import org.videolan.tools.BETA_WELCOME
 import org.videolan.tools.KEY_CURRENT_SETTINGS_VERSION
 import org.videolan.tools.KEY_FRAGMENT_ID
 import org.videolan.tools.KEY_NAVIGATOR_SCREEN_UNSTABLE
@@ -72,6 +73,7 @@ import org.videolan.tools.Settings
 import org.videolan.tools.awaitAppIsForegroung
 import org.videolan.tools.getContextWithLocale
 import org.videolan.tools.putSingle
+import org.videolan.vlc.gui.BetaWelcomeActivity
 import org.videolan.vlc.gui.helpers.hf.StoragePermissionsDelegate.Companion.getStoragePermission
 import org.videolan.vlc.gui.onboarding.ONBOARDING_DONE_KEY
 import org.videolan.vlc.gui.onboarding.startOnboarding
@@ -119,6 +121,15 @@ class StartActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        try {
+            if (!Settings.showTvUi && BuildConfig.BETA && !Settings.getInstance(this).getBoolean(BETA_WELCOME, false)) {
+                val intent = Intent(this, BetaWelcomeActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                startActivityForResult(intent, SEND_CRASH_RESULT)
+                Settings.getInstance(this).putSingle(BETA_WELCOME, true)
+                return
+            }
+        } catch (ignored: Exception) {}
         resume()
     }
 

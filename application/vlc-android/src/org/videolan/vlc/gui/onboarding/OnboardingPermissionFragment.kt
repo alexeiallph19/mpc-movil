@@ -74,7 +74,7 @@ class OnboardingPermissionFragment : OnboardingFragment(), View.OnClickListener 
         permAll.setOnClickListener(this)
         currentlySelected = permAllImage
 
-        currentlySelected.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.grey500))
+        currentlySelected.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.orange500))
     }
 
     override fun onResume() {
@@ -93,8 +93,8 @@ class OnboardingPermissionFragment : OnboardingFragment(), View.OnClickListener 
         oldSelected = currentlySelected
         when (view) {
             permNone -> {
-                permMedia.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
-                permAll.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
+                permMedia.background = null
+                permAll.background = null
                 permMedia.animate().scaleX(0.8F).scaleY(0.8F)
                 permAll.animate().scaleX(0.8F).scaleY(0.8F)
                 permDescription.setText(R.string.permission_onboarding_no_perm)
@@ -103,8 +103,8 @@ class OnboardingPermissionFragment : OnboardingFragment(), View.OnClickListener 
             }
             permMedia -> {
                 permDescription.setText(R.string.permission_onboarding_perm_media)
-                permNone.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
-                permAll.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
+                permNone.background = null
+                permAll.background = null
                 permNone.animate().scaleX(0.8F).scaleY(0.8F)
                 permAll.animate().scaleX(0.8F).scaleY(0.8F)
                 currentlySelected = permMediaImage
@@ -112,8 +112,8 @@ class OnboardingPermissionFragment : OnboardingFragment(), View.OnClickListener 
             }
             permAll -> {
                 permDescription.setText(R.string.permission_onboarding_perm_all)
-                permNone.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
-                permMedia.background = ContextCompat.getDrawable(requireActivity(), R.drawable.mpm_onboarding_option)
+                permNone.background = null
+                permMedia.background = null
                 permNone.animate().scaleX(0.8F).scaleY(0.8F)
                 permMedia.animate().scaleX(0.8F).scaleY(0.8F)
                 currentlySelected = permAllImage
@@ -125,7 +125,7 @@ class OnboardingPermissionFragment : OnboardingFragment(), View.OnClickListener 
 
     private fun animateColor() {
 
-        val colorFrom = ContextCompat.getColor(requireActivity(), R.color.grey500)
+        val colorFrom = ContextCompat.getColor(requireActivity(), R.color.orange500)
         val colorTo = ContextCompat.getColor(requireActivity(), R.color.white)
         val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo)
         colorAnimation.duration = 250 // milliseconds
@@ -136,8 +136,8 @@ class OnboardingPermissionFragment : OnboardingFragment(), View.OnClickListener 
         }
         colorAnimation.start()
 
-        val colorFrom2 = ContextCompat.getColor(requireActivity(), R.color.grey500)
-        val colorTo2 = ContextCompat.getColor(requireActivity(), R.color.white)
+        val colorFrom2 = ContextCompat.getColor(requireActivity(), R.color.white)
+        val colorTo2 = ContextCompat.getColor(requireActivity(), R.color.orange500)
         val colorAnimation2 = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom2, colorTo2)
         colorAnimation2.duration = 250 // milliseconds
 

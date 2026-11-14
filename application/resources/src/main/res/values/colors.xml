@@ -9,37 +9,24 @@
     Material color swatches
     The main color is always xxx500
 -->
-    <!-- MPM turquoise/blue accent palette -->
-    <color name="mpm_accent_50">#E0F7FA</color>
-    <color name="mpm_accent_100">#B2EBF2</color>
-    <color name="mpm_accent_200">#80DEEA</color>
-    <color name="mpm_accent_300">#4DD0E1</color>
-    <color name="mpm_accent_400">#26C6DA</color>
-    <color name="mpm_accent">#00B8D4</color>
-    <color name="mpm_accent_600">#00ACC1</color>
-    <color name="mpm_accent_700">#0097A7</color>
-    <color name="mpm_accent_800">#00838F</color>
-    <color name="mpm_accent_900">#006064</color>
-
-    <!-- Legacy VLC color names retained as aliases for compatibility -->
-    <color name="orange50">@color/mpm_accent_50</color>
-    <color name="orange100">@color/mpm_accent_100</color>
-    <color name="orange200">@color/mpm_accent_200</color>
-    <color name="orange300">@color/mpm_accent_300</color>
-    <color name="orange400">@color/mpm_accent_400</color>
-    <color name="orange500">@color/mpm_accent</color>
-    <color name="orange600">@color/mpm_accent_600</color>
-    <color name="orange700">@color/mpm_accent_700</color>
-    <color name="orange800">@color/mpm_accent_800</color>
-    <color name="orange900">@color/mpm_accent_900</color>
+    <color name="orange50">#fff3e0</color>
+    <color name="orange100">#ffdfae</color>
+    <color name="orange200">#ffca7d</color>
+    <color name="orange300">#ffb54c</color>
+    <color name="orange400">#ffa11a</color>
+    <color name="orange500">#FF8800</color>
+    <color name="orange600">#ff7d00</color>
+    <color name="orange700">#ff7200</color>
+    <color name="orange800">#ff610a</color>
+    <color name="orange900">#ff5014</color>
 
     <color name="red500transparent_10">#1aff0000</color>
     <color name="red500transparent25">#40ff0000</color>
     <color name="red500transparent">#b4ff0000</color>
     <color name="red200">#EF9A9A</color>
-    <color name="orange500transparent">#b400b8d4</color>
-    <color name="orange500focus">#8600b8d4</color>
-    <color name="orange200transparent">#6480deea</color>
+    <color name="orange500transparent">#b4ff8800</color>
+    <color name="orange500focus">#86ff8800</color>
+    <color name="orange200transparent">#64ffca7d</color>
 
     <color name="green50">#bdeadd</color>
     <color name="green100">#a7e3d1</color>
@@ -125,9 +112,9 @@
     <color name="black_transparent_80">#cc000000</color>
     <color name="black_transparent_90">#E6000000</color>
 
-    <color name="orange_800_transparent_10">#1a00838f</color>
-    <color name="orange_800_transparent_20">#3300838f</color>
-    <color name="orange_500_transparent_20">#3300B8D4</color>
+    <color name="orange_800_transparent_10">#1aff610a</color>
+    <color name="orange_800_transparent_20">#33ff610a</color>
+    <color name="orange_500_transparent_20">#33FF8800</color>
 
     <color name="tv_bg">#34434e</color>
     <color name="tv_card_content">#34434e</color>

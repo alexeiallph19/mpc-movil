@@ -9,117 +9,66 @@
 
     <FrameLayout
             android:id="@+id/dayNightTheme"
-            android:layout_width="92dp"
-            android:layout_height="116dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:background="@drawable/theme_selection_rounded"
             android:contentDescription="@string/theme_auto"
-            android:padding="8dp"
-            app:layout_constraintHorizontal_bias="0.5"
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="@+id/lightTheme"
             app:layout_constraintEnd_toStartOf="@+id/lightTheme"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/themeDescription"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_chainStyle="packed">
+            app:layout_constraintTop_toTopOf="@+id/lightTheme">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
-
-            <ImageView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/mpm_theme_auto" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/theme_auto"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-        </LinearLayout>
+        <ImageView
+                android:id="@+id/imageView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_theme_daynight" />
     </FrameLayout>
 
     <FrameLayout
             android:id="@+id/lightTheme"
-            android:layout_width="92dp"
-            android:layout_height="116dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/mpm_onboarding_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:padding="16dp"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
             android:contentDescription="@string/light_theme"
-            android:padding="8dp"
-            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintBottom_toTopOf="@+id/theme_title"
             app:layout_constraintEnd_toStartOf="@+id/darkTheme"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/dayNightTheme"
-            app:layout_constraintTop_toTopOf="@+id/dayNightTheme"
-            app:layout_constraintBottom_toBottomOf="@+id/dayNightTheme">
+            app:layout_constraintTop_toTopOf="@+id/guideline3">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
-
-            <ImageView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/mpm_theme_light" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/light_theme"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-        </LinearLayout>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_theme_light" />
     </FrameLayout>
 
     <FrameLayout
             android:id="@+id/darkTheme"
-            android:layout_width="92dp"
-            android:layout_height="116dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/mpm_onboarding_option"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:padding="16dp"
             android:contentDescription="@string/enable_black_theme"
-            android:padding="8dp"
-            app:layout_constraintHorizontal_bias="0.5"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
+            app:layout_constraintBottom_toBottomOf="@+id/lightTheme"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/lightTheme"
-            app:layout_constraintTop_toTopOf="@+id/dayNightTheme"
-            app:layout_constraintBottom_toBottomOf="@+id/dayNightTheme">
+            app:layout_constraintTop_toTopOf="@+id/lightTheme">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
-
-            <ImageView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/mpm_theme_dark" />
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/enable_black_theme"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-        </LinearLayout>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_theme_dark" />
     </FrameLayout>
 
     <TextView
@@ -131,10 +80,9 @@
             android:text="@string/onboarding_theme_title"
             android:textAlignment="center"
             android:textAppearance="@style/VLC.Onboarding.Title"
+            app:layout_constraintBottom_toTopOf="@+id/themeDescription"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" 
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="64dp"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
             android:id="@+id/themeDescription"
@@ -148,8 +96,7 @@
             android:textAppearance="@style/VLC.Onboarding.Text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/theme_title" 
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintTop_toBottomOf="@+id/theme_title" />
 
     <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
