@@ -687,7 +687,7 @@
     <string name="medialibrary_directories">Media library folders</string>
 
     <!--What's new-->
-    <string name="whats_new_title">What's new in MPM Player %s</string>
+    <string name="whats_new_title">What\'s new in MPM Player %s</string>
     <string name="whats_new_37_equalizer_text">The equalizer has been reworked from scratch. It\'s easier to use, lets you disable the default presets and allows you to backup, restore and share your presets.</string>
     <string name="whats_new_37_import_export">We improved the backup and restore settings feature. It now lets you backup more settings, including the equalizer presets.</string>
     <string name="whats_new_37_android_auto">Due to some new store constraints, the Android Auto settings have all been moved to the mobile application. It becomes the new place to change your automotive experience.</string>
@@ -696,7 +696,7 @@
 <!--    update-->
     <string name="update_title">Update available</string>
     <string name="install_nightly_title">Install the nightly version</string>
-    <string name="update_text">A new test release of MPM Player is available!\n\nYou're seeing this because you are using a test build.</string>
+    <string name="update_text">A new test release of MPM Player is available!\n\nYou\'re seeing this because you are using a test build.</string>
     <string name="install_text">Nightly versions are updated automatically everyday with the latest features and fixes.\n\nDownload now?</string>
 
     <string name="open_in_browser">Open in browser</string>
@@ -1360,7 +1360,7 @@
     <string name="ra_browser_audio_unsupported_format">This audio format is not supported by your browser</string>
     <string name="ra_upload_subtitle">Upload subtitle</string>
 
-    <string name="ra_onboarding_welcome_desc">Welcome to MPM Player remote access.\nBy enabling it you can control this device's playback and more.</string>
+    <string name="ra_onboarding_welcome_desc">Welcome to MPM Player remote access.\nBy enabling it you can control this device\'s playback and more.</string>
     <string name="ra_onboarding_how_title">Control your device</string>
     <string name="ra_onboarding_how_desc">Control your device playback, send or retrieve files and more</string>
     <string name="ra_onboarding_ssl_title">Data encryption</string>
@@ -1387,7 +1387,7 @@
     <string name="podcast_mode_help">Podcast controls appear when playing a single track which meets one of the following criteria:\n\t• Length greater than 60 min\n\t• Length greater than 15 min with no album name\n\t• Genre is %s</string>
     <string name="podcast_mode_genres" translatable="false">audiobook(s), podcast, speech, or vocal</string>
     <string name="voice_control">Voice control</string>
-    <string name="voice_control_help">MPM Player can be controlled through Google Assistant by speaking the following commands:\n\t• Play, Pause, Stop, Previous, Next\n\t• Rewind, Fast Forward, Repeat &lt;all|one|off&gt;\n\t• Jump to &lt;time&gt;, Skip &lt;duration&gt;\n\t• What's this &lt;artist|album|song&gt;\n\t• Play [artist|album|song|genre|playlist] &lt;name&gt;</string>
+    <string name="voice_control_help">MPM Player can be controlled through Google Assistant by speaking the following commands:\n\t• Play, Pause, Stop, Previous, Next\n\t• Rewind, Fast Forward, Repeat &lt;all|one|off&gt;\n\t• Jump to &lt;time&gt;, Skip &lt;duration&gt;\n\t• What\'s this &lt;artist|album|song&gt;\n\t• Play [artist|album|song|genre|playlist] &lt;name&gt;</string>
 
     <string name="network" >Network</string>
     <string name="metered_connection">Action for streams when the connection is metered</string>
